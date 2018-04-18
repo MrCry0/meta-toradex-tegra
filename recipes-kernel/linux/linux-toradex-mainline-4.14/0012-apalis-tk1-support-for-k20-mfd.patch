@@ -1,0 +1,3185 @@
+From babab7769aa903d7602c24d4422bca72b5903093 Mon Sep 17 00:00:00 2001
+Message-Id: <babab7769aa903d7602c24d4422bca72b5903093.1529072479.git.marcel.ziswiler@toradex.com>
+In-Reply-To: <fb4764e8eb658d35e8fc62ae79c77e1f6e2b0ef3.1529072479.git.marcel.ziswiler@toradex.com>
+References: <fb4764e8eb658d35e8fc62ae79c77e1f6e2b0ef3.1529072479.git.marcel.ziswiler@toradex.com>
+From: Dominik Sliwa <dominik.sliwa@toradex.com>
+Date: Wed, 18 Apr 2018 12:22:26 +0200
+Subject: [PATCH 12/27] apalis-tk1: support for k20 mfd
+
+Signed-off-by: Dominik Sliwa <dominik.sliwa@toradex.com>
+Acked-by: Marcel Ziswiler <marcel.ziswiler@toradex.com>
+---
+ arch/arm/boot/dts/tegra124-apalis-v1.2.dtsi   |   28 +
+ arch/arm/configs/tegra_defconfig              |    7 +
+ drivers/gpio/Kconfig                          |    6 +
+ drivers/gpio/Makefile                         |    1 +
+ drivers/gpio/gpio-apalis-tk1-k20.c            |  221 +++++
+ drivers/iio/adc/Kconfig                       |    6 +
+ drivers/iio/adc/Makefile                      |    1 +
+ drivers/iio/adc/apalis-tk1-k20_adc.c          |  200 +++++
+ drivers/input/touchscreen/Kconfig             |   10 +
+ drivers/input/touchscreen/Makefile            |    1 +
+ drivers/input/touchscreen/apalis-tk1-k20_ts.c |  234 ++++++
+ drivers/mfd/Kconfig                           |   14 +
+ drivers/mfd/Makefile                          |    1 +
+ drivers/mfd/apalis-tk1-k20-ezp.h              |   47 ++
+ drivers/mfd/apalis-tk1-k20.c                  | 1062 +++++++++++++++++++++++++
+ drivers/net/can/Kconfig                       |    6 +
+ drivers/net/can/Makefile                      |    1 +
+ drivers/net/can/apalis-tk1-k20-can.c          |  817 +++++++++++++++++++
+ drivers/spi/spi-tegra114.c                    |    7 +-
+ include/linux/mfd/apalis-tk1-k20-api.h        |  123 +++
+ include/linux/mfd/apalis-tk1-k20.h            |  114 +++
+ 21 files changed, 2901 insertions(+), 6 deletions(-)
+ create mode 100644 drivers/gpio/gpio-apalis-tk1-k20.c
+ create mode 100644 drivers/iio/adc/apalis-tk1-k20_adc.c
+ create mode 100644 drivers/input/touchscreen/apalis-tk1-k20_ts.c
+ create mode 100644 drivers/mfd/apalis-tk1-k20-ezp.h
+ create mode 100644 drivers/mfd/apalis-tk1-k20.c
+ create mode 100644 drivers/net/can/apalis-tk1-k20-can.c
+ create mode 100644 include/linux/mfd/apalis-tk1-k20-api.h
+ create mode 100644 include/linux/mfd/apalis-tk1-k20.h
+
+diff --git a/arch/arm/boot/dts/tegra124-apalis-v1.2.dtsi b/arch/arm/boot/dts/tegra124-apalis-v1.2.dtsi
+index c2b14e693cda..bca22e2a6dcb 100644
+--- a/arch/arm/boot/dts/tegra124-apalis-v1.2.dtsi
++++ b/arch/arm/boot/dts/tegra124-apalis-v1.2.dtsi
+@@ -1792,6 +1792,34 @@
+ 	spi@7000d600 {
+ 		status = "okay";
+ 		spi-max-frequency = <25000000>;
++
++		k20mcu: apalis-tk1-k20@1 {
++			compatible = "toradex,apalis-tk1-k20";
++			reg = <1>;
++			spi-max-frequency = <6120000>;
++			interrupt-parent =<&gpio>;
++			interrupts = <TEGRA_GPIO(K, 2) (IRQ_TYPE_EDGE_FALLING | IRQ_TYPE_EDGE_RISING)>,
++							<TEGRA_GPIO(I, 5) (IRQ_TYPE_EDGE_FALLING | IRQ_TYPE_EDGE_RISING)>, /* INT3 CAN0 */
++							<TEGRA_GPIO(J, 0) (IRQ_TYPE_EDGE_FALLING  | IRQ_TYPE_EDGE_RISING)>; /* INT4 CAN1 */
++			rst-gpio = <&gpio TEGRA_GPIO(BB, 6) GPIO_ACTIVE_HIGH>;
++
++			/* GPIO based CS used to enter K20 EzPort mode */
++			ezport-cs-gpio = <&gpio TEGRA_GPIO(W, 2) GPIO_ACTIVE_HIGH>;
++			/* extra INT lines between K20 and TK1 */
++			int2-gpio = <&gpio TEGRA_GPIO(J, 2) GPIO_ACTIVE_HIGH>;
++
++			toradex,apalis-tk1-k20-uses-adc;
++			toradex,apalis-tk1-k20-uses-can;
++			toradex,apalis-tk1-k20-uses-gpio;
++			toradex,apalis-tk1-k20-uses-tsc;
++
++			controller-data {
++				nvidia,enable-hw-based-cs;
++				nvidia,cs-setup-clk-count = <1>;
++				nvidia,cs-hold-clk-count = <1>;
++			};
++		};
++
+ 	};
+ 
+ 	pmc@7000e400 {
+diff --git a/arch/arm/configs/tegra_defconfig b/arch/arm/configs/tegra_defconfig
+index cfe997c617fc..e8c9bdafa1b9 100644
+--- a/arch/arm/configs/tegra_defconfig
++++ b/arch/arm/configs/tegra_defconfig
+@@ -63,6 +63,7 @@ CONFIG_IPV6_MIP6=y
+ CONFIG_IPV6_TUNNEL=y
+ CONFIG_IPV6_MULTIPLE_TABLES=y
+ CONFIG_CAN=y
++CONFIG_CAN_APALIS_TK1_K20=m
+ CONFIG_CAN_MCP251X=y
+ CONFIG_BT=y
+ CONFIG_BT_RFCOMM=y
+@@ -126,6 +127,7 @@ CONFIG_KEYBOARD_TEGRA=y
+ CONFIG_KEYBOARD_CROS_EC=y
+ CONFIG_MOUSE_PS2_ELANTECH=y
+ CONFIG_INPUT_TOUCHSCREEN=y
++CONFIG_TOUCHSCREEN_APALIS_TK1_K20=m
+ CONFIG_TOUCHSCREEN_ATMEL_MXT=y
+ CONFIG_TOUCHSCREEN_WM97XX=y
+ # CONFIG_TOUCHSCREEN_WM9705 is not set
+@@ -155,6 +157,7 @@ CONFIG_GPIO_PCA953X_IRQ=y
+ CONFIG_GPIO_PALMAS=y
+ CONFIG_GPIO_TPS6586X=y
+ CONFIG_GPIO_TPS65910=y
++CONFIG_GPIO_APALIS_TK1_K20=m
+ CONFIG_POWER_RESET=y
+ CONFIG_POWER_RESET_AS3722=y
+ CONFIG_POWER_RESET_GPIO=y
+@@ -165,6 +168,8 @@ CONFIG_SENSORS_LM95245=y
+ CONFIG_WATCHDOG=y
+ CONFIG_TEGRA_WATCHDOG=y
+ CONFIG_MFD_AS3722=y
++CONFIG_MFD_APALIS_TK1_K20=m
++CONFIG_APALIS_TK1_K20_EZP=y
+ CONFIG_MFD_CROS_EC=y
+ CONFIG_MFD_CROS_EC_SPI=y
+ CONFIG_MFD_MAX8907=y
+@@ -276,6 +281,7 @@ CONFIG_ARCH_TEGRA_114_SOC=y
+ CONFIG_ARCH_TEGRA_124_SOC=y
+ CONFIG_MEMORY=y
+ CONFIG_IIO=y
++CONFIG_APALIS_TK1_K20_ADC=m
+ CONFIG_MPU3050_I2C=y
+ CONFIG_SENSORS_ISL29018=y
+ CONFIG_SENSORS_ISL29028=y
+@@ -309,6 +315,7 @@ CONFIG_ROOT_NFS=y
+ CONFIG_NLS_CODEPAGE_437=y
+ CONFIG_NLS_ISO8859_1=y
+ CONFIG_PRINTK_TIME=y
++CONFIG_DYNAMIC_DEBUG=y
+ CONFIG_DEBUG_INFO=y
+ CONFIG_MAGIC_SYSRQ=y
+ CONFIG_DEBUG_SLAB=y
+diff --git a/drivers/gpio/Kconfig b/drivers/gpio/Kconfig
+index 3f80f167ed56..c5b006c10d37 100644
+--- a/drivers/gpio/Kconfig
++++ b/drivers/gpio/Kconfig
+@@ -1248,6 +1248,12 @@ endmenu
+ menu "SPI GPIO expanders"
+ 	depends on SPI_MASTER
+ 
++config GPIO_APALIS_TK1_K20
++	tristate "GPIOs of K20 MCU on Apalis TK1"
++	depends on MFD_APALIS_TK1_K20
++	help
++	  This enables support for GPIOs of K20 MCU found on Apalis TK1.
++
+ config GPIO_74X164
+ 	tristate "74x164 serial-in/parallel-out 8-bits shift register"
+ 	depends on OF_GPIO
+diff --git a/drivers/gpio/Makefile b/drivers/gpio/Makefile
+index 8a2dfba3b231..8ea42ecdf87e 100644
+--- a/drivers/gpio/Makefile
++++ b/drivers/gpio/Makefile
+@@ -29,6 +29,7 @@ obj-$(CONFIG_GPIO_ALTERA)  	+= gpio-altera.o
+ obj-$(CONFIG_GPIO_ALTERA_A10SR)	+= gpio-altera-a10sr.o
+ obj-$(CONFIG_GPIO_AMD8111)	+= gpio-amd8111.o
+ obj-$(CONFIG_GPIO_AMDPT)	+= gpio-amdpt.o
++obj-$(CONFIG_GPIO_APALIS_TK1_K20)	+= gpio-apalis-tk1-k20.o
+ obj-$(CONFIG_GPIO_ARIZONA)	+= gpio-arizona.o
+ obj-$(CONFIG_GPIO_ATH79)	+= gpio-ath79.o
+ obj-$(CONFIG_GPIO_ASPEED)	+= gpio-aspeed.o
+diff --git a/drivers/gpio/gpio-apalis-tk1-k20.c b/drivers/gpio/gpio-apalis-tk1-k20.c
+new file mode 100644
+index 000000000000..7b44f93df85b
+--- /dev/null
++++ b/drivers/gpio/gpio-apalis-tk1-k20.c
+@@ -0,0 +1,221 @@
++/*
++ * Copyright 2016-2017 Toradex AG
++ * Dominik Sliwa <dominik.sliwa@toradex.com>
++ *
++ * This program is free software; you can redistribute it and/or modify it under
++ * the terms of the GNU General Public License version 2 as published by the
++ * Free Software Foundation.
++ */
++
++#include <linux/mfd/apalis-tk1-k20.h>
++#include <linux/kernel.h>
++#include <linux/module.h>
++#include <linux/gpio.h>
++#include <linux/slab.h>
++#include <linux/platform_device.h>
++
++struct apalis_tk1_k20_gpio {
++	struct gpio_chip chip;
++	struct apalis_tk1_k20_regmap *apalis_tk1_k20;
++};
++
++static int apalis_tk1_k20_gpio_input(struct gpio_chip *chip,
++				     unsigned int offset)
++{
++	struct apalis_tk1_k20_gpio *gpio = container_of(chip,
++			struct apalis_tk1_k20_gpio, chip);
++
++	apalis_tk1_k20_lock(gpio->apalis_tk1_k20);
++
++	apalis_tk1_k20_reg_write(gpio->apalis_tk1_k20, APALIS_TK1_K20_GPIO_NO,
++			offset);
++	apalis_tk1_k20_reg_write(gpio->apalis_tk1_k20, APALIS_TK1_K20_GPIO_STA,
++			0);
++
++	apalis_tk1_k20_unlock(gpio->apalis_tk1_k20);
++
++	return 0;
++}
++
++static int apalis_tk1_k20_gpio_output(struct gpio_chip *chip,
++				      unsigned int offset,
++				      int value)
++{
++	struct apalis_tk1_k20_gpio *gpio = container_of(chip,
++			struct apalis_tk1_k20_gpio, chip);
++	int status;
++
++	apalis_tk1_k20_lock(gpio->apalis_tk1_k20);
++
++	apalis_tk1_k20_reg_write(gpio->apalis_tk1_k20, APALIS_TK1_K20_GPIO_NO,
++			offset);
++	status = APALIS_TK1_K20_GPIO_STA_OE;
++	status += value ? APALIS_TK1_K20_GPIO_STA_VAL : 0;
++	apalis_tk1_k20_reg_write(gpio->apalis_tk1_k20, APALIS_TK1_K20_GPIO_STA,
++			status);
++
++	apalis_tk1_k20_unlock(gpio->apalis_tk1_k20);
++
++	return 0;
++}
++
++static int apalis_tk1_k20_gpio_get(struct gpio_chip *chip, unsigned int offset)
++{
++	struct apalis_tk1_k20_gpio *gpio = container_of(chip,
++			struct apalis_tk1_k20_gpio, chip);
++	int value;
++
++	apalis_tk1_k20_lock(gpio->apalis_tk1_k20);
++
++	apalis_tk1_k20_reg_write(gpio->apalis_tk1_k20, APALIS_TK1_K20_GPIO_NO,
++			offset);
++	if (apalis_tk1_k20_reg_read(gpio->apalis_tk1_k20,
++			APALIS_TK1_K20_GPIO_STA, &value) < 0) {
++		apalis_tk1_k20_unlock(gpio->apalis_tk1_k20);
++		return -ENODEV;
++	}
++	value &= APALIS_TK1_K20_GPIO_STA_VAL;
++
++	apalis_tk1_k20_unlock(gpio->apalis_tk1_k20);
++
++	return value ? 1 : 0;
++}
++
++static int apalis_tk1_k20_gpio_request(struct gpio_chip *chip,
++				       unsigned int offset)
++{
++	struct apalis_tk1_k20_gpio *gpio = container_of(chip,
++			struct apalis_tk1_k20_gpio, chip);
++	int status = 0;
++
++	dev_dbg(gpio->apalis_tk1_k20->dev, "APALIS TK1 K20 GPIO %d\n",
++		offset);
++
++	apalis_tk1_k20_lock(gpio->apalis_tk1_k20);
++
++	apalis_tk1_k20_reg_write(gpio->apalis_tk1_k20, APALIS_TK1_K20_GPIO_NO,
++			offset);
++	if (apalis_tk1_k20_reg_read(gpio->apalis_tk1_k20,
++			APALIS_TK1_K20_GPIO_NO, &status) < 0) {
++		apalis_tk1_k20_unlock(gpio->apalis_tk1_k20);
++		return -ENODEV;
++	}
++
++	apalis_tk1_k20_unlock(gpio->apalis_tk1_k20);
++
++	return status;
++}
++
++static void apalis_tk1_k20_gpio_free(struct gpio_chip *chip,
++				     unsigned int offset)
++{
++	struct apalis_tk1_k20_gpio *gpio =
++			container_of(chip, struct apalis_tk1_k20_gpio, chip);
++
++	apalis_tk1_k20_lock(gpio->apalis_tk1_k20);
++
++	apalis_tk1_k20_reg_write(gpio->apalis_tk1_k20, APALIS_TK1_K20_GPIO_NO,
++			offset);
++	apalis_tk1_k20_reg_write(gpio->apalis_tk1_k20,
++			APALIS_TK1_K20_GPIO_STA, 0);
++
++	apalis_tk1_k20_unlock(gpio->apalis_tk1_k20);
++}
++
++
++static void apalis_tk1_k20_gpio_set(struct gpio_chip *chip, unsigned int offset,
++		int value)
++{
++	struct apalis_tk1_k20_gpio *gpio = container_of(chip,
++			struct apalis_tk1_k20_gpio, chip);
++	int status;
++
++	apalis_tk1_k20_lock(gpio->apalis_tk1_k20);
++
++	apalis_tk1_k20_reg_write(gpio->apalis_tk1_k20, APALIS_TK1_K20_GPIO_NO,
++			offset);
++	if (apalis_tk1_k20_reg_read(gpio->apalis_tk1_k20,
++			APALIS_TK1_K20_GPIO_STA, &status) < 0) {
++		apalis_tk1_k20_unlock(gpio->apalis_tk1_k20);
++		return;
++	}
++
++	status &= ~APALIS_TK1_K20_GPIO_STA_VAL;
++	status += value ? APALIS_TK1_K20_GPIO_STA_VAL : 0;
++	apalis_tk1_k20_reg_write(gpio->apalis_tk1_k20, APALIS_TK1_K20_GPIO_STA,
++			status);
++
++	apalis_tk1_k20_unlock(gpio->apalis_tk1_k20);
++}
++
++static int apalis_tk1_k20_gpio_probe(struct platform_device *pdev)
++{
++	struct apalis_tk1_k20_gpio *priv;
++	struct apalis_tk1_k20_regmap *apalis_tk1_k20;
++	int status;
++
++	priv = devm_kzalloc(&pdev->dev, sizeof(*priv), GFP_KERNEL);
++	if (!priv)
++		return -ENOMEM;
++
++	apalis_tk1_k20 = dev_get_drvdata(pdev->dev.parent);
++	if (!apalis_tk1_k20)
++		return -ENODEV;
++	priv->apalis_tk1_k20 = apalis_tk1_k20;
++
++	platform_set_drvdata(pdev, priv);
++
++	apalis_tk1_k20_lock(apalis_tk1_k20);
++
++	/* TBD: some code */
++
++	apalis_tk1_k20_unlock(apalis_tk1_k20);
++
++	priv->chip.base			= -1;
++	priv->chip.can_sleep		= 1;
++	priv->chip.parent			= &pdev->dev;
++	priv->chip.owner		= THIS_MODULE;
++	priv->chip.get			= apalis_tk1_k20_gpio_get;
++	priv->chip.set			= apalis_tk1_k20_gpio_set;
++	priv->chip.direction_input	= apalis_tk1_k20_gpio_input;
++	priv->chip.direction_output	= apalis_tk1_k20_gpio_output;
++	priv->chip.request		= apalis_tk1_k20_gpio_request;
++	priv->chip.free			= apalis_tk1_k20_gpio_free;
++	/* TODO: include as a define somewhere */
++	priv->chip.ngpio		= 160;
++
++	status = gpiochip_add(&priv->chip);
++
++	return status;
++}
++
++static int apalis_tk1_k20_gpio_remove(struct platform_device *pdev)
++{
++	struct apalis_tk1_k20_gpio *priv = platform_get_drvdata(pdev);
++
++	gpiochip_remove(&priv->chip);
++	return 0;
++}
++
++static const struct platform_device_id apalis_tk1_k20_gpio_idtable[] = {
++	{
++		.name = "apalis-tk1-k20-gpio",
++	},
++	{ /* sentinel */ }
++};
++MODULE_DEVICE_TABLE(platform, apalis_tk1_k20_gpio_idtable);
++
++static struct platform_driver apalis_tk1_k20_gpio_driver = {
++	.id_table = apalis_tk1_k20_gpio_idtable,
++	.remove = apalis_tk1_k20_gpio_remove,
++	.probe = apalis_tk1_k20_gpio_probe,
++	.driver = {
++		.name = "apalis-tk1-k20-gpio",
++	},
++};
++
++module_platform_driver(apalis_tk1_k20_gpio_driver);
++
++MODULE_DESCRIPTION("GPIO driver for K20 MCU on Apalis TK1");
++MODULE_AUTHOR("Dominik Sliwa <dominik.sliwa@toradex.com>");
++MODULE_LICENSE("GPL v2");
+diff --git a/drivers/iio/adc/Kconfig b/drivers/iio/adc/Kconfig
+index 1d13bf03c758..38da40c0f19b 100644
+--- a/drivers/iio/adc/Kconfig
++++ b/drivers/iio/adc/Kconfig
+@@ -116,6 +116,12 @@ config AD7923
+ 	  To compile this driver as a module, choose M here: the
+ 	  module will be called ad7923.
+ 
++config APALIS_TK1_K20_ADC
++	tristate "ADCs of K20 MCU on Apalis TK1"
++	depends on MFD_APALIS_TK1_K20
++	help
++	  This enables support for ADCs of K20 MCU found on Apalis TK1.
++
+ config AD799X
+ 	tristate "Analog Devices AD799x ADC driver"
+ 	depends on I2C
+diff --git a/drivers/iio/adc/Makefile b/drivers/iio/adc/Makefile
+index 9572c1090f35..5f761384b305 100644
+--- a/drivers/iio/adc/Makefile
++++ b/drivers/iio/adc/Makefile
+@@ -16,6 +16,7 @@ obj-$(CONFIG_AD7793) += ad7793.o
+ obj-$(CONFIG_AD7887) += ad7887.o
+ obj-$(CONFIG_AD799X) += ad799x.o
+ obj-$(CONFIG_ASPEED_ADC) += aspeed_adc.o
++obj-$(CONFIG_APALIS_TK1_K20_ADC) += apalis-tk1-k20_adc.o
+ obj-$(CONFIG_AT91_ADC) += at91_adc.o
+ obj-$(CONFIG_AT91_SAMA5D2_ADC) += at91-sama5d2_adc.o
+ obj-$(CONFIG_AXP20X_ADC) += axp20x_adc.o
+diff --git a/drivers/iio/adc/apalis-tk1-k20_adc.c b/drivers/iio/adc/apalis-tk1-k20_adc.c
+new file mode 100644
+index 000000000000..b45e51df5c81
+--- /dev/null
++++ b/drivers/iio/adc/apalis-tk1-k20_adc.c
+@@ -0,0 +1,200 @@
++/*
++ * Copyright 2016-2017 Toradex AG
++ * Dominik Sliwa <dominik.sliwa@toradex.com>
++ *
++ * This program is free software; you can redistribute it and/or modify it under
++ * the terms of the GNU General Public License version 2 as published by the
++ * Free Software Foundation.
++ */
++
++#include <linux/mfd/apalis-tk1-k20.h>
++#include <linux/delay.h>
++#include <linux/iio/iio.h>
++#include <linux/iio/driver.h>
++#include <linux/iio/machine.h>
++#include <linux/module.h>
++#include <linux/mutex.h>
++#include <linux/platform_device.h>
++#include <linux/slab.h>
++
++struct apalis_tk1_k20_adc {
++	struct iio_dev chip;
++	struct apalis_tk1_k20_regmap *apalis_tk1_k20;
++};
++
++static int apalis_tk1_k20_get_adc_result(struct apalis_tk1_k20_adc *adc, int id,
++		int *val)
++{
++	uint8_t adc_read[2];
++	int adc_register;
++
++	switch (id) {
++	case APALIS_TK1_K20_ADC1:
++		adc_register = APALIS_TK1_K20_ADC_CH0L;
++		break;
++	case APALIS_TK1_K20_ADC2:
++		adc_register = APALIS_TK1_K20_ADC_CH1L;
++		break;
++	case APALIS_TK1_K20_ADC3:
++		adc_register = APALIS_TK1_K20_ADC_CH2L;
++		break;
++	case APALIS_TK1_K20_ADC4:
++		adc_register = APALIS_TK1_K20_ADC_CH3L;
++		break;
++	default:
++		return -ENODEV;
++	}
++
++	apalis_tk1_k20_lock(adc->apalis_tk1_k20);
++
++	if (apalis_tk1_k20_reg_read_bulk(adc->apalis_tk1_k20, adc_register,
++			adc_read, 2) < 0) {
++		apalis_tk1_k20_unlock(adc->apalis_tk1_k20);
++		return -EIO;
++	}
++	*val = (adc_read[1] << 8) + adc_read[0];
++
++	apalis_tk1_k20_unlock(adc->apalis_tk1_k20);
++
++	return 0;
++}
++
++static int apalis_tk1_k20_adc_read_raw(struct iio_dev *indio_dev,
++			struct iio_chan_spec const *chan,
++			int *val, int *val2, long mask)
++{
++	struct apalis_tk1_k20_adc *adc = iio_priv(indio_dev);
++	enum apalis_tk1_k20_adc_id id = chan->channel;
++	int ret;
++
++	switch (mask) {
++	case IIO_CHAN_INFO_RAW:
++		ret = apalis_tk1_k20_get_adc_result(adc, id, val) ?
++				-EIO : IIO_VAL_INT;
++		break;
++	case IIO_CHAN_INFO_SCALE:
++		*val = APALIS_TK1_K20_VADC_MILI;
++		*val2 = APALIS_TK1_K20_ADC_BITS;
++		ret = IIO_VAL_FRACTIONAL_LOG2;
++		break;
++	default:
++		ret = -EINVAL;
++		break;
++	}
++
++	return ret;
++}
++
++static const struct iio_info apalis_tk1_k20_adc_info = {
++	.read_raw = &apalis_tk1_k20_adc_read_raw,
++	.driver_module = THIS_MODULE,
++};
++
++#define APALIS_TK1_K20_CHAN(_id, _type) {			\
++		.type = _type,					\
++		.indexed = 1,					\
++		.channel = APALIS_TK1_K20_##_id,		\
++		.info_mask_separate = BIT(IIO_CHAN_INFO_RAW) |	\
++				      BIT(IIO_CHAN_INFO_SCALE),	\
++		.datasheet_name = #_id,				\
++}
++
++static const struct iio_chan_spec apalis_tk1_k20_adc_channels[] = {
++	[APALIS_TK1_K20_ADC1] = APALIS_TK1_K20_CHAN(ADC1, IIO_VOLTAGE),
++	[APALIS_TK1_K20_ADC2] = APALIS_TK1_K20_CHAN(ADC2, IIO_VOLTAGE),
++	[APALIS_TK1_K20_ADC3] = APALIS_TK1_K20_CHAN(ADC3, IIO_VOLTAGE),
++	[APALIS_TK1_K20_ADC4] = APALIS_TK1_K20_CHAN(ADC4, IIO_VOLTAGE),
++};
++
++
++static int apalis_tk1_k20_adc_probe(struct platform_device *pdev)
++{
++	struct apalis_tk1_k20_adc *priv;
++	struct apalis_tk1_k20_regmap *apalis_tk1_k20;
++	struct iio_dev *indio_dev;
++	int ret;
++
++	indio_dev = iio_device_alloc(sizeof(*priv));
++	if (!indio_dev)
++		return -ENOMEM;
++
++	apalis_tk1_k20 = dev_get_drvdata(pdev->dev.parent);
++	if (!apalis_tk1_k20) {
++		ret = -ENODEV;
++		goto err_iio_device;
++	}
++
++	priv = iio_priv(indio_dev);
++	priv->apalis_tk1_k20 = apalis_tk1_k20;
++
++	apalis_tk1_k20_lock(apalis_tk1_k20);
++
++	/* Enable ADC */
++	apalis_tk1_k20_reg_write(apalis_tk1_k20, APALIS_TK1_K20_ADCREG, 0x01);
++
++	apalis_tk1_k20_unlock(apalis_tk1_k20);
++
++	platform_set_drvdata(pdev, indio_dev);
++
++	indio_dev->dev.of_node	= pdev->dev.of_node;
++	indio_dev->dev.parent	= &pdev->dev;
++	indio_dev->name		= pdev->name;
++	indio_dev->modes	= INDIO_DIRECT_MODE;
++	indio_dev->info		= &apalis_tk1_k20_adc_info;
++	indio_dev->channels	= apalis_tk1_k20_adc_channels;
++	indio_dev->num_channels	= ARRAY_SIZE(apalis_tk1_k20_adc_channels);
++
++	ret = iio_device_register(indio_dev);
++	if (ret) {
++		dev_err(&pdev->dev, "iio dev register err: %d\n", ret);
++		goto err_iio_device;
++	}
++
++	return 0;
++
++err_iio_device:
++	iio_device_free(indio_dev);
++	return ret;
++}
++
++static int apalis_tk1_k20_adc_remove(struct platform_device *pdev)
++{
++	struct iio_dev *indio_dev = platform_get_drvdata(pdev);
++	struct apalis_tk1_k20_regmap *apalis_tk1_k20 = dev_get_drvdata(
++			pdev->dev.parent);
++
++	apalis_tk1_k20_lock(apalis_tk1_k20);
++
++	/* Disable ADC */
++	apalis_tk1_k20_reg_write(apalis_tk1_k20, APALIS_TK1_K20_ADCREG, 0x00);
++
++	apalis_tk1_k20_unlock(apalis_tk1_k20);
++
++	iio_device_unregister(indio_dev);
++	iio_device_free(indio_dev);
++
++	return 0;
++}
++
++static const struct platform_device_id apalis_tk1_k20_adc_idtable[] = {
++	{
++		.name = "apalis-tk1-k20-adc",
++	},
++	{ /* sentinel */ }
++};
++MODULE_DEVICE_TABLE(platform, apalis_tk1_k20_adc_idtable);
++
++static struct platform_driver apalis_tk1_k20_adc_driver = {
++	.id_table = apalis_tk1_k20_adc_idtable,
++	.remove = apalis_tk1_k20_adc_remove,
++	.probe = apalis_tk1_k20_adc_probe,
++	.driver = {
++		.name = "apalis-tk1-k20-adc",
++	},
++};
++
++module_platform_driver(apalis_tk1_k20_adc_driver);
++
++MODULE_DESCRIPTION("K20 ADCs on Apalis TK1");
++MODULE_AUTHOR("Dominik Sliwa");
++MODULE_LICENSE("GPL");
+diff --git a/drivers/input/touchscreen/Kconfig b/drivers/input/touchscreen/Kconfig
+index 64b30fe273fd..81e9c604f612 100644
+--- a/drivers/input/touchscreen/Kconfig
++++ b/drivers/input/touchscreen/Kconfig
+@@ -92,6 +92,16 @@ config TOUCHSCREEN_AD7879_SPI
+ 	  To compile this driver as a module, choose M here: the
+ 	  module will be called ad7879-spi.
+ 
++config TOUCHSCREEN_APALIS_TK1_K20
++	tristate "K20 based touchscreen controller on Apalis TK1"
++	depends on MFD_APALIS_TK1_K20
++	help
++	  Say Y here if you want to support the touchscreen controller
++	  implemented in the K20 found on Apalis TK1.
++
++	  To compile this driver as a module, choose M here: the module will be
++	  called apalis-tk1-k20_ts.
++
+ config TOUCHSCREEN_AR1021_I2C
+ 	tristate "Microchip AR1020/1021 i2c touchscreen"
+ 	depends on I2C && OF
+diff --git a/drivers/input/touchscreen/Makefile b/drivers/input/touchscreen/Makefile
+index 850c1562555a..d9352ec30431 100644
+--- a/drivers/input/touchscreen/Makefile
++++ b/drivers/input/touchscreen/Makefile
+@@ -14,6 +14,7 @@ obj-$(CONFIG_TOUCHSCREEN_AD7879)	+= ad7879.o
+ obj-$(CONFIG_TOUCHSCREEN_AD7879_I2C)	+= ad7879-i2c.o
+ obj-$(CONFIG_TOUCHSCREEN_AD7879_SPI)	+= ad7879-spi.o
+ obj-$(CONFIG_TOUCHSCREEN_ADS7846)	+= ads7846.o
++obj-$(CONFIG_TOUCHSCREEN_APALIS_TK1_K20)	+= apalis-tk1-k20_ts.o
+ obj-$(CONFIG_TOUCHSCREEN_AR1021_I2C)	+= ar1021_i2c.o
+ obj-$(CONFIG_TOUCHSCREEN_ATMEL_MXT)	+= atmel_mxt_ts.o
+ obj-$(CONFIG_TOUCHSCREEN_AUO_PIXCIR)	+= auo-pixcir-ts.o
+diff --git a/drivers/input/touchscreen/apalis-tk1-k20_ts.c b/drivers/input/touchscreen/apalis-tk1-k20_ts.c
+new file mode 100644
+index 000000000000..ef9e56c94685
+--- /dev/null
++++ b/drivers/input/touchscreen/apalis-tk1-k20_ts.c
+@@ -0,0 +1,234 @@
++/*
++ * Copyright 2016-2017 Toradex AG
++ * Dominik Sliwa <dominik.sliwa@toradex.com>
++ *
++ * Based on driver for the Freescale Semiconductor MC13783 touchscreen by:
++ * Copyright 2004-2007 Freescale Semiconductor, Inc. All Rights Reserved.
++ * Copyright (C) 2009 Sascha Hauer, Pengutronix
++ *
++ * This program is free software; you can redistribute it and/or modify it
++ * under the terms of the GNU General Public License version 2 as published by
++ * the Free Software Foundation.
++ */
++
++#include <linux/platform_device.h>
++#include <linux/mfd/apalis-tk1-k20.h>
++#include <linux/kernel.h>
++#include <linux/module.h>
++#include <linux/input.h>
++#include <linux/sched.h>
++#include <linux/slab.h>
++#include <linux/init.h>
++
++#define APALIS_TK1_K20_TS_NAME	"apalis-tk1-k20-ts"
++
++struct apalis_tk1_k20_ts {
++	struct input_dev *idev;
++	struct apalis_tk1_k20_regmap *apalis_tk1_k20;
++	struct delayed_work work;
++	struct workqueue_struct *workq;
++	uint16_t sample[4];
++};
++
++static irqreturn_t apalis_tk1_k20_ts_handler(int irq, void *data)
++{
++	struct apalis_tk1_k20_ts *priv = data;
++
++	/*
++	 * Kick off reading coordinates. Note that if work happens already
++	 * be queued for future execution (it rearms itself) it will not
++	 * be rescheduled for immediate execution here. However the rearm
++	 * delay is HZ / 25 which is acceptable.
++	 */
++	queue_delayed_work(priv->workq, &priv->work, 0);
++
++	return IRQ_HANDLED;
++}
++
++static void apalis_tk1_k20_ts_report_sample(struct apalis_tk1_k20_ts *priv)
++{
++	struct input_dev *idev = priv->idev;
++	int xp, xm, yp, ym;
++	int x, y, press, btn;
++
++	xp = priv->sample[1];
++	xm = priv->sample[0];
++	yp = priv->sample[3];
++	ym = priv->sample[2];
++
++	x = (xp + xm) / 2;
++	y = (yp + ym) / 2;
++	press = (abs(yp - ym) + abs(xp - xm)) / 2;
++
++	if ((yp != 0) && (xp != 0)) {
++		btn = 1;
++		input_report_abs(idev, ABS_X, x);
++		input_report_abs(idev, ABS_Y, y);
++
++		dev_dbg(&idev->dev, "report (%d, %d, %d)\n",
++				x, y, press);
++		queue_delayed_work(priv->workq, &priv->work, HZ / 25);
++	} else {
++		dev_dbg(&idev->dev, "report release\n");
++		btn = 0;
++	}
++
++	input_report_abs(idev, ABS_PRESSURE, press);
++	input_report_key(idev, BTN_TOUCH, btn);
++	input_sync(idev);
++}
++
++static void apalis_tk1_k20_ts_work(struct work_struct *work)
++{
++	struct apalis_tk1_k20_ts *priv =
++		container_of(work, struct apalis_tk1_k20_ts, work.work);
++	uint8_t buf[8], i;
++
++	apalis_tk1_k20_lock(priv->apalis_tk1_k20);
++
++	if (apalis_tk1_k20_reg_read_bulk(priv->apalis_tk1_k20,
++			APALIS_TK1_K20_TSC_XML, buf, 8) < 0) {
++		apalis_tk1_k20_unlock(priv->apalis_tk1_k20);
++		dev_err(&priv->idev->dev, "Error reading data\n");
++		return;
++	}
++
++	apalis_tk1_k20_unlock(priv->apalis_tk1_k20);
++
++	for (i = 0; i < 4; i++)
++		priv->sample[i] = (buf[(2 * i) + 1] << 8) + buf[2 * i];
++
++	apalis_tk1_k20_ts_report_sample(priv);
++}
++
++static int apalis_tk1_k20_ts_open(struct input_dev *dev)
++{
++	struct apalis_tk1_k20_ts *priv = input_get_drvdata(dev);
++	int ret;
++
++	apalis_tk1_k20_lock(priv->apalis_tk1_k20);
++
++	ret = apalis_tk1_k20_irq_request(priv->apalis_tk1_k20,
++			APALIS_TK1_K20_TSC_IRQ, apalis_tk1_k20_ts_handler,
++			APALIS_TK1_K20_TS_NAME, priv);
++	if (ret)
++		goto out;
++
++	ret = apalis_tk1_k20_reg_rmw(priv->apalis_tk1_k20,
++			APALIS_TK1_K20_TSCREG, APALIS_TK1_K20_TSC_ENA_MASK,
++			APALIS_TK1_K20_TSC_ENA);
++	if (ret)
++		apalis_tk1_k20_irq_free(priv->apalis_tk1_k20,
++				APALIS_TK1_K20_TSC_IRQ, priv);
++
++out:
++	apalis_tk1_k20_unlock(priv->apalis_tk1_k20);
++
++	return ret;
++}
++
++static void apalis_tk1_k20_ts_close(struct input_dev *dev)
++{
++	struct apalis_tk1_k20_ts *priv = input_get_drvdata(dev);
++
++	apalis_tk1_k20_lock(priv->apalis_tk1_k20);
++
++	apalis_tk1_k20_reg_rmw(priv->apalis_tk1_k20, APALIS_TK1_K20_TSCREG,
++			APALIS_TK1_K20_TSC_ENA_MASK, 0);
++	apalis_tk1_k20_irq_free(priv->apalis_tk1_k20, APALIS_TK1_K20_TSC_IRQ,
++			priv);
++
++	apalis_tk1_k20_unlock(priv->apalis_tk1_k20);
++
++	cancel_delayed_work_sync(&priv->work);
++}
++
++static int apalis_tk1_k20_ts_probe(struct platform_device *pdev)
++{
++	struct apalis_tk1_k20_ts *priv;
++	struct input_dev *idev;
++	int ret = -ENOMEM;
++
++	priv = kzalloc(sizeof(*priv), GFP_KERNEL);
++	idev = input_allocate_device();
++	if (!priv || !idev)
++		goto err_free_mem;
++
++	INIT_DELAYED_WORK(&priv->work, apalis_tk1_k20_ts_work);
++
++	priv->apalis_tk1_k20 = dev_get_drvdata(pdev->dev.parent);
++	priv->idev = idev;
++
++	priv->workq = create_singlethread_workqueue("apalis_tk1_k20_ts");
++	if (!priv->workq)
++		goto err_free_mem;
++
++	idev->name = APALIS_TK1_K20_TS_NAME;
++	idev->dev.parent = &pdev->dev;
++
++	idev->evbit[0] = BIT_MASK(EV_KEY) | BIT_MASK(EV_ABS);
++	idev->keybit[BIT_WORD(BTN_TOUCH)] = BIT_MASK(BTN_TOUCH);
++	input_set_abs_params(idev, ABS_X, 0, 0xfff, 0, 0);
++	input_set_abs_params(idev, ABS_Y, 0, 0xfff, 0, 0);
++	input_set_abs_params(idev, ABS_PRESSURE, 0, 0xfff, 0, 0);
++
++	idev->open = apalis_tk1_k20_ts_open;
++	idev->close = apalis_tk1_k20_ts_close;
++
++	input_set_drvdata(idev, priv);
++
++	ret = input_register_device(priv->idev);
++	if (ret) {
++		dev_err(&pdev->dev,
++			"register input device failed with %d\n", ret);
++		goto err_destroy_wq;
++	}
++
++	platform_set_drvdata(pdev, priv);
++
++	return 0;
++
++err_destroy_wq:
++	destroy_workqueue(priv->workq);
++err_free_mem:
++	input_free_device(idev);
++	kfree(priv);
++
++	return ret;
++}
++
++static int apalis_tk1_k20_ts_remove(struct platform_device *pdev)
++{
++	struct apalis_tk1_k20_ts *priv = platform_get_drvdata(pdev);
++
++	platform_set_drvdata(pdev, NULL);
++
++	destroy_workqueue(priv->workq);
++	input_unregister_device(priv->idev);
++	kfree(priv);
++
++	return 0;
++}
++
++static const struct platform_device_id apalis_tk1_k20_ts_idtable[] = {
++	{
++		.name = "apalis-tk1-k20-ts",
++	},
++	{ /* sentinel */ }
++};
++MODULE_DEVICE_TABLE(platform, apalis_tk1_k20_ts_idtable);
++
++static struct platform_driver apalis_tk1_k20_ts_driver = {
++	.id_table = apalis_tk1_k20_ts_idtable,
++	.probe = apalis_tk1_k20_ts_probe,
++	.remove = apalis_tk1_k20_ts_remove,
++	.driver		= {
++		.name	= APALIS_TK1_K20_TS_NAME,
++	},
++};
++
++module_platform_driver(apalis_tk1_k20_ts_driver);
++
++MODULE_DESCRIPTION("K20 touchscreen controller on Apalis TK1");
++MODULE_AUTHOR("Dominik Sliwa <dominik.sliwa@toradex.com>");
++MODULE_LICENSE("GPL v2");
+diff --git a/drivers/mfd/Kconfig b/drivers/mfd/Kconfig
+index fc5e4fef89d2..cd0a1dfd0a63 100644
+--- a/drivers/mfd/Kconfig
++++ b/drivers/mfd/Kconfig
+@@ -190,6 +190,20 @@ config MFD_AXP20X_RSB
+ 	  components like regulators or the PEK (Power Enable Key) under the
+ 	  corresponding menus.
+ 
++config MFD_APALIS_TK1_K20
++	tristate "K20 on Apalis TK1"
++	depends on SPI_MASTER
++	select MFD_CORE
++	help
++	  The Kinetis MK20DN512 companion micro controller found on Apalis TK1
++	  supports CAN, resistive touch, GPIOs and analog inputs.
++
++config APALIS_TK1_K20_EZP
++	bool "K20 on Apalis TK1 programming via EZ Port"
++	depends on MFD_APALIS_TK1_K20
++	help
++		Support for flashing new K20 firmware using EZ-Port functionality.
++
+ config MFD_CROS_EC
+ 	tristate "ChromeOS Embedded Controller"
+ 	select MFD_CORE
+diff --git a/drivers/mfd/Makefile b/drivers/mfd/Makefile
+index 8703ff17998e..ba4f60862f9f 100644
+--- a/drivers/mfd/Makefile
++++ b/drivers/mfd/Makefile
+@@ -9,6 +9,7 @@ obj-$(CONFIG_MFD_88PM800)	+= 88pm800.o 88pm80x.o
+ obj-$(CONFIG_MFD_88PM805)	+= 88pm805.o 88pm80x.o
+ obj-$(CONFIG_MFD_ACT8945A)	+= act8945a.o
+ obj-$(CONFIG_MFD_SM501)		+= sm501.o
++obj-$(CONFIG_MFD_APALIS_TK1_K20)	+= apalis-tk1-k20.o
+ obj-$(CONFIG_MFD_ASIC3)		+= asic3.o tmio_core.o
+ obj-$(CONFIG_MFD_BCM590XX)	+= bcm590xx.o
+ obj-$(CONFIG_MFD_BD9571MWV)	+= bd9571mwv.o
+diff --git a/drivers/mfd/apalis-tk1-k20-ezp.h b/drivers/mfd/apalis-tk1-k20-ezp.h
+new file mode 100644
+index 000000000000..e89d6adbe471
+--- /dev/null
++++ b/drivers/mfd/apalis-tk1-k20-ezp.h
+@@ -0,0 +1,47 @@
++/*
++ * Copyright 2016-2017 Toradex AG
++ * Dominik Sliwa <dominik.sliwa@toradex.com>
++ *
++ * This program is free software; you can redistribute it and/or modify it under
++ * the terms of the GNU General Public License version 2 as published by the
++ * Free Software Foundation.
++ */
++
++#ifndef __DRIVERS_MFD_APALIS_TK1_K20_H
++#define __DRIVERS_MFD_APALIS_TK1_K20_H
++
++#ifdef CONFIG_APALIS_TK1_K20_EZP
++#define APALIS_TK1_K20_FW_FOPT_ADDR	0x40D
++#define APALIS_TK1_K20_FOPT_EZP_ENA	BIT(1)
++#define APALIS_TK1_K20_FW_VER_ADDR	0x410
++
++#define APALIS_TK1_K20_FLASH_SIZE	0x80000
++
++/* EZ Port commands */
++#define APALIS_TK1_K20_EZP_WREN		0x06
++#define APALIS_TK1_K20_EZP_WRDI		0x04
++#define APALIS_TK1_K20_EZP_RDSR		0x05
++#define APALIS_TK1_K20_EZP_READ		0x03
++#define APALIS_TK1_K20_EZP_FREAD	0x0B
++#define APALIS_TK1_K20_EZP_SP		0x02
++#define APALIS_TK1_K20_EZP_SE		0xD8
++#define APALIS_TK1_K20_EZP_BE		0xC7
++#define APALIS_TK1_K20_EZP_RESET	0xB9
++#define APALIS_TK1_K20_EZP_WRFCCOB	0xBA
++#define APALIS_TK1_K20_EZP_FRDFCOOB	0xBB
++
++/* Bits of EZ Port status register */
++#define APALIS_TK1_K20_EZP_STA_WIP	BIT(0)
++#define APALIS_TK1_K20_EZP_STA_WEN	BIT(1)
++#define APALIS_TK1_K20_EZP_STA_BEDIS	BIT(2)
++#define APALIS_TK1_K20_EZP_STA_WEF	BIT(6)
++#define APALIS_TK1_K20_EZP_STA_FS	BIT(7)
++
++#define APALIS_TK1_K20_EZP_MAX_SPEED	4080000
++#define APALIS_TK1_K20_EZP_MAX_DATA	32
++#define APALIS_TK1_K20_EZP_WRITE_SIZE	32
++
++static const struct firmware *fw_entry;
++#endif /* CONFIG_APALIS_TK1_K20_EZP */
++
++#endif /* __DRIVERS_MFD_APALIS_TK1_K20_H */
+diff --git a/drivers/mfd/apalis-tk1-k20.c b/drivers/mfd/apalis-tk1-k20.c
+new file mode 100644
+index 000000000000..913be65c33e6
+--- /dev/null
++++ b/drivers/mfd/apalis-tk1-k20.c
+@@ -0,0 +1,1062 @@
++/*
++ * Copyright 2016-2017 Toradex AG
++ * Dominik Sliwa <dominik.sliwa@toradex.com>
++ *
++ * based on an driver for MC13xxx by:
++ * Copyright 2009-2010 Pengutronix
++ * Uwe Kleine-Koenig <u.kleine-koenig@pengutronix.de>
++ *
++ * This program is free software; you can redistribute it and/or modify it under
++ * the terms of the GNU General Public License version 2 as published by the
++ * Free Software Foundation.
++ */
++
++#include <linux/slab.h>
++#include <linux/module.h>
++#include <linux/platform_device.h>
++#include <linux/interrupt.h>
++#include <linux/mfd/core.h>
++#include <linux/mfd/apalis-tk1-k20.h>
++#include <linux/of.h>
++#include <linux/of_device.h>
++#include <linux/of_gpio.h>
++#include <linux/of_irq.h>
++#include <linux/err.h>
++#include <linux/firmware.h>
++#include <linux/spi/spi.h>
++#include <linux/delay.h>
++
++#include "apalis-tk1-k20-ezp.h"
++#define APALIS_TK1_K20_MAX_MSG 4
++
++static const struct spi_device_id apalis_tk1_k20_device_ids[] = {
++	{
++		.name = "apalis-tk1-k20",
++	}, {
++		/* sentinel */
++	}
++};
++MODULE_DEVICE_TABLE(spi, apalis_tk1_k20_device_ids);
++
++static const struct of_device_id apalis_tk1_k20_dt_ids[] = {
++	{
++		.compatible = "toradex,apalis-tk1-k20",
++	}, {
++		/* sentinel */
++	}
++};
++MODULE_DEVICE_TABLE(of, apalis_tk1_k20_dt_ids);
++
++static const struct regmap_config apalis_tk1_k20_regmap_spi_config = {
++	.reg_bits = 8,
++	.pad_bits = 0,
++	.val_bits = 8,
++
++	.max_register = APALIS_TK1_K20_LAST_REG,
++
++	.cache_type = REGCACHE_NONE,
++	.use_single_rw = 0,
++};
++
++static int apalis_tk1_k20_spi_read(void *context, const void *reg,
++		size_t reg_size, void *val, size_t val_size)
++{
++	unsigned char w[APALIS_TK1_K20_MAX_BULK] = {APALIS_TK1_K20_READ_INST,
++			 *((unsigned char *) reg), val_size, 0x00, 0x00, 0x00,
++			0x00};
++	unsigned char r[APALIS_TK1_K20_MAX_BULK];
++	unsigned char *p = val;
++	int i = 0, j = 0;
++	struct device *dev = context;
++	struct spi_device *spi = to_spi_device(dev);
++	struct spi_transfer t = {
++		.tx_buf = w,
++		.rx_buf = r,
++		.len = 8,
++		.cs_change = 0,
++		.delay_usecs = 0,
++	};
++
++	struct spi_message m;
++	int ret;
++	spi->mode = SPI_MODE_1;
++
++	if (reg_size != 1)
++		return -ENOTSUPP;
++
++	if (val_size == 1) {
++		spi_message_init(&m);
++		spi_message_add_tail(&t, &m);
++		ret = spi_sync(spi, &m);
++
++		for (i = 3; i < 7; i++ )
++		{
++			if (((unsigned char *)t.rx_buf)[i] == 0x55) {
++				*p = ((unsigned char *)t.rx_buf)[i + 1];
++				return ret;
++			}
++		}
++
++		for (j = 0; j < APALIS_TK1_MAX_RETRY_CNT; j++) {
++			udelay(250 * j * j);
++			t.tx_buf = w;
++			t.rx_buf = r;
++			spi_message_init(&m);
++			spi_message_add_tail(&t, &m);
++			ret = spi_sync(spi, &m);
++			for (i = 3; i < 7; i++ )
++			{
++				if (((unsigned char *)t.rx_buf)[i] == 0x55) {
++					*p = ((unsigned char *)t.rx_buf)[i + 1];
++					return ret;
++				}
++			}
++		}
++		ret = -EIO;
++
++	} else if ((val_size > 1) && (val_size < APALIS_TK1_K20_MAX_BULK)) {
++		t.len = 5;
++		w[0] = APALIS_TK1_K20_BULK_READ_INST;
++		spi_message_init(&m);
++		spi_message_add_tail(&t, &m);
++		ret = spi_sync(spi, &m);
++		/* no need to reinit the message*/
++		t.len = val_size;
++		t.rx_buf = p;
++		/* just use the same transfer */
++		ret = spi_sync(spi, &m);
++
++	} else {
++		return -ENOTSUPP;
++	}
++
++	return ret;
++}
++
++
++static int apalis_tk1_k20_spi_write(void *context, const void *data,
++		size_t count)
++{
++	struct device *dev = context;
++	struct spi_device *spi = to_spi_device(dev);
++	uint8_t out_data[APALIS_TK1_K20_MAX_BULK];
++	int ret;
++
++
++	spi->mode = SPI_MODE_1;
++
++	if (count == 2) {
++		out_data[0] = APALIS_TK1_K20_WRITE_INST;
++		out_data[1] = ((uint8_t *)data)[0];
++		out_data[2] = ((uint8_t *)data)[1];
++		ret = spi_write(spi, out_data, 3);
++
++	} else if ((count > 2) && (count < APALIS_TK1_K20_MAX_BULK)) {
++		out_data[0] = APALIS_TK1_K20_BULK_WRITE_INST;
++		out_data[1] = ((uint8_t *)data)[0];
++		out_data[2] = count - 1;
++		memcpy(&out_data[3], &((uint8_t *)data)[1], count - 1);
++		ret = spi_write(spi, out_data, count + 2);
++	} else {
++		dev_err(dev, "Apalis TK1 K20 MFD invalid write count = %d\n",
++				count);
++		return -ENOTSUPP;
++	}
++	return ret;
++}
++
++static struct regmap_bus regmap_apalis_tk1_k20_bus = {
++	.write = apalis_tk1_k20_spi_write,
++	.read = apalis_tk1_k20_spi_read,
++};
++
++void apalis_tk1_k20_lock(struct apalis_tk1_k20_regmap *apalis_tk1_k20)
++{
++	if (!mutex_trylock(&apalis_tk1_k20->lock)) {
++		dev_dbg(apalis_tk1_k20->dev, "wait for %s from %ps\n",
++				__func__, __builtin_return_address(0));
++
++		mutex_lock(&apalis_tk1_k20->lock);
++	}
++	dev_dbg(apalis_tk1_k20->dev, "%s from %ps\n",
++			__func__, __builtin_return_address(0));
++}
++EXPORT_SYMBOL(apalis_tk1_k20_lock);
++
++void apalis_tk1_k20_unlock(struct apalis_tk1_k20_regmap *apalis_tk1_k20)
++{
++	dev_dbg(apalis_tk1_k20->dev, "%s from %ps\n",
++			__func__, __builtin_return_address(0));
++	mutex_unlock(&apalis_tk1_k20->lock);
++}
++EXPORT_SYMBOL(apalis_tk1_k20_unlock);
++
++int apalis_tk1_k20_reg_read(struct apalis_tk1_k20_regmap *apalis_tk1_k20,
++		unsigned int offset, u32 *val)
++{
++	int ret;
++
++	ret = regmap_read(apalis_tk1_k20->regmap, offset, val);
++	dev_dbg(apalis_tk1_k20->dev, "[0x%02x] -> 0x%02x ret = %d\n", offset,
++			*val, ret);
++
++	return ret;
++}
++EXPORT_SYMBOL(apalis_tk1_k20_reg_read);
++
++int apalis_tk1_k20_reg_write(struct apalis_tk1_k20_regmap *apalis_tk1_k20,
++		unsigned int offset, u32 val)
++{
++	int ret;
++
++	if (val >= BIT(24))
++		return -EINVAL;
++
++	ret = regmap_write(apalis_tk1_k20->regmap, offset, val);
++
++	dev_dbg(apalis_tk1_k20->dev, "[0x%02x] <- 0x%02x ret = %d\n", offset, val,
++			 ret);
++
++	return ret;
++}
++EXPORT_SYMBOL(apalis_tk1_k20_reg_write);
++
++int apalis_tk1_k20_reg_read_bulk(struct apalis_tk1_k20_regmap *apalis_tk1_k20,
++		unsigned int offset,
++		uint8_t *val, size_t size)
++{
++	int ret;
++
++	if (size > APALIS_TK1_K20_MAX_BULK)
++		return -EINVAL;
++
++	ret = regmap_bulk_read(apalis_tk1_k20->regmap, offset, val, size);
++	dev_dbg(apalis_tk1_k20->dev, "bulk read %d bytes from [0x%02x]\n",
++			size, offset);
++
++	return ret;
++}
++EXPORT_SYMBOL(apalis_tk1_k20_reg_read_bulk);
++
++int apalis_tk1_k20_reg_write_bulk(struct apalis_tk1_k20_regmap *apalis_tk1_k20,
++		unsigned int offset, uint8_t *buf, size_t size)
++{
++	dev_dbg(apalis_tk1_k20->dev, "bulk write %d bytes to [0x%02x]\n",
++			(unsigned int)size, offset);
++
++	if (size > APALIS_TK1_K20_MAX_BULK)
++		return -EINVAL;
++	return regmap_bulk_write(apalis_tk1_k20->regmap, offset, buf, size);
++}
++EXPORT_SYMBOL(apalis_tk1_k20_reg_write_bulk);
++
++int apalis_tk1_k20_reg_rmw(struct apalis_tk1_k20_regmap *apalis_tk1_k20,
++		unsigned int offset, u32 mask, u32 val)
++{
++	dev_dbg(apalis_tk1_k20->dev, "[0x%02x] <- 0x%06x (mask: 0x%06x)\n",
++			offset, val, mask);
++
++	return regmap_update_bits(apalis_tk1_k20->regmap, offset, mask, val);
++}
++EXPORT_SYMBOL(apalis_tk1_k20_reg_rmw);
++
++int apalis_tk1_k20_irq_mask(struct apalis_tk1_k20_regmap *apalis_tk1_k20,
++		int irq)
++{
++	int virq = -1;
++	if (irq != APALIS_TK1_K20_CAN1_IRQ && irq != APALIS_TK1_K20_CAN0_IRQ) {
++		virq = regmap_irq_get_virq(apalis_tk1_k20->irq_data, irq);
++
++	} else {
++		virq = (irq == APALIS_TK1_K20_CAN0_IRQ) ?
++			apalis_tk1_k20->can0_irq:apalis_tk1_k20->can1_irq;
++	}
++
++	disable_irq_nosync(virq);
++
++	return 0;
++}
++EXPORT_SYMBOL(apalis_tk1_k20_irq_mask);
++
++int apalis_tk1_k20_irq_unmask(struct apalis_tk1_k20_regmap *apalis_tk1_k20,
++		int irq)
++{
++	int virq = -1;
++	if (irq != APALIS_TK1_K20_CAN1_IRQ && irq != APALIS_TK1_K20_CAN0_IRQ) {
++		virq = regmap_irq_get_virq(apalis_tk1_k20->irq_data, irq);
++
++	} else {
++		virq = (irq == APALIS_TK1_K20_CAN0_IRQ) ?
++			apalis_tk1_k20->can0_irq:apalis_tk1_k20->can1_irq;
++	}
++
++	enable_irq(virq);
++
++	return 0;
++}
++EXPORT_SYMBOL(apalis_tk1_k20_irq_unmask);
++
++int apalis_tk1_k20_irq_status(struct apalis_tk1_k20_regmap *apalis_tk1_k20,
++		int irq, int *enabled, int *pending)
++{
++	int ret;
++	unsigned int offmask = APALIS_TK1_K20_MSQREG;
++	unsigned int offstat = APALIS_TK1_K20_IRQREG;
++	u32 irqbit = 1 << irq;
++
++	if (irq < 0 || irq >= ARRAY_SIZE(apalis_tk1_k20->irqs))
++		return -EINVAL;
++
++	if (enabled) {
++		u32 mask;
++
++		ret = apalis_tk1_k20_reg_read(apalis_tk1_k20, offmask, &mask);
++		if (ret)
++			return ret;
++
++		*enabled = mask & irqbit;
++	}
++
++	if (pending) {
++		u32 stat;
++
++		ret = apalis_tk1_k20_reg_read(apalis_tk1_k20, offstat, &stat);
++		if (ret)
++			return ret;
++
++		*pending = stat & irqbit;
++	}
++
++	return 0;
++}
++EXPORT_SYMBOL(apalis_tk1_k20_irq_status);
++
++int apalis_tk1_k20_irq_request(struct apalis_tk1_k20_regmap *apalis_tk1_k20,
++		int irq, irq_handler_t handler, const char *name, void *dev)
++{
++	int virq = -1;
++	int irq_flags = IRQF_ONESHOT;
++	if (irq != APALIS_TK1_K20_CAN1_IRQ && irq != APALIS_TK1_K20_CAN0_IRQ) {
++		virq = regmap_irq_get_virq(apalis_tk1_k20->irq_data, irq);
++		irq_flags = IRQF_ONESHOT;
++	} else {
++		virq = (irq == APALIS_TK1_K20_CAN0_IRQ) ?
++			apalis_tk1_k20->can0_irq:apalis_tk1_k20->can1_irq;
++		irq_flags = IRQF_ONESHOT | IRQF_TRIGGER_FALLING |
++				IRQF_TRIGGER_RISING;
++	}
++	return devm_request_threaded_irq(apalis_tk1_k20->dev, virq,
++			 NULL, handler, irq_flags, name, dev);
++}
++EXPORT_SYMBOL(apalis_tk1_k20_irq_request);
++
++int apalis_tk1_k20_irq_free(struct apalis_tk1_k20_regmap *apalis_tk1_k20,
++		int irq, void *dev)
++{
++	int virq = -1;
++	if (irq != APALIS_TK1_K20_CAN1_IRQ && irq != APALIS_TK1_K20_CAN0_IRQ) {
++		virq = regmap_irq_get_virq(apalis_tk1_k20->irq_data, irq);
++
++	} else {
++		virq = (irq == APALIS_TK1_K20_CAN0_IRQ) ?
++			apalis_tk1_k20->can0_irq:apalis_tk1_k20->can1_irq;
++	}
++
++	devm_free_irq(apalis_tk1_k20->dev, virq, dev);
++
++	return 0;
++}
++EXPORT_SYMBOL(apalis_tk1_k20_irq_free);
++
++
++static int apalis_tk1_k20_add_subdevice_pdata_id(
++		struct apalis_tk1_k20_regmap *apalis_tk1_k20, const char *name,
++		void *pdata, size_t pdata_size, int id)
++{
++	struct mfd_cell cell = {
++		.platform_data = pdata,
++		.pdata_size = pdata_size,
++	};
++
++	cell.name = kmemdup(name, strlen(name) + 1, GFP_KERNEL);
++	if (!cell.name)
++		return -ENOMEM;
++
++	return mfd_add_devices(apalis_tk1_k20->dev, id, &cell, 1, NULL, 0,
++			       regmap_irq_get_domain(apalis_tk1_k20->irq_data));
++}
++
++static int apalis_tk1_k20_add_subdevice_pdata(
++		struct apalis_tk1_k20_regmap *apalis_tk1_k20, const char *name,
++		void *pdata, size_t pdata_size)
++{
++	return apalis_tk1_k20_add_subdevice_pdata_id(apalis_tk1_k20, name,
++			pdata, pdata_size, -1);
++}
++
++static int apalis_tk1_k20_add_subdevice(
++		struct apalis_tk1_k20_regmap *apalis_tk1_k20, const char *name)
++{
++	return apalis_tk1_k20_add_subdevice_pdata(apalis_tk1_k20, name, NULL,
++						  0);
++}
++
++static void apalis_tk1_k20_reset_chip(
++		struct apalis_tk1_k20_regmap *apalis_tk1_k20)
++{
++	udelay(10);
++	gpio_set_value(apalis_tk1_k20->reset_gpio, 0);
++	msleep(10);
++	gpio_set_value(apalis_tk1_k20->reset_gpio, 1);
++	udelay(10);
++}
++
++#ifdef CONFIG_APALIS_TK1_K20_EZP
++static int apalis_tk1_k20_read_ezport(
++		struct apalis_tk1_k20_regmap *apalis_tk1_k20, uint8_t command,
++		int addr, int count, uint8_t *buffer)
++{
++	uint8_t w[4 + APALIS_TK1_K20_EZP_MAX_DATA];
++	uint8_t r[4 + APALIS_TK1_K20_EZP_MAX_DATA];
++	uint8_t *out;
++	struct spi_message m;
++	struct spi_device *spi = to_spi_device(apalis_tk1_k20->dev);
++	struct spi_transfer t = {
++		.tx_buf = w,
++		.rx_buf = r,
++		.speed_hz = APALIS_TK1_K20_EZP_MAX_SPEED,
++	};
++	int ret;
++
++	spi->mode = SPI_MODE_0;
++
++	if (count > APALIS_TK1_K20_EZP_MAX_DATA)
++		return -ENOSPC;
++
++	memset(w, 0, 4 + count);
++
++	switch (command) {
++	case APALIS_TK1_K20_EZP_READ:
++	case APALIS_TK1_K20_EZP_FREAD:
++		t.len = 4 + count;
++		w[1] = (addr & 0xFF0000) >> 16;
++		w[2] = (addr & 0xFF00) >> 8;
++		w[3] = (addr & 0xFC);
++		out = &r[4];
++		break;
++	case APALIS_TK1_K20_EZP_RDSR:
++	case APALIS_TK1_K20_EZP_FRDFCOOB:
++		t.len = 1 + count;
++		out = &r[1];
++		break;
++	default:
++		return -EINVAL;
++	}
++	w[0] = command;
++
++	gpio_set_value(apalis_tk1_k20->ezpcs_gpio, 0);
++	spi_message_init(&m);
++	spi_message_add_tail(&t, &m);
++	ret = spi_sync(spi, &m);
++	gpio_set_value(apalis_tk1_k20->ezpcs_gpio, 1);
++	if (ret != 0)
++		return ret;
++
++	memcpy(buffer, out, count);
++
++	return 0;
++}
++
++static int apalis_tk1_k20_write_ezport(
++		struct apalis_tk1_k20_regmap *apalis_tk1_k20, uint8_t command,
++		int addr, int count, const uint8_t *buffer)
++{
++	uint8_t w[4 + APALIS_TK1_K20_EZP_MAX_DATA];
++	uint8_t r[4 + APALIS_TK1_K20_EZP_MAX_DATA];
++	struct spi_message m;
++	struct spi_device *spi = to_spi_device(apalis_tk1_k20->dev);
++	struct spi_transfer t = {
++		.tx_buf = w,
++		.rx_buf = r,
++		.speed_hz = APALIS_TK1_K20_EZP_MAX_SPEED,
++	};
++	int ret;
++
++	spi->mode = SPI_MODE_0;
++
++	if (count > APALIS_TK1_K20_EZP_MAX_DATA)
++		return -ENOSPC;
++
++	switch (command) {
++	case APALIS_TK1_K20_EZP_SP:
++	case APALIS_TK1_K20_EZP_SE:
++		t.len = 4 + count;
++		w[1] = (addr & 0xFF0000) >> 16;
++		w[2] = (addr & 0xFF00) >> 8;
++		w[3] = (addr & 0xF8);
++		memcpy(&w[4], buffer, count);
++		break;
++	case APALIS_TK1_K20_EZP_WREN:
++	case APALIS_TK1_K20_EZP_WRDI:
++	case APALIS_TK1_K20_EZP_BE:
++	case APALIS_TK1_K20_EZP_RESET:
++	case APALIS_TK1_K20_EZP_WRFCCOB:
++		t.len = 1 + count;
++		memcpy(&w[1], buffer, count);
++		break;
++	default:
++		return -EINVAL;
++	}
++	w[0] = command;
++
++	gpio_set_value(apalis_tk1_k20->ezpcs_gpio, 0);
++	spi_message_init(&m);
++	spi_message_add_tail(&t, &m);
++	ret = spi_sync(spi, &m);
++	gpio_set_value(apalis_tk1_k20->ezpcs_gpio, 1);
++
++	return ret;
++}
++
++static int apalis_tk1_k20_set_wren_ezport(
++		struct apalis_tk1_k20_regmap *apalis_tk1_k20)
++{
++	uint8_t buffer;
++
++	if (apalis_tk1_k20_write_ezport(apalis_tk1_k20, APALIS_TK1_K20_EZP_WREN,
++			0, 0, NULL) < 0)
++		return -EIO;
++	if (apalis_tk1_k20_read_ezport(apalis_tk1_k20, APALIS_TK1_K20_EZP_RDSR,
++			0, 1, &buffer) < 0)
++		return -EIO;
++	if ((buffer & APALIS_TK1_K20_EZP_STA_WEN))
++		return 0;
++
++	/* If it failed try one last time */
++	if (apalis_tk1_k20_write_ezport(apalis_tk1_k20, APALIS_TK1_K20_EZP_WREN,
++			0, 0, NULL) < 0)
++		return -EIO;
++	if (apalis_tk1_k20_read_ezport(apalis_tk1_k20, APALIS_TK1_K20_EZP_RDSR,
++			0, 1, &buffer) < 0)
++		return -EIO;
++	if ((buffer & APALIS_TK1_K20_EZP_STA_WEN))
++		return 0;
++
++	return -EIO;
++
++}
++
++static int apalis_tk1_k20_enter_ezport(
++		struct apalis_tk1_k20_regmap *apalis_tk1_k20)
++{
++	uint8_t status = 0x00;
++	uint8_t buffer;
++
++	gpio_set_value(apalis_tk1_k20->ezpcs_gpio, 0);
++	msleep(10);
++	apalis_tk1_k20_reset_chip(apalis_tk1_k20);
++	msleep(10);
++	gpio_set_value(apalis_tk1_k20->ezpcs_gpio, 1);
++	if (apalis_tk1_k20_read_ezport(apalis_tk1_k20, APALIS_TK1_K20_EZP_RDSR,
++			0, 1, &buffer) < 0)
++		goto bad;
++	status = buffer;
++	if (apalis_tk1_k20_write_ezport(apalis_tk1_k20, APALIS_TK1_K20_EZP_WREN,
++			0, 0, NULL) < 0)
++		goto bad;
++	if (apalis_tk1_k20_read_ezport(apalis_tk1_k20, APALIS_TK1_K20_EZP_RDSR,
++			0, 1, &buffer) < 0)
++		goto bad;
++	if ((buffer & APALIS_TK1_K20_EZP_STA_WEN) && buffer != status)
++		return 0;
++
++bad:
++	dev_err(apalis_tk1_k20->dev, "Error entering EZ Port mode.\n");
++	return -EIO;
++}
++
++static int apalis_tk1_k20_erase_chip_ezport(
++		struct apalis_tk1_k20_regmap *apalis_tk1_k20)
++{
++	uint8_t buffer[16];
++	int i;
++
++	if (apalis_tk1_k20_set_wren_ezport(apalis_tk1_k20))
++		goto bad;
++	if (apalis_tk1_k20_write_ezport(apalis_tk1_k20, APALIS_TK1_K20_EZP_BE,
++			0, 0, NULL) < 0)
++		goto bad;
++
++	if (apalis_tk1_k20_read_ezport(apalis_tk1_k20, APALIS_TK1_K20_EZP_RDSR,
++			0, 1, buffer) < 0)
++		goto bad;
++
++	i = 0;
++	while (buffer[0] & APALIS_TK1_K20_EZP_STA_WIP) {
++		msleep(20);
++		if ((apalis_tk1_k20_read_ezport(apalis_tk1_k20,
++		     APALIS_TK1_K20_EZP_RDSR, 0, 1, buffer) < 0) || (i > 50))
++			goto bad;
++		i++;
++	}
++
++	return 0;
++
++bad:
++	dev_err(apalis_tk1_k20->dev, "Error erasing the chip.\n");
++	return -EIO;
++}
++
++static int apalis_tk1_k20_flash_chip_ezport(
++		struct apalis_tk1_k20_regmap *apalis_tk1_k20)
++{
++	uint8_t buffer;
++	const uint8_t *fw_chunk;
++	int i, j, transfer_size;
++
++	for (i = 0; i < fw_entry->size;) {
++		if (apalis_tk1_k20_set_wren_ezport(apalis_tk1_k20))
++			goto bad;
++
++		fw_chunk = fw_entry->data + i;
++		transfer_size = (i + APALIS_TK1_K20_EZP_WRITE_SIZE <
++				 fw_entry->size) ? APALIS_TK1_K20_EZP_WRITE_SIZE
++				 : (fw_entry->size - i - 1);
++		dev_dbg(apalis_tk1_k20->dev,
++			 "Apalis TK1 K20 MFD transfer_size = %d addr = 0x%X\n",
++				 transfer_size, i);
++		if (apalis_tk1_k20_write_ezport(apalis_tk1_k20,
++				APALIS_TK1_K20_EZP_SP, i,
++			transfer_size, fw_chunk) < 0)
++			goto bad;
++		udelay(2000);
++		if (apalis_tk1_k20_read_ezport(apalis_tk1_k20,
++				APALIS_TK1_K20_EZP_RDSR, 0, 1, &buffer) < 0)
++			goto bad;
++
++		j = 0;
++		while (buffer & APALIS_TK1_K20_EZP_STA_WIP) {
++			msleep(10);
++			if ((apalis_tk1_k20_read_ezport(apalis_tk1_k20,
++					APALIS_TK1_K20_EZP_RDSR, 0, 1,
++					&buffer) < 0) || (j > 10000))
++				goto bad;
++			j++;
++		}
++		i += APALIS_TK1_K20_EZP_WRITE_SIZE;
++	}
++
++	return 0;
++
++bad:
++	dev_err(apalis_tk1_k20->dev, "Error writing to the chip.\n");
++	return -EIO;
++}
++
++static uint8_t apalis_tk1_k20_fw_ezport_status(void)
++{
++	return fw_entry->data[APALIS_TK1_K20_FW_FOPT_ADDR] &
++			APALIS_TK1_K20_FOPT_EZP_ENA;
++}
++
++static uint8_t apalis_tk1_k20_get_fw_revision(void)
++{
++	if (fw_entry)
++		if (fw_entry->size > APALIS_TK1_K20_FW_VER_ADDR)
++			return fw_entry->data[APALIS_TK1_K20_FW_VER_ADDR];
++	return 0;
++}
++#endif /* CONFIG_APALIS_TK1_K20_EZP */
++
++
++#ifdef CONFIG_OF
++static int apalis_tk1_k20_probe_flags_dt(
++		struct apalis_tk1_k20_regmap *apalis_tk1_k20)
++{
++	struct device_node *np = apalis_tk1_k20->dev->of_node;
++
++	if (!np)
++		return -ENODEV;
++
++	if (of_property_read_bool(np, "toradex,apalis-tk1-k20-uses-adc"))
++		apalis_tk1_k20->flags |= APALIS_TK1_K20_USES_ADC;
++
++	if (of_property_read_bool(np, "toradex,apalis-tk1-k20-uses-tsc"))
++		apalis_tk1_k20->flags |= APALIS_TK1_K20_USES_TSC;
++
++	if (of_property_read_bool(np, "toradex,apalis-tk1-k20-uses-can"))
++		apalis_tk1_k20->flags |= APALIS_TK1_K20_USES_CAN;
++
++	if (of_property_read_bool(np, "toradex,apalis-tk1-k20-uses-gpio"))
++		apalis_tk1_k20->flags |= APALIS_TK1_K20_USES_GPIO;
++
++	return 0;
++}
++
++static int apalis_tk1_k20_probe_gpios_dt(
++		struct apalis_tk1_k20_regmap *apalis_tk1_k20)
++{
++	struct device_node *np = apalis_tk1_k20->dev->of_node;
++
++	if (!np)
++		return -ENODEV;
++
++	apalis_tk1_k20->reset_gpio = of_get_named_gpio(np, "rst-gpio", 0);
++	if (apalis_tk1_k20->reset_gpio < 0)
++		return apalis_tk1_k20->reset_gpio;
++	gpio_request(apalis_tk1_k20->reset_gpio, "apalis-tk1-k20-reset");
++	gpio_direction_output(apalis_tk1_k20->reset_gpio, 1);
++
++	apalis_tk1_k20->ezpcs_gpio = of_get_named_gpio(np, "ezport-cs-gpio", 0);
++	if (apalis_tk1_k20->ezpcs_gpio < 0)
++		return apalis_tk1_k20->ezpcs_gpio;
++	gpio_request(apalis_tk1_k20->ezpcs_gpio, "apalis-tk1-k20-ezpcs");
++	gpio_direction_output(apalis_tk1_k20->ezpcs_gpio, 1);
++
++	apalis_tk1_k20->int2_gpio = of_get_named_gpio(np, "int2-gpio", 0);
++	if (apalis_tk1_k20->int2_gpio < 0)
++		return apalis_tk1_k20->int2_gpio;
++	gpio_request(apalis_tk1_k20->int2_gpio, "apalis-tk1-k20-int2");
++	gpio_direction_output(apalis_tk1_k20->int2_gpio, 1);
++
++	return 0;
++}
++#else
++static inline int apalis_tk1_k20_probe_flags_dt(
++		struct apalis_tk1_k20_regmap *apalis_tk1_k20)
++{
++	return -ENODEV;
++}
++static inline int apalis_tk1_k20_probe_gpios_dt(
++		struct apalis_tk1_k20_regmap *apalis_tk1_k20)
++{
++	return -ENODEV;
++}
++#endif
++
++int apalis_tk1_k20_dev_init(struct device *dev)
++{
++	struct apalis_tk1_k20_platform_data *pdata = dev_get_platdata(dev);
++	struct apalis_tk1_k20_regmap *apalis_tk1_k20 = dev_get_drvdata(dev);
++	uint32_t revision = 0x00;
++	int ret, i;
++	int erase_only = 0;
++
++	apalis_tk1_k20->dev = dev;
++
++	ret = apalis_tk1_k20_probe_gpios_dt(apalis_tk1_k20);
++	if ((ret < 0) && pdata) {
++		if (pdata) {
++			apalis_tk1_k20->ezpcs_gpio = pdata->ezpcs_gpio;
++			apalis_tk1_k20->reset_gpio = pdata->reset_gpio;
++			apalis_tk1_k20->int2_gpio = pdata->int2_gpio;
++		} else {
++			dev_err(dev, "Error claiming GPIOs\n");
++			ret = -EINVAL;
++			goto bad;
++		}
++	}
++	apalis_tk1_k20_reset_chip(apalis_tk1_k20);
++	msleep(10);
++	ret = apalis_tk1_k20_reg_read(apalis_tk1_k20, APALIS_TK1_K20_REVREG,
++			&revision);
++
++#ifdef CONFIG_APALIS_TK1_K20_EZP
++	if ((request_firmware(&fw_entry, "apalis-tk1-k20.bin", dev) < 0)
++	    && (revision != APALIS_TK1_K20_FW_VER)) {
++		dev_err(apalis_tk1_k20->dev,
++			"Unsupported firmware version %d.%d and no local" \
++			" firmware file available.\n",
++			(revision & 0xF0 >> 8),
++			(revision & 0x0F));
++		ret = -ENOTSUPP;
++		goto bad;
++	}
++
++	if ((fw_entry == NULL) && (revision != APALIS_TK1_K20_FW_VER)) {
++		dev_err(apalis_tk1_k20->dev,
++			"Unsupported firmware version %d.%d and no local" \
++			" firmware file available.\n",
++			(revision & 0xF0 >> 8),
++			(revision & 0x0F));
++		ret = -ENOTSUPP;
++		goto bad;
++	}
++
++	if (fw_entry != NULL) {
++		if (fw_entry->size == 1)
++			erase_only = 1;
++	}
++
++	if ((apalis_tk1_k20_get_fw_revision() != APALIS_TK1_K20_FW_VER) &&
++		(revision != APALIS_TK1_K20_FW_VER) && !erase_only &&
++		(fw_entry != NULL)) {
++		dev_err(apalis_tk1_k20->dev,
++			"Unsupported firmware version in both the device " \
++			"as well as the local firmware file.\n");
++		release_firmware(fw_entry);
++		ret = -ENOTSUPP;
++		goto bad;
++	}
++
++	if ((revision != APALIS_TK1_K20_FW_VER) && !erase_only &&
++			(!apalis_tk1_k20_fw_ezport_status()) &&
++			(fw_entry != NULL)) {
++		dev_err(apalis_tk1_k20->dev,
++			"Unsupported firmware version in the device and the " \
++			"local firmware file disables the EZ Port.\n");
++		release_firmware(fw_entry);
++		ret = -ENOTSUPP;
++		goto bad;
++	}
++
++	if (((revision != APALIS_TK1_K20_FW_VER) || erase_only) &&
++			(fw_entry != NULL)) {
++		i = 0;
++		while (apalis_tk1_k20_enter_ezport(apalis_tk1_k20) < 0
++				&& i++ < 5) {
++			msleep(50);
++		}
++		if (i >= 5) {
++			dev_err(apalis_tk1_k20->dev,
++				"Problem entering EZ port mode.\n");
++			release_firmware(fw_entry);
++			ret = -EIO;
++			goto bad;
++		}
++		if (apalis_tk1_k20_erase_chip_ezport(apalis_tk1_k20) < 0) {
++			dev_err(apalis_tk1_k20->dev,
++				"Problem erasing the chip.\n");
++			release_firmware(fw_entry);
++			ret = -EPROBE_DEFER;
++			goto bad;
++		}
++		if (erase_only) {
++			dev_err(apalis_tk1_k20->dev,
++				"Chip fully erased.\n");
++			release_firmware(fw_entry);
++			ret = -EIO;
++			goto bad;
++		}
++		if (apalis_tk1_k20_flash_chip_ezport(apalis_tk1_k20) < 0) {
++			dev_err(apalis_tk1_k20->dev,
++				"Problem flashing new firmware.\n");
++			release_firmware(fw_entry);
++			ret = -EPROBE_DEFER;
++			goto bad;
++		}
++	}
++	if (fw_entry != NULL)
++		release_firmware(fw_entry);
++
++	msleep(10);
++	apalis_tk1_k20_reset_chip(apalis_tk1_k20);
++	msleep(10);
++
++	ret = apalis_tk1_k20_reg_read(apalis_tk1_k20, APALIS_TK1_K20_REVREG,
++			&revision);
++#endif /* CONFIG_APALIS_TK1_K20_EZP */
++
++	if (ret) {
++		dev_err(apalis_tk1_k20->dev, "Device is not answering.\n");
++		goto bad;
++	}
++
++	if (revision != APALIS_TK1_K20_FW_VER) {
++		dev_err(apalis_tk1_k20->dev,
++			"Unsupported firmware version %d.%d.\n",
++			((revision & 0xF0) >> 4), (revision & 0x0F));
++		ret = -ENOTSUPP;
++		goto bad;
++	}
++
++	for (i = 0; i < ARRAY_SIZE(apalis_tk1_k20->irqs); i++) {
++		apalis_tk1_k20->irqs[i].reg_offset = i /
++						     APALIS_TK1_K20_IRQ_PER_REG;
++		apalis_tk1_k20->irqs[i].mask = BIT(i %
++						   APALIS_TK1_K20_IRQ_PER_REG);
++	}
++
++	apalis_tk1_k20->irq_chip.name		= dev_name(dev);
++	apalis_tk1_k20->irq_chip.status_base	= APALIS_TK1_K20_IRQREG;
++	apalis_tk1_k20->irq_chip.mask_base	= APALIS_TK1_K20_MSQREG;
++	apalis_tk1_k20->irq_chip.ack_base	= 0;
++	apalis_tk1_k20->irq_chip.irq_reg_stride	= 0;
++	apalis_tk1_k20->irq_chip.num_regs	= APALIS_TK1_K20_IRQ_REG_CNT;
++	apalis_tk1_k20->irq_chip.irqs		= apalis_tk1_k20->irqs;
++	apalis_tk1_k20->irq_chip.num_irqs = ARRAY_SIZE(apalis_tk1_k20->irqs);
++
++	ret = regmap_add_irq_chip(apalis_tk1_k20->regmap, apalis_tk1_k20->irq,
++			IRQF_ONESHOT | IRQF_TRIGGER_FALLING |
++			IRQF_TRIGGER_RISING, 0, &apalis_tk1_k20->irq_chip,
++			&apalis_tk1_k20->irq_data);
++	if (ret)
++		goto bad;
++
++	mutex_init(&apalis_tk1_k20->lock);
++
++	if (apalis_tk1_k20_probe_flags_dt(apalis_tk1_k20) < 0 && pdata)
++		apalis_tk1_k20->flags = pdata->flags;
++
++	if (apalis_tk1_k20->flags & APALIS_TK1_K20_USES_CAN) {
++		apalis_tk1_k20->can0_irq = irq_of_parse_and_map(
++					apalis_tk1_k20->dev->of_node, 1);
++		apalis_tk1_k20->can1_irq = irq_of_parse_and_map(
++					apalis_tk1_k20->dev->of_node, 2);
++		if (apalis_tk1_k20->can0_irq == 0 ||
++				apalis_tk1_k20->can1_irq == 0) {
++			apalis_tk1_k20->flags &= ~APALIS_TK1_K20_USES_CAN;
++			dev_err(apalis_tk1_k20->dev,
++					"Missing CAN interrupts.\n");
++		}
++	}
++
++	if (pdata) {
++		if (apalis_tk1_k20->flags & APALIS_TK1_K20_USES_TSC)
++			apalis_tk1_k20_add_subdevice_pdata(apalis_tk1_k20,
++					"apalis-tk1-k20-ts",
++					&pdata->touch, sizeof(pdata->touch));
++
++		if (apalis_tk1_k20->flags & APALIS_TK1_K20_USES_ADC)
++			apalis_tk1_k20_add_subdevice_pdata(apalis_tk1_k20,
++					"apalis-tk1-k20-adc",
++					&pdata->adc, sizeof(pdata->adc));
++
++		if (apalis_tk1_k20->flags & APALIS_TK1_K20_USES_CAN) {
++			/* We have 2 CAN devices inside K20 */
++			pdata->can0.id = 0;
++			pdata->can1.id = 1;
++			apalis_tk1_k20_add_subdevice_pdata(apalis_tk1_k20,
++					"apalis-tk1-k20-can",
++					&pdata->can0, sizeof(pdata->can0));
++			apalis_tk1_k20_add_subdevice_pdata(apalis_tk1_k20,
++					"apalis-tk1-k20-can",
++					&pdata->can1, sizeof(pdata->can1));
++		}
++		if (apalis_tk1_k20->flags & APALIS_TK1_K20_USES_GPIO)
++			apalis_tk1_k20_add_subdevice_pdata(apalis_tk1_k20,
++					"apalis-tk1-k20-gpio",
++					&pdata->gpio, sizeof(pdata->gpio));
++	} else {
++		if (apalis_tk1_k20->flags & APALIS_TK1_K20_USES_TSC)
++			apalis_tk1_k20_add_subdevice(apalis_tk1_k20,
++					"apalis-tk1-k20-ts");
++
++		if (apalis_tk1_k20->flags & APALIS_TK1_K20_USES_ADC)
++			apalis_tk1_k20_add_subdevice(apalis_tk1_k20,
++					"apalis-tk1-k20-adc");
++
++		if (apalis_tk1_k20->flags & APALIS_TK1_K20_USES_CAN) {
++			/* We have 2 CAN devices inside K20 */
++			apalis_tk1_k20_add_subdevice_pdata_id(apalis_tk1_k20,
++					"apalis-tk1-k20-can",
++					NULL, 0, 0);
++			apalis_tk1_k20_add_subdevice_pdata_id(apalis_tk1_k20,
++					"apalis-tk1-k20-can",
++					NULL, 0, 1);
++		}
++
++		if (apalis_tk1_k20->flags & APALIS_TK1_K20_USES_GPIO)
++			apalis_tk1_k20_add_subdevice(apalis_tk1_k20,
++					"apalis-tk1-k20-gpio");
++	}
++
++	dev_info(apalis_tk1_k20->dev, "Apalis TK1 K20 MFD driver. "
++			"Firmware version %d.%d.\n", FW_MAJOR, FW_MINOR);
++
++	return 0;
++
++bad:
++	if (apalis_tk1_k20->ezpcs_gpio >= 0)
++		gpio_free(apalis_tk1_k20->ezpcs_gpio);
++	if (apalis_tk1_k20->reset_gpio >= 0)
++		gpio_free(apalis_tk1_k20->reset_gpio);
++	if (apalis_tk1_k20->int2_gpio >= 0)
++		gpio_free(apalis_tk1_k20->int2_gpio);
++
++	return ret;
++}
++
++
++static int apalis_tk1_k20_spi_probe(struct spi_device *spi)
++{
++	struct apalis_tk1_k20_regmap *apalis_tk1_k20;
++	int ret;
++
++	apalis_tk1_k20 = devm_kzalloc(&spi->dev, sizeof(*apalis_tk1_k20),
++			GFP_KERNEL);
++	if (!apalis_tk1_k20)
++		return -ENOMEM;
++
++	dev_set_drvdata(&spi->dev, apalis_tk1_k20);
++
++	spi->mode = SPI_MODE_1;
++
++	apalis_tk1_k20->irq = spi->irq;
++
++	spi->max_speed_hz = (spi->max_speed_hz >= APALIS_TK1_K20_MAX_SPI_SPEED)
++				? APALIS_TK1_K20_MAX_SPI_SPEED : spi->max_speed_hz;
++
++	ret = spi_setup(spi);
++	if (ret)
++		return ret;
++
++	apalis_tk1_k20->regmap = devm_regmap_init(&spi->dev,
++			&regmap_apalis_tk1_k20_bus, &spi->dev,
++			&apalis_tk1_k20_regmap_spi_config);
++	if (IS_ERR(apalis_tk1_k20->regmap)) {
++		ret = PTR_ERR(apalis_tk1_k20->regmap);
++		dev_err(&spi->dev, "Failed to initialize regmap: %d\n", ret);
++		return ret;
++	}
++
++	return apalis_tk1_k20_dev_init(&spi->dev);
++}
++
++static int apalis_tk1_k20_spi_remove(struct spi_device *spi)
++{
++	struct apalis_tk1_k20_regmap *apalis_tk1_k20 =
++			dev_get_drvdata(&spi->dev);
++
++	if (apalis_tk1_k20->ezpcs_gpio >= 0)
++		gpio_free(apalis_tk1_k20->ezpcs_gpio);
++	if (apalis_tk1_k20->reset_gpio >= 0)
++		gpio_free(apalis_tk1_k20->reset_gpio);
++	if (apalis_tk1_k20->int2_gpio >= 0)
++		gpio_free(apalis_tk1_k20->int2_gpio);
++
++	kfree(spi->controller_data);
++	spi->controller_data = NULL;
++
++	mfd_remove_devices(&spi->dev);
++	regmap_del_irq_chip(apalis_tk1_k20->irq, apalis_tk1_k20->irq_data);
++	mutex_destroy(&apalis_tk1_k20->lock);
++
++	return 0;
++}
++
++static struct spi_driver apalis_tk1_k20_spi_driver = {
++	.id_table = apalis_tk1_k20_device_ids,
++	.driver = {
++		.name = "apalis-tk1-k20",
++		.of_match_table = apalis_tk1_k20_dt_ids,
++	},
++	.probe = apalis_tk1_k20_spi_probe,
++	.remove = apalis_tk1_k20_spi_remove,
++};
++
++static int __init apalis_tk1_k20_init(void)
++{
++	return spi_register_driver(&apalis_tk1_k20_spi_driver);
++}
++subsys_initcall(apalis_tk1_k20_init);
++
++static void __exit apalis_tk1_k20_exit(void)
++{
++	spi_unregister_driver(&apalis_tk1_k20_spi_driver);
++}
++module_exit(apalis_tk1_k20_exit);
++
++MODULE_DESCRIPTION("MFD driver for Kinetis MK20DN512 MCU on Apalis TK1");
++MODULE_AUTHOR("Dominik Sliwa <dominik.sliwa@toradex.com>");
++MODULE_LICENSE("GPL v2");
+diff --git a/drivers/net/can/Kconfig b/drivers/net/can/Kconfig
+index ac4ff394bc56..16b2d8e2d16a 100644
+--- a/drivers/net/can/Kconfig
++++ b/drivers/net/can/Kconfig
+@@ -88,6 +88,12 @@ config CAN_AT91
+ 	  This is a driver for the SoC CAN controller in Atmel's AT91SAM9263
+ 	  and AT91SAM9X5 processors.
+ 
++config CAN_APALIS_TK1_K20
++	tristate "Apalis TK1 K20 CAN controllers"
++	depends on MFD_APALIS_TK1_K20
++	---help---
++	  Driver for the Apalis TK1 K20 CAN controllers.
++
+ config CAN_BFIN
+ 	depends on BF534 || BF536 || BF537 || BF538 || BF539 || BF54x
+ 	tristate "Analog Devices Blackfin on-chip CAN"
+diff --git a/drivers/net/can/Makefile b/drivers/net/can/Makefile
+index 02b8ed794564..80ca9eba724a 100644
+--- a/drivers/net/can/Makefile
++++ b/drivers/net/can/Makefile
+@@ -19,6 +19,7 @@ obj-y				+= usb/
+ obj-y				+= softing/
+ 
+ obj-$(CONFIG_CAN_AT91)		+= at91_can.o
++obj-$(CONFIG_CAN_APALIS_TK1_K20)	+= apalis-tk1-k20-can.o
+ obj-$(CONFIG_CAN_BFIN)		+= bfin_can.o
+ obj-$(CONFIG_CAN_CC770)		+= cc770/
+ obj-$(CONFIG_CAN_C_CAN)		+= c_can/
+diff --git a/drivers/net/can/apalis-tk1-k20-can.c b/drivers/net/can/apalis-tk1-k20-can.c
+new file mode 100644
+index 000000000000..e24adbb35dfd
+--- /dev/null
++++ b/drivers/net/can/apalis-tk1-k20-can.c
+@@ -0,0 +1,817 @@
++/*
++ * Copyright 2016-2017 Toradex AG
++ * Dominik Sliwa <dominik.sliwa@toradex.com>
++ *
++ * CAN bus driver for Apalis TK1 K20 CAN Controller over MFD device
++ * based on MCP251x CAN driver
++ *
++ * This program is free software; you can redistribute it and/or modify it under
++ * the terms of the GNU General Public License version 2 as published by the
++ * Free Software Foundation.
++ */
++
++#include <linux/can/core.h>
++#include <linux/can/dev.h>
++#include <linux/can/led.h>
++#include <linux/completion.h>
++#include <linux/delay.h>
++#include <linux/device.h>
++#include <linux/dma-mapping.h>
++#include <linux/freezer.h>
++#include <linux/interrupt.h>
++#include <linux/io.h>
++#include <linux/kernel.h>
++#include <linux/mfd/apalis-tk1-k20.h>
++#include <linux/module.h>
++#include <linux/netdevice.h>
++#include <linux/platform_device.h>
++#include <linux/slab.h>
++#include <linux/uaccess.h>
++
++/* Buffer size required for the largest transfer (i.e., reading a
++ * frame)
++ */
++#define CAN_FRAME_MAX_LEN	8
++#define CAN_HEADER_MAX_LEN	5
++#define CAN_TRANSFER_BUF_LEN	(CAN_HEADER_MAX_LEN + CAN_FRAME_MAX_LEN)
++
++#define MB_DLC_OFF	4
++#define MB_EID_OFF	0
++#define MB_RTR_SHIFT	4
++#define MB_IDE_SHIFT	5
++#define MB_DLC_MASK	0xF
++#define MB_EID_LEN	4
++
++#define CANCTRL_MODMASK	0x03
++#define CANCTRL_INTEN	BIT(2)
++#define CANINTF_RX	BIT(3)
++#define CANINTF_TX	BIT(4)
++#define CANINTF_ERR	BIT(5)
++#define CANCTRL_INTMASK	(CANINTF_RX | CANINTF_TX | CANINTF_ERR)
++
++#define EFLG_EWARN	0x01
++#define EFLG_RXWAR	0x02
++#define EFLG_TXWAR	0x04
++#define EFLG_RXEP	0x08
++#define EFLG_TXEP	0x10
++#define EFLG_TXBO	0x20
++#define EFLG_RXOVR	0x40
++
++#define TX_ECHO_SKB_MAX	1
++
++#define K20_CAN_MAX_ID	1
++
++#define DEVICE_NAME "apalis-tk1-k20-can"
++
++static const struct can_bittiming_const apalis_tk1_k20_can_bittiming_const = {
++	.name = "tk1-k20-can",
++	.tseg1_min = 3,
++	.tseg1_max = 16,
++	.tseg2_min = 2,
++	.tseg2_max = 8,
++	.sjw_max = 4,
++	.brp_min = 1,
++	.brp_max = 64,
++	.brp_inc = 1,
++};
++
++struct apalis_tk1_k20_priv {
++	struct can_priv can;
++	struct net_device *net;
++	struct apalis_tk1_k20_regmap *apalis_tk1_k20;
++	struct apalis_tk1_k20_can_platform_data *pdata;
++
++	struct sk_buff *tx_skb;
++	int tx_len;
++
++	struct workqueue_struct *wq;
++	struct work_struct tx_work;
++	struct work_struct restart_work;
++	struct mutex apalis_tk1_k20_can_lock;
++
++	int force_quit;
++	int after_suspend;
++#define AFTER_SUSPEND_UP	1
++#define AFTER_SUSPEND_DOWN	2
++#define AFTER_SUSPEND_RESTART	4
++	int restart_tx;
++};
++
++static void apalis_tk1_k20_can_clean(struct net_device *net)
++{
++	struct apalis_tk1_k20_priv *priv = netdev_priv(net);
++
++	if (priv->tx_skb || priv->tx_len)
++		net->stats.tx_errors++;
++	if (priv->tx_skb)
++		dev_kfree_skb(priv->tx_skb);
++	if (priv->tx_len)
++		can_free_echo_skb(priv->net, 0);
++	priv->tx_skb = NULL;
++	priv->tx_len = 0;
++}
++
++static void apalis_tk1_k20_can_hw_tx_frame(struct net_device *net, u8 *buf,
++					   int len, int tx_buf_idx)
++{
++	/* TODO: Implement multiple TX buffer handling */
++	struct apalis_tk1_k20_priv *priv = netdev_priv(net);
++
++	apalis_tk1_k20_lock(priv->apalis_tk1_k20);
++	apalis_tk1_k20_reg_write_bulk(priv->apalis_tk1_k20,
++				      APALIS_TK1_K20_CAN_OUT_BUF
++				      + APALIS_TK1_K20_CAN_DEV_OFFSET(
++				      priv->pdata->id), buf, len);
++	apalis_tk1_k20_unlock(priv->apalis_tk1_k20);
++}
++
++static void apalis_tk1_k20_can_hw_tx(struct net_device *net,
++				     struct can_frame *frame, int tx_buf_idx)
++{
++	u8 buf[CAN_TRANSFER_BUF_LEN];
++
++	buf[MB_DLC_OFF] = frame->can_dlc;
++	memcpy(buf + MB_EID_OFF, &frame->can_id, MB_EID_LEN);
++	memcpy(buf + CAN_HEADER_MAX_LEN, frame->data, frame->can_dlc);
++
++	apalis_tk1_k20_can_hw_tx_frame(net, buf, frame->can_dlc
++			+ CAN_HEADER_MAX_LEN, tx_buf_idx);
++}
++
++static void apalis_tk1_k20_can_hw_rx(struct net_device *net, int buf_idx)
++{
++	int i = 0;
++	struct apalis_tk1_k20_priv *priv = netdev_priv(net);
++	struct sk_buff *skb;
++	struct can_frame *frame;
++	u8 buf[CAN_TRANSFER_BUF_LEN * APALIS_TK1_MAX_CAN_DMA_XREF];
++	u32 frame_available = 0;
++
++	apalis_tk1_k20_lock(priv->apalis_tk1_k20);
++	apalis_tk1_k20_reg_read(priv->apalis_tk1_k20,
++				      APALIS_TK1_K20_CAN_IN_BUF_CNT
++				      + APALIS_TK1_K20_CAN_DEV_OFFSET(
++				      priv->pdata->id), &frame_available);
++	frame_available = min(frame_available, APALIS_TK1_MAX_CAN_DMA_XREF);
++	apalis_tk1_k20_reg_read_bulk(priv->apalis_tk1_k20,
++				     APALIS_TK1_K20_CAN_IN_BUF
++				     + APALIS_TK1_K20_CAN_DEV_OFFSET(
++				     priv->pdata->id), buf,
++				     CAN_TRANSFER_BUF_LEN * frame_available);
++	apalis_tk1_k20_unlock(priv->apalis_tk1_k20);
++
++	for (i = 0; i < frame_available; i++) {
++		skb = alloc_can_skb(priv->net, &frame);
++		if (!skb) {
++			dev_err(&net->dev, "cannot allocate RX skb\n");
++			priv->net->stats.rx_dropped++;
++			return;
++		}
++		memcpy(&frame->can_id, &buf[i * CAN_TRANSFER_BUF_LEN]
++				 + MB_EID_OFF, MB_EID_LEN);
++		/* Data length */
++		frame->can_dlc = get_can_dlc(buf[i * CAN_TRANSFER_BUF_LEN
++						 + MB_DLC_OFF]);
++		memcpy(frame->data, &buf[i * CAN_TRANSFER_BUF_LEN]
++				 + CAN_HEADER_MAX_LEN, frame->can_dlc);
++
++		priv->net->stats.rx_packets++;
++		priv->net->stats.rx_bytes += frame->can_dlc;
++
++		can_led_event(priv->net, CAN_LED_EVENT_RX);
++
++		netif_rx_ni(skb);
++	}
++
++
++}
++
++static netdev_tx_t apalis_tk1_k20_can_hard_start_xmit(struct sk_buff *skb,
++						      struct net_device *net)
++{
++	struct apalis_tk1_k20_priv *priv = netdev_priv(net);
++
++	if (priv->tx_skb || priv->tx_len) {
++		dev_warn(&net->dev, "hard_xmit called while TX busy\n");
++		return NETDEV_TX_BUSY;
++	}
++
++	if (can_dropped_invalid_skb(net, skb))
++		return NETDEV_TX_OK;
++
++	netif_stop_queue(net);
++	priv->tx_skb = skb;
++	queue_work(priv->wq, &priv->tx_work);
++
++	return NETDEV_TX_OK;
++}
++
++static int apalis_tk1_k20_can_do_set_mode(struct net_device *net,
++					  enum can_mode mode)
++{
++	struct apalis_tk1_k20_priv *priv = netdev_priv(net);
++
++	switch (mode) {
++	case CAN_MODE_START:
++		apalis_tk1_k20_can_clean(net);
++		/* We have to delay work since I/O may sleep */
++		priv->can.state = CAN_STATE_ERROR_ACTIVE;
++		priv->restart_tx = 1;
++		if (priv->can.restart_ms == 0)
++			priv->after_suspend = AFTER_SUSPEND_RESTART;
++		queue_work(priv->wq, &priv->restart_work);
++		break;
++	default:
++		return -EOPNOTSUPP;
++	}
++
++	return 0;
++}
++
++static int apalis_tk1_k20_can_set_normal_mode(struct net_device *net)
++{
++	struct apalis_tk1_k20_priv *priv = netdev_priv(net);
++
++	apalis_tk1_k20_lock(priv->apalis_tk1_k20);
++	/* Enable interrupts */
++	apalis_tk1_k20_reg_rmw(priv->apalis_tk1_k20, APALIS_TK1_K20_CANREG
++			       + APALIS_TK1_K20_CAN_DEV_OFFSET(
++			       priv->pdata->id),
++			       CANCTRL_INTEN, CANCTRL_INTEN);
++
++	if (priv->can.ctrlmode & CAN_CTRLMODE_LOOPBACK) {
++		/* Put device into loopback mode */
++		apalis_tk1_k20_reg_rmw(priv->apalis_tk1_k20,
++				       APALIS_TK1_K20_CANREG
++				       + APALIS_TK1_K20_CAN_DEV_OFFSET(
++				       priv->pdata->id), CANCTRL_MODMASK,
++				       CAN_CTRLMODE_LOOPBACK);
++	} else if (priv->can.ctrlmode & CAN_CTRLMODE_LISTENONLY) {
++		/* Put device into listen-only mode */
++		apalis_tk1_k20_reg_rmw(priv->apalis_tk1_k20,
++				       APALIS_TK1_K20_CANREG
++				       + APALIS_TK1_K20_CAN_DEV_OFFSET(
++				       priv->pdata->id), CANCTRL_MODMASK,
++				       CAN_CTRLMODE_LISTENONLY);
++	} else {
++		/* Put device into normal mode */
++		apalis_tk1_k20_reg_rmw(priv->apalis_tk1_k20,
++				       APALIS_TK1_K20_CANREG
++				       + APALIS_TK1_K20_CAN_DEV_OFFSET(
++				       priv->pdata->id), CANCTRL_MODMASK,
++				       0x00);
++	}
++	apalis_tk1_k20_unlock(priv->apalis_tk1_k20);
++	priv->can.state = CAN_STATE_ERROR_ACTIVE;
++	return 0;
++}
++
++static int apalis_tk1_k20_can_do_set_bittiming(struct net_device *net)
++{
++	struct apalis_tk1_k20_priv *priv = netdev_priv(net);
++	struct can_bittiming *bt = &priv->can.bittiming;
++
++	if ((bt->bitrate / APALIS_TK1_CAN_CLK_UNIT) > 0xFF)
++		return -EINVAL;
++
++	apalis_tk1_k20_lock(priv->apalis_tk1_k20);
++	apalis_tk1_k20_reg_write(priv->apalis_tk1_k20,
++				 APALIS_TK1_K20_CAN_BAUD_REG
++				 + APALIS_TK1_K20_CAN_DEV_OFFSET(
++				 priv->pdata->id), (bt->bitrate /
++				 APALIS_TK1_CAN_CLK_UNIT) & 0xFF);
++	apalis_tk1_k20_reg_write(priv->apalis_tk1_k20,
++				 APALIS_TK1_K20_CAN_BIT_1
++				 + APALIS_TK1_K20_CAN_DEV_OFFSET(
++				 priv->pdata->id),
++				 ((bt->sjw & 0x3) << 6) |
++				  ((bt->phase_seg2 & 0x7) << 3) |
++				  (bt->phase_seg1 & 0x7));
++	apalis_tk1_k20_reg_write(priv->apalis_tk1_k20,
++				 APALIS_TK1_K20_CAN_BIT_2
++				 + APALIS_TK1_K20_CAN_DEV_OFFSET(
++				 priv->pdata->id),
++				 (bt->prop_seg & 0x7));
++	apalis_tk1_k20_unlock(priv->apalis_tk1_k20);
++	dev_dbg(priv->apalis_tk1_k20->dev, "Setting CAN%d bitrate " \
++		"to %d (0x%X * 6.25kHz)\n", priv->pdata->id, bt->bitrate,
++		(bt->bitrate / APALIS_TK1_CAN_CLK_UNIT) & 0xFF);
++	dev_dbg(priv->apalis_tk1_k20->dev, "Setting CAN%d bit timing " \
++		"RJW = %d, PSEG1 = %d, PSEG2 = %d, PROPSEG = %d\n",
++		priv->pdata->id, bt->sjw, bt->phase_seg1,
++		bt->phase_seg2, bt->prop_seg);
++	dev_dbg(priv->apalis_tk1_k20->dev, "Setting CAN%d bit timing " \
++		"bitrate = %d\n", priv->pdata->id, bt->bitrate);
++
++	return 0;
++}
++
++static int apalis_tk1_k20_can_setup(struct net_device *net,
++				    struct apalis_tk1_k20_priv *priv)
++{
++	apalis_tk1_k20_can_do_set_bittiming(net);
++
++	return 0;
++}
++
++static int apalis_tk1_k20_can_hw_reset(struct net_device *net)
++{
++	return 0;
++}
++
++static void apalis_tk1_k20_can_open_clean(struct net_device *net)
++{
++	struct apalis_tk1_k20_priv *priv = netdev_priv(net);
++	struct apalis_tk1_k20_can_platform_data *pdata = priv->pdata;
++
++	if (pdata->id == 0)
++		apalis_tk1_k20_irq_free(priv->apalis_tk1_k20,
++					APALIS_TK1_K20_CAN0_IRQ, priv);
++	if (pdata->id == 1)
++		apalis_tk1_k20_irq_free(priv->apalis_tk1_k20,
++					APALIS_TK1_K20_CAN1_IRQ, priv);
++	close_candev(net);
++}
++
++static int apalis_tk1_k20_can_stop(struct net_device *net)
++{
++	struct apalis_tk1_k20_priv *priv = netdev_priv(net);
++	struct apalis_tk1_k20_can_platform_data *pdata = priv->pdata;
++
++	close_candev(net);
++
++	priv->force_quit = 1;
++	if (pdata->id == 0)
++		apalis_tk1_k20_irq_free(priv->apalis_tk1_k20,
++					APALIS_TK1_K20_CAN0_IRQ, priv);
++	if (pdata->id == 1)
++		apalis_tk1_k20_irq_free(priv->apalis_tk1_k20,
++					APALIS_TK1_K20_CAN1_IRQ, priv);
++	destroy_workqueue(priv->wq);
++	priv->wq = NULL;
++
++	mutex_lock(&priv->apalis_tk1_k20_can_lock);
++	apalis_tk1_k20_lock(priv->apalis_tk1_k20);
++	if (pdata->id == 0)
++		apalis_tk1_k20_irq_mask(priv->apalis_tk1_k20,
++					APALIS_TK1_K20_CAN0_IRQ);
++	if (pdata->id == 1)
++		apalis_tk1_k20_irq_mask(priv->apalis_tk1_k20,
++					APALIS_TK1_K20_CAN1_IRQ);
++	/* Disable and clear pending interrupts */
++	priv->can.state = CAN_STATE_STOPPED;
++	apalis_tk1_k20_unlock(priv->apalis_tk1_k20);
++	mutex_unlock(&priv->apalis_tk1_k20_can_lock);
++
++	can_led_event(net, CAN_LED_EVENT_STOP);
++
++	return 0;
++}
++
++static void apalis_tk1_k20_can_error_skb(struct net_device *net, int can_id,
++					 int data1)
++{
++	struct sk_buff *skb;
++	struct can_frame *frame;
++
++	skb = alloc_can_err_skb(net, &frame);
++	if (skb) {
++		frame->can_id |= can_id;
++		frame->data[1] = data1;
++		netif_rx_ni(skb);
++	} else {
++		netdev_err(net, "cannot allocate error skb\n");
++	}
++}
++
++static void apalis_tk1_k20_can_tx_work_handler(struct work_struct *ws)
++{
++	struct apalis_tk1_k20_priv *priv = container_of(ws,
++			struct apalis_tk1_k20_priv, tx_work);
++	struct net_device *net = priv->net;
++	struct can_frame *frame;
++
++	mutex_lock(&priv->apalis_tk1_k20_can_lock);
++	if (priv->tx_skb) {
++		if (priv->can.state == CAN_STATE_BUS_OFF) {
++			apalis_tk1_k20_can_clean(net);
++		} else {
++			frame = (struct can_frame *)priv->tx_skb->data;
++
++			if (frame->can_dlc > CAN_FRAME_MAX_LEN)
++				frame->can_dlc = CAN_FRAME_MAX_LEN;
++			apalis_tk1_k20_can_hw_tx(net, frame, 0);
++			priv->tx_len = 1 + frame->can_dlc;
++			can_put_echo_skb(priv->tx_skb, net, 0);
++			priv->tx_skb = NULL;
++		}
++	}
++	mutex_unlock(&priv->apalis_tk1_k20_can_lock);
++}
++
++#ifdef CONFIG_PM_SLEEP
++
++static int apalis_tk1_k20_can_suspend(struct device *dev)
++{
++	struct apalis_tk1_k20_priv *priv = dev_get_drvdata(dev);
++	struct apalis_tk1_k20_can_platform_data *pdata = priv->pdata;
++
++	priv->force_quit = 1;
++
++	mutex_lock(&priv->apalis_tk1_k20_can_lock);
++	apalis_tk1_k20_lock(priv->apalis_tk1_k20);
++	if (pdata->id == 0)
++		apalis_tk1_k20_irq_mask(priv->apalis_tk1_k20,
++					APALIS_TK1_K20_CAN0_IRQ);
++	if (pdata->id == 1)
++		apalis_tk1_k20_irq_mask(priv->apalis_tk1_k20,
++					APALIS_TK1_K20_CAN1_IRQ);
++	/* Disable interrupts */
++	apalis_tk1_k20_unlock(priv->apalis_tk1_k20);
++	mutex_unlock(&priv->apalis_tk1_k20_can_lock);
++	/* Note: at this point neither IST nor workqueues are running.
++	 * open/stop cannot be called anyway so locking is not needed
++	 */
++	if (netif_running(priv->net)) {
++		netif_device_detach(priv->net);
++
++		priv->after_suspend = AFTER_SUSPEND_UP;
++	} else {
++		priv->after_suspend = AFTER_SUSPEND_DOWN;
++	}
++
++	return 0;
++}
++
++static int apalis_tk1_k20_can_resume(struct device *dev)
++{
++	struct apalis_tk1_k20_priv *priv = dev_get_drvdata(dev);
++	struct apalis_tk1_k20_can_platform_data *pdata = priv->pdata;
++
++	if (priv->after_suspend & AFTER_SUSPEND_UP)
++		queue_work(priv->wq, &priv->restart_work);
++	else
++		priv->after_suspend = 0;
++
++	priv->force_quit = 0;
++	mutex_lock(&priv->apalis_tk1_k20_can_lock);
++	apalis_tk1_k20_lock(priv->apalis_tk1_k20);
++	if (pdata->id == 0)
++		apalis_tk1_k20_irq_unmask(priv->apalis_tk1_k20,
++					  APALIS_TK1_K20_CAN0_IRQ);
++	if (pdata->id == 1)
++		apalis_tk1_k20_irq_unmask(priv->apalis_tk1_k20,
++					  APALIS_TK1_K20_CAN1_IRQ);
++	/* Enable interrupts */
++	priv->can.state = CAN_STATE_STOPPED;
++	apalis_tk1_k20_unlock(priv->apalis_tk1_k20);
++	mutex_unlock(&priv->apalis_tk1_k20_can_lock);
++	return 0;
++}
++
++static SIMPLE_DEV_PM_OPS(apalis_tk1_k20_can_pm_ops, apalis_tk1_k20_can_suspend,
++		apalis_tk1_k20_can_resume);
++
++#endif
++
++static void apalis_tk1_k20_can_restart_work_handler(struct work_struct *ws)
++{
++	struct apalis_tk1_k20_priv *priv = container_of(ws,
++			struct apalis_tk1_k20_priv, restart_work);
++	struct net_device *net = priv->net;
++
++	mutex_lock(&priv->apalis_tk1_k20_can_lock);
++	if (priv->after_suspend) {
++		mdelay(10);
++		apalis_tk1_k20_can_hw_reset(net);
++		apalis_tk1_k20_can_setup(net, priv);
++		if (priv->after_suspend & AFTER_SUSPEND_RESTART) {
++			apalis_tk1_k20_can_set_normal_mode(net);
++		} else if (priv->after_suspend & AFTER_SUSPEND_UP) {
++			netif_device_attach(net);
++			apalis_tk1_k20_can_clean(net);
++			apalis_tk1_k20_can_set_normal_mode(net);
++			netif_wake_queue(net);
++		}
++		priv->after_suspend = 0;
++		priv->force_quit = 0;
++	}
++
++	if (priv->restart_tx) {
++		priv->restart_tx = 0;
++		apalis_tk1_k20_can_clean(net);
++		netif_wake_queue(net);
++		apalis_tk1_k20_can_error_skb(net, CAN_ERR_RESTARTED, 0);
++	}
++	mutex_unlock(&priv->apalis_tk1_k20_can_lock);
++}
++
++static irqreturn_t apalis_tk1_k20_can_ist(int irq, void *dev_id)
++{
++	struct apalis_tk1_k20_priv *priv = dev_id;
++	struct net_device *net = priv->net;
++
++	mutex_lock(&priv->apalis_tk1_k20_can_lock);
++	while (!priv->force_quit) {
++		enum can_state new_state = CAN_STATE_ERROR_ACTIVE;
++		int ret;
++		u32 intf, eflag;
++		u8 clear_intf = 0;
++		int can_id = 0, data1 = 0;
++
++		apalis_tk1_k20_lock(priv->apalis_tk1_k20);
++		ret = apalis_tk1_k20_reg_read(priv->apalis_tk1_k20,
++					      APALIS_TK1_K20_CANREG
++					      + APALIS_TK1_K20_CAN_DEV_OFFSET(
++					      priv->pdata->id), &intf);
++		apalis_tk1_k20_unlock(priv->apalis_tk1_k20);
++
++		if (ret) {
++			dev_err(&net->dev, "Communication error\n");
++			break;
++		}
++
++		intf &= CANCTRL_INTMASK;
++		/* receive */
++		if (intf & CANINTF_RX)
++			apalis_tk1_k20_can_hw_rx(net, 0);
++
++		/* any error interrupt we need to clear? */
++		if (intf & CANINTF_ERR)
++			clear_intf |= intf & CANINTF_ERR;
++		apalis_tk1_k20_lock(priv->apalis_tk1_k20);
++		if (clear_intf)
++			ret = apalis_tk1_k20_reg_write(priv->apalis_tk1_k20,
++						APALIS_TK1_K20_CANREG_CLR
++						+ APALIS_TK1_K20_CAN_DEV_OFFSET(
++						priv->pdata->id),clear_intf);
++		if (ret) {
++			apalis_tk1_k20_unlock(priv->apalis_tk1_k20);
++			dev_err(&net->dev, "Communication error\n");
++			break;
++		}
++
++		/* Update can state */
++		if (intf & CANINTF_ERR) {
++			ret = apalis_tk1_k20_reg_read(priv->apalis_tk1_k20,
++						      APALIS_TK1_K20_CANERR +
++						      APALIS_TK1_K20_CAN_DEV_OFFSET(
++						      priv->pdata->id), &eflag);
++			apalis_tk1_k20_unlock(priv->apalis_tk1_k20);
++			if (ret) {
++				dev_err(&net->dev, "Communication error\n");
++				break;
++			}
++			if (eflag & EFLG_TXBO) {
++				new_state = CAN_STATE_BUS_OFF;
++				can_id |= CAN_ERR_BUSOFF;
++			} else if (eflag & EFLG_TXEP) {
++				new_state = CAN_STATE_ERROR_PASSIVE;
++				can_id |= CAN_ERR_CRTL;
++				data1 |= CAN_ERR_CRTL_TX_PASSIVE;
++			} else if (eflag & EFLG_RXEP) {
++				new_state = CAN_STATE_ERROR_PASSIVE;
++				can_id |= CAN_ERR_CRTL;
++				data1 |= CAN_ERR_CRTL_RX_PASSIVE;
++			} else if (eflag & EFLG_TXWAR) {
++				new_state = CAN_STATE_ERROR_WARNING;
++				can_id |= CAN_ERR_CRTL;
++				data1 |= CAN_ERR_CRTL_TX_WARNING;
++			} else if (eflag & EFLG_RXWAR) {
++				new_state = CAN_STATE_ERROR_WARNING;
++				can_id |= CAN_ERR_CRTL;
++				data1 |= CAN_ERR_CRTL_RX_WARNING;
++			} else {
++				new_state = CAN_STATE_ERROR_ACTIVE;
++			}
++		}
++		else {
++			apalis_tk1_k20_unlock(priv->apalis_tk1_k20);
++		}
++
++		/* Update can state statistics */
++		switch (priv->can.state) {
++		case CAN_STATE_ERROR_ACTIVE:
++			if (new_state >= CAN_STATE_ERROR_WARNING &&
++			    new_state <= CAN_STATE_BUS_OFF)
++				priv->can.can_stats.error_warning++;
++		case CAN_STATE_ERROR_WARNING: /* fallthrough */
++			if (new_state >= CAN_STATE_ERROR_PASSIVE &&
++			    new_state <= CAN_STATE_BUS_OFF)
++				priv->can.can_stats.error_passive++;
++			break;
++		default:
++			break;
++		}
++		priv->can.state = new_state;
++
++		if (intf & CANINTF_ERR) {
++			/* Handle overflow counters */
++			if (eflag & EFLG_RXOVR) {
++				if (eflag & EFLG_RXOVR) {
++					net->stats.rx_over_errors++;
++					net->stats.rx_errors++;
++				}
++				can_id |= CAN_ERR_CRTL;
++				data1 |= CAN_ERR_CRTL_RX_OVERFLOW;
++			}
++			apalis_tk1_k20_can_error_skb(net, can_id, data1);
++		}
++
++		if (priv->can.state == CAN_STATE_BUS_OFF &&
++		    priv->can.restart_ms == 0) {
++			priv->force_quit = 1;
++			can_bus_off(net);
++			break;
++		}
++
++		if (intf == 0)
++			break;
++
++		if (intf & CANINTF_TX) {
++			net->stats.tx_packets++;
++			net->stats.tx_bytes += priv->tx_len - 1;
++			can_led_event(net, CAN_LED_EVENT_TX);
++			if (priv->tx_len) {
++				can_get_echo_skb(net, 0);
++				priv->tx_len = 0;
++			}
++			netif_wake_queue(net);
++			if (!(intf & (CANINTF_RX | CANINTF_ERR)))
++				break;
++		}
++	}
++	mutex_unlock(&priv->apalis_tk1_k20_can_lock);
++	return IRQ_HANDLED;
++}
++
++static int apalis_tk1_k20_can_open(struct net_device *net)
++{
++	struct apalis_tk1_k20_priv *priv = netdev_priv(net);
++	struct apalis_tk1_k20_can_platform_data *pdata = priv->pdata;
++	int ret;
++
++	ret = open_candev(net);
++	if (ret) {
++		dev_err(&net->dev, "unable to initialize CAN\n");
++		return ret;
++	}
++
++	mutex_lock(&priv->apalis_tk1_k20_can_lock);
++
++	priv->force_quit = 0;
++	priv->tx_skb = NULL;
++	priv->tx_len = 0;
++	apalis_tk1_k20_lock(priv->apalis_tk1_k20);
++	if (pdata->id == 0)
++		ret = apalis_tk1_k20_irq_request(priv->apalis_tk1_k20,
++						 APALIS_TK1_K20_CAN0_IRQ,
++						 apalis_tk1_k20_can_ist,
++						 DEVICE_NAME, priv);
++	if (pdata->id == 1)
++		ret = apalis_tk1_k20_irq_request(priv->apalis_tk1_k20,
++						 APALIS_TK1_K20_CAN1_IRQ,
++						 apalis_tk1_k20_can_ist,
++						 DEVICE_NAME, priv);
++	apalis_tk1_k20_unlock(priv->apalis_tk1_k20);
++	if (ret) {
++		dev_err(&net->dev, "failed to acquire IRQ\n");
++		close_candev(net);
++		goto open_unlock;
++	}
++
++	priv->wq = create_freezable_workqueue("apalis_tk1_k20_wq");
++	INIT_WORK(&priv->tx_work, apalis_tk1_k20_can_tx_work_handler);
++	INIT_WORK(&priv->restart_work, apalis_tk1_k20_can_restart_work_handler);
++
++	ret = apalis_tk1_k20_can_hw_reset(net);
++	if (ret) {
++		apalis_tk1_k20_can_open_clean(net);
++		goto open_unlock;
++	}
++
++	ret = apalis_tk1_k20_can_setup(net, priv);
++	if (ret) {
++		apalis_tk1_k20_can_open_clean(net);
++		goto open_unlock;
++	}
++
++	ret = apalis_tk1_k20_can_set_normal_mode(net);
++	if (ret) {
++		apalis_tk1_k20_can_open_clean(net);
++		goto open_unlock;
++	}
++
++	can_led_event(net, CAN_LED_EVENT_OPEN);
++
++	netif_wake_queue(net);
++
++open_unlock:
++	mutex_unlock(&priv->apalis_tk1_k20_can_lock);
++	return ret;
++}
++
++static const struct net_device_ops apalis_tk1_k20_netdev_ops = {
++		.ndo_open = apalis_tk1_k20_can_open,
++		.ndo_stop = apalis_tk1_k20_can_stop,
++		.ndo_start_xmit = apalis_tk1_k20_can_hard_start_xmit,
++};
++
++static int apalis_tk1_k20_can_probe(struct platform_device *pdev)
++{
++	struct net_device *net;
++	struct apalis_tk1_k20_priv *priv;
++	struct apalis_tk1_k20_can_platform_data *pdata =
++			pdev->dev.platform_data;
++	int ret = -ENODEV;
++
++	if (!pdata) {
++		pdata = kmalloc(sizeof(struct apalis_tk1_k20_can_platform_data),
++				GFP_KERNEL);
++		if (pdev->id == -1)
++			pdata->id = 0;
++		if (pdev->id >= 0 && pdev->id <= K20_CAN_MAX_ID)
++			pdata->id = pdev->id;
++		else
++			goto error_out;
++	}
++
++	if (pdata->id > K20_CAN_MAX_ID)
++		goto error_out;
++	/* Allocate can/net device */
++	net = alloc_candev(sizeof(struct apalis_tk1_k20_priv), TX_ECHO_SKB_MAX);
++	if (!net) {
++		ret = -ENOMEM;
++		goto error_out;
++	}
++
++	net->netdev_ops = &apalis_tk1_k20_netdev_ops;
++	net->flags |= IFF_ECHO;
++
++	priv = netdev_priv(net);
++	priv->can.bittiming_const = &apalis_tk1_k20_can_bittiming_const;
++	priv->can.do_set_mode = apalis_tk1_k20_can_do_set_mode;
++	priv->can.clock.freq = 8000000;
++	priv->can.ctrlmode_supported = CAN_CTRLMODE_3_SAMPLES |
++			CAN_CTRLMODE_LOOPBACK | CAN_CTRLMODE_LISTENONLY;
++	priv->net = net;
++	priv->pdata = pdata;
++	priv->apalis_tk1_k20 = dev_get_drvdata(pdev->dev.parent);
++
++	mutex_init(&priv->apalis_tk1_k20_can_lock);
++
++	SET_NETDEV_DEV(net, &pdev->dev);
++
++	platform_set_drvdata(pdev, priv);
++
++	ret = register_candev(net);
++	if (ret)
++		goto error_probe;
++
++	devm_can_led_init(net);
++
++	dev_info(&pdev->dev, "probed %d\n", pdev->id);
++
++	return ret;
++
++error_probe:
++	free_candev(net);
++error_out:
++	return ret;
++}
++
++static int apalis_tk1_k20_can_remove(struct platform_device *pdev)
++{
++	struct apalis_tk1_k20_priv *priv = platform_get_drvdata(pdev);
++	struct net_device *net = priv->net;
++
++	unregister_candev(net);
++	free_candev(net);
++
++	return 0;
++}
++
++static const struct platform_device_id apalis_tk1_k20_can_idtable[] = {
++		{.name = "apalis-tk1-k20-can", },
++		{ /* sentinel */}
++};
++
++MODULE_DEVICE_TABLE(platform, apalis_tk1_k20_can_idtable);
++
++static struct platform_driver apalis_tk1_k20_can_driver = {
++		.id_table = apalis_tk1_k20_can_idtable,
++		.remove = apalis_tk1_k20_can_remove,
++		.probe = apalis_tk1_k20_can_probe,
++		.driver = {
++				.name = DEVICE_NAME,
++#ifdef CONFIG_PM_SLEEP
++				.pm = &apalis_tk1_k20_can_pm_ops,
++#endif
++		},
++};
++
++module_platform_driver(apalis_tk1_k20_can_driver);
++
++MODULE_DESCRIPTION("CAN driver for K20 MCU on Apalis TK1");
++MODULE_AUTHOR("Dominik Sliwa <dominik.sliwa@toradex.com>");
++MODULE_LICENSE("GPL v2");
+diff --git a/drivers/spi/spi-tegra114.c b/drivers/spi/spi-tegra114.c
+index 44550182a4a3..329dd49724a1 100644
+--- a/drivers/spi/spi-tegra114.c
++++ b/drivers/spi/spi-tegra114.c
+@@ -703,12 +703,6 @@ static u32 tegra_spi_setup_transfer_one(struct spi_device *spi,
+ 		} else
+ 			tegra_spi_writel(tspi, command1, SPI_COMMAND1);
+ 
+-		command1 |= SPI_CS_SW_HW;
+-		if (spi->mode & SPI_CS_HIGH)
+-			command1 |= SPI_CS_SS_VAL;
+-		else
+-			command1 &= ~SPI_CS_SS_VAL;
+-
+ 		tegra_spi_writel(tspi, 0, SPI_COMMAND2);
+ 	} else {
+ 		command1 = tspi->command1_reg;
+@@ -776,6 +770,7 @@ static int tegra_spi_setup(struct spi_device *spi)
+ 
+ 	spin_lock_irqsave(&tspi->lock, flags);
+ 	val = tspi->def_command1_reg;
++	val |= SPI_CS_SEL(spi->chip_select);
+ 	if (spi->mode & SPI_CS_HIGH)
+ 		val &= ~SPI_CS_POL_INACTIVE(spi->chip_select);
+ 	else
+diff --git a/include/linux/mfd/apalis-tk1-k20-api.h b/include/linux/mfd/apalis-tk1-k20-api.h
+new file mode 100644
+index 000000000000..85bbf9f28ca4
+--- /dev/null
++++ b/include/linux/mfd/apalis-tk1-k20-api.h
+@@ -0,0 +1,123 @@
++/*
++ * Copyright 2016-2017 Toradex AG
++ * Dominik Sliwa <dominik.sliwa@toradex.com>
++ *
++ * This program is free software; you can redistribute it and/or modify it under
++ * the terms of the GNU General Public License version 2 as published by the
++ * Free Software Foundation.
++ */
++
++#ifndef __LINUX_MFD_APALIS_TK1_K20_API_H
++#define __LINUX_MFD_APALIS_TK1_K20_API_H
++
++/* Commands and registers used in SPI communication */
++
++/* Commands*/
++#define APALIS_TK1_K20_READ_INST		0x0F
++#define APALIS_TK1_K20_WRITE_INST		0xF0
++#define APALIS_TK1_K20_BULK_WRITE_INST		0x3C
++#define APALIS_TK1_K20_BULK_READ_INST		0xC3
++
++#define APALIS_TK1_K20_MAX_BULK			250u
++#define APALIS_TK1_K20_HEADER			4u
++
++/* General registers*/
++#define APALIS_TK1_K20_STAREG			0x00 /* general status register RO */
++#define APALIS_TK1_K20_REVREG			0x01 /* FW revision register RO*/
++#define APALIS_TK1_K20_IRQREG			0x02 /* IRQ status RO(reset of read) */
++#define APALIS_TK1_K20_CTRREG			0x03 /* general control register RW */
++#define APALIS_TK1_K20_MSQREG			0x04 /* IRQ mask register RW */
++
++/* 0x05-0x0F Reserved */
++
++/* CAN Registers */
++#define APALIS_TK1_K20_CANREG			0x10 /* CAN0 control & status register RW */
++#define APALIS_TK1_K20_CANREG_CLR		0x11 /* CAN0 CANREG clear register WO */
++#define APALIS_TK1_K20_CANERR			0x12 /* CAN0 error register RW */
++#define APALIS_TK1_K20_CAN_BAUD_REG		0x13 /* CAN0 baud set register RW */
++#define APALIS_TK1_K20_CAN_BIT_1		0x14 /* CAN0 bit timing register 1 RW */
++#define APALIS_TK1_K20_CAN_BIT_2		0x15 /* CAN0 bit timing register 2 RW */
++#define APALIS_TK1_K20_CAN_IN_BUF_CNT		0x16 /* CAN0 IN received data count RO */
++#define APALIS_TK1_K20_CAN_IN_BUF		0x17 /* CAN0 IN RO */
++/* buffer size is 13 bytes */
++#define APALIS_TK1_K20_CAN_IN_BUF_END		0x23 /* CAN0 IN RO */
++#define APALIS_TK1_K20_CAN_OUT_BUF		0x24 /* CAN0 OUT WO */
++/* buffer size is 13 bytes */
++#define APALIS_TK1_K20_CAN_OUT_BUF_END		(APALIS_TK1_K20_CAN_OUT_BUF + 13 - 1)/* CAN OUT BUF END */
++#define APALIS_TK1_K20_CAN_OFFSET		0x30
++#define APALIS_TK1_K20_CAN_DEV_OFFSET(x)	(x ? APALIS_TK1_K20_CAN_OFFSET : 0)
++
++/* 0x30-0x3F Reserved */
++/* 0x40-0x62 CAN1 registers same layout as CAN0*/
++/* 0x63-0x6F Reserved */
++
++/* ADC Registers */
++#define APALIS_TK1_K20_ADCREG			0x70 /* ADC control & status register RW */
++#define APALIS_TK1_K20_ADC_CH0L			0x71 /* ADC Channel 0 LSB RO */
++#define APALIS_TK1_K20_ADC_CH0H			0x72 /* ADC Channel 0 MSB RO */
++#define APALIS_TK1_K20_ADC_CH1L			0x73 /* ADC Channel 1 LSB RO */
++#define APALIS_TK1_K20_ADC_CH1H			0x74 /* ADC Channel 1 MSB RO */
++#define APALIS_TK1_K20_ADC_CH2L			0x75 /* ADC Channel 2 LSB RO */
++#define APALIS_TK1_K20_ADC_CH2H			0x76 /* ADC Channel 2 MSB RO */
++#define APALIS_TK1_K20_ADC_CH3L			0x77 /* ADC Channel 3 LSB RO */
++#define APALIS_TK1_K20_ADC_CH3H			0x78 /* ADC Channel 3 MSB RO */
++/* Bulk read of LSB register can be use to read entire 16-bit in one command */
++/* Bulk read of APALIS_TK1_K20_ADC_CH0L register can be use to read all
++ * ADC channels in one command */
++
++/* 0x79-0x7F reserved */
++
++/* TSC Register */
++#define APALIS_TK1_K20_TSCREG			0x80 /* TSC control & status register RW */
++#define APALIS_TK1_K20_TSC_XML			0x81 /* TSC X- data LSB RO */
++#define APALIS_TK1_K20_TSC_XMH			0x82 /* TSC X- data MSB RO */
++#define APALIS_TK1_K20_TSC_XPL			0x83 /* TSC X+ data LSB RO */
++#define APALIS_TK1_K20_TSC_XPH			0x84 /* TSC X+ data MSB RO */
++#define APALIS_TK1_K20_TSC_YML			0x85 /* TSC Y- data LSB RO */
++#define APALIS_TK1_K20_TSC_YMH			0x86 /* TSC Y- data MSB RO */
++#define APALIS_TK1_K20_TSC_YPL			0x87 /* TSC Y+ data LSB RO */
++#define APALIS_TK1_K20_TSC_YPH			0x88 /* TSC Y+ data MSB RO */
++/* Bulk read of LSB register can be use to read entire 16-bit in one command */
++#define APALIS_TK1_K20_TSC_ENA			BIT(0)
++#define APALIS_TK1_K20_TSC_ENA_MASK		BIT(0)
++
++/* 0x89-0x8F Reserved */
++
++/* GPIO Registers */
++#define APALIS_TK1_K20_GPIOREG			0x90 /* GPIO control & status register RW */
++#define APALIS_TK1_K20_GPIO_NO			0x91 /* currently configured GPIO RW */
++#define APALIS_TK1_K20_GPIO_STA			0x92 /* Status register for the APALIS_TK1_K20_GPIO_NO GPIO RW */
++/* MSB | 0 ... 0 | VALUE | Output-1 / Input-0 | LSB  */
++#define APALIS_TK1_K20_GPIO_STA_OE		BIT(0)
++#define APALIS_TK1_K20_GPIO_STA_VAL		BIT(1)
++
++/* 0x93-0xFC Reserved */
++#define APALIS_TK1_K20_LAST_REG			0xFD
++#define APALIS_TK1_K20_RET_REQ			0xFE
++/* 0xFF Reserved */
++
++/* Interrupt flags */
++#define APALIS_TK1_K20_GEN_IRQ			0
++#define APALIS_TK1_K20_CAN0_IRQ			1
++#define APALIS_TK1_K20_CAN1_IRQ			2
++#define APALIS_TK1_K20_ADC_IRQ			3
++#define APALIS_TK1_K20_TSC_IRQ			4
++#define APALIS_TK1_K20_GPIO_IRQ			5
++
++#define APALIS_TK1_K20_FW_VER			0x10
++
++#define FW_MINOR (APALIS_TK1_K20_FW_VER & 0x0F)
++#define FW_MAJOR ((APALIS_TK1_K20_FW_VER & 0xF0) >> 4)
++
++#define TK1_K20_SENTINEL			0x55
++#define TK1_K20_INVAL				0xAA
++
++#define APALIS_TK1_K20_NUMREGS			0x3f
++#define APALIS_TK1_K20_IRQ_REG_CNT		1
++#define APALIS_TK1_K20_IRQ_PER_REG		8
++
++#define APALIS_TK1_CAN_CLK_UNIT			6250
++
++#define APALIS_TK1_MAX_CAN_DMA_XREF		19u
++
++#endif /* ifndef __LINUX_MFD_APALIS_TK1_K20_API_H */
+diff --git a/include/linux/mfd/apalis-tk1-k20.h b/include/linux/mfd/apalis-tk1-k20.h
+new file mode 100644
+index 000000000000..6d9e42b6002e
+--- /dev/null
++++ b/include/linux/mfd/apalis-tk1-k20.h
+@@ -0,0 +1,114 @@
++/*
++ * Copyright 2016-2017 Toradex AG
++ * Dominik Sliwa <dominik.sliwa@toradex.com>
++ *
++ * This program is free software; you can redistribute it and/or modify it under
++ * the terms of the GNU General Public License version 2 as published by the
++ * Free Software Foundation.
++ */
++
++#ifndef __LINUX_MFD_APALIS_TK1_K20_H
++#define __LINUX_MFD_APALIS_TK1_K20_H
++
++#include <linux/interrupt.h>
++#include <linux/mutex.h>
++#include <linux/regmap.h>
++#include <linux/mfd/apalis-tk1-k20-api.h>
++
++#define APALIS_TK1_MAX_RETRY_CNT		4
++
++#define APALIS_TK1_K20_MAX_SPI_SPEED		6120000
++
++struct apalis_tk1_k20_regmap {
++	struct regmap *regmap;
++
++	struct device *dev;
++
++	struct regmap_irq irqs[APALIS_TK1_K20_IRQ_REG_CNT * APALIS_TK1_K20_IRQ_PER_REG];
++	struct regmap_irq_chip irq_chip;
++	struct regmap_irq_chip_data *irq_data;
++	int can0_irq;
++	int can1_irq;
++
++	struct mutex lock;
++	int irq;
++	int flags;
++
++	int ezpcs_gpio;
++	int reset_gpio;
++	int appcs_gpio;
++	int int2_gpio;
++};
++
++void apalis_tk1_k20_lock(struct apalis_tk1_k20_regmap *apalis_tk1_k20);
++void apalis_tk1_k20_unlock(struct apalis_tk1_k20_regmap *apalis_tk1_k20);
++
++int apalis_tk1_k20_reg_read(struct apalis_tk1_k20_regmap *apalis_tk1_k20, unsigned int offset, u32 *val);
++int apalis_tk1_k20_reg_write(struct apalis_tk1_k20_regmap *apalis_tk1_k20, unsigned int offset, u32 val);
++int apalis_tk1_k20_reg_read_bulk(struct apalis_tk1_k20_regmap *apalis_tk1_k20, unsigned int offset,
++		uint8_t *val, size_t size);
++int apalis_tk1_k20_reg_write_bulk(struct apalis_tk1_k20_regmap *apalis_tk1_k20, unsigned int offset,
++		uint8_t *val, size_t size);
++int apalis_tk1_k20_reg_rmw(struct apalis_tk1_k20_regmap *apalis_tk1_k20, unsigned int offset,
++		u32 mask, u32 val);
++
++int apalis_tk1_k20_irq_mask(struct apalis_tk1_k20_regmap *apalis_tk1_k20, int irq);
++int apalis_tk1_k20_irq_unmask(struct apalis_tk1_k20_regmap *apalis_tk1_k20, int irq);
++int apalis_tk1_k20_irq_request(struct apalis_tk1_k20_regmap *apalis_tk1_k20, int irq,
++		irq_handler_t handler, const char *name, void *dev);
++int apalis_tk1_k20_irq_free(struct apalis_tk1_k20_regmap *apalis_tk1_k20, int irq, void *dev);
++
++int apalis_tk1_k20_irq_status(struct apalis_tk1_k20_regmap *apalis_tk1_k20, int irq,
++		int *enabled, int *pending);
++
++int apalis_tk1_k20_get_flags(struct apalis_tk1_k20_regmap *apalis_tk1_k20);
++
++struct apalis_tk1_k20_can_platform_data {
++	uint8_t id;
++	u16 status;
++};
++
++struct apalis_tk1_k20_tsc_platform_data {
++	u16 status;
++};
++
++struct apalis_tk1_k20_adc_platform_data {
++	u16 status;
++};
++
++struct apalis_tk1_k20_gpio_platform_data {
++	u16 status;
++};
++
++#define APALIS_TK1_K20_USES_TSC		BIT(0)
++#define APALIS_TK1_K20_USES_ADC		BIT(1)
++#define APALIS_TK1_K20_USES_CAN		BIT(2)
++#define APALIS_TK1_K20_USES_GPIO	BIT(3)
++
++struct apalis_tk1_k20_platform_data {
++	unsigned int flags;
++
++	struct apalis_tk1_k20_tsc_platform_data touch;
++	struct apalis_tk1_k20_adc_platform_data adc;
++	struct apalis_tk1_k20_can_platform_data can0;
++	struct apalis_tk1_k20_can_platform_data can1;
++	struct apalis_tk1_k20_gpio_platform_data gpio;
++
++	int ezpcs_gpio;
++	int reset_gpio;
++	int appcs_gpio;
++	int int2_gpio;
++};
++
++#define APALIS_TK1_K20_ADC_CHANNELS	4
++#define APALIS_TK1_K20_ADC_BITS		16
++#define APALIS_TK1_K20_VADC_MILI	3300
++
++enum apalis_tk1_k20_adc_id {
++	APALIS_TK1_K20_ADC1,
++	APALIS_TK1_K20_ADC2,
++	APALIS_TK1_K20_ADC3,
++	APALIS_TK1_K20_ADC4
++};
++
++#endif /* ifndef __LINUX_MFD_APALIS_TK1_K20_H */
+-- 
+2.14.4
+

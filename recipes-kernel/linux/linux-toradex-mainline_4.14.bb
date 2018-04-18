@@ -28,6 +28,7 @@ TK1-PATCHES = " \
     file://0009-drm-tegra-gem-Reshuffle-declarations.patch \
     file://0010-drm-tegra-gem-Make-__tegra_gem_mmap-available-more-w.patch \
     file://0011-drm-tegra-fb-Implement-fb_mmap-callback.patch \
+    file://0012-apalis-tk1-support-for-k20-mfd.patch \
 "
 SRC_URI = " \
     https://cdn.kernel.org/pub/linux/kernel/v4.x/linux-${PV}.tar.xz \
