@@ -5,6 +5,7 @@ inherit tegra-u-boot-localversion
 
 PROVIDES = "u-boot virtual/bootloader"
 DEPENDS += "dtc-native"
+DEPENDS_append_apalis-t30 = " cbootimage-native"
 DEPENDS_append_apalis-tk1 = " cbootimage-native"
 DEPENDS_append_apalis-tk1-mainline = " cbootimage-native"
 
@@ -26,6 +27,10 @@ SRCBRANCH = "2016.11-toradex"
 SRCREV_use-head-next = "${AUTOREV}"
 SRCBRANCH_use-head-next = "2016.11-toradex-next"
 SRC_URI = "git://git.toradex.com/u-boot-toradex.git;protocol=git;branch=${SRCBRANCH}"
+SRC_URI_append_apalis-t30 = " \
+    file://apalis_t30.img.cfg \
+    file://Apalis_T30_2GB_800Mhz.bct \
+"
 SRC_URI_append_apalis-tk1 = " \
     file://apalis-tk1.img.cfg \
     file://PM375_Hynix_2GB_H5TC4G63AFR_RDA_924MHz.bct \
@@ -40,6 +45,12 @@ PR = "${TDX_VER_ITEM}"
 
 PACKAGE_ARCH = "${MACHINE_ARCH}"
 
+do_deploy_append_apalis-t30() {
+    cd ${DEPLOYDIR}
+    cp ${WORKDIR}/Apalis_T30_2GB_800Mhz.bct .
+    cbootimage -s tegra30 ${WORKDIR}/apalis_t30.img.cfg apalis_t30.img
+    rm Apalis_T30_2GB_800Mhz.bct
+}
 do_deploy_append_apalis-tk1() {
     cd ${DEPLOYDIR}
     cp ${WORKDIR}/PM375_Hynix_2GB_H5TC4G63AFR_RDA_924MHz.bct .
