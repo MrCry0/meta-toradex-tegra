@@ -68,6 +68,10 @@ do_install_append_tegra124() {
     install_unlock_emmc
 }
 
+do_install_append_tegra124m() {
+    install_unlock_emmc
+}
+
 pkg_postinst_${PN}_colibri-t20 () {
     # can't do this offline
     if [ "x$D" != "x" ]; then
