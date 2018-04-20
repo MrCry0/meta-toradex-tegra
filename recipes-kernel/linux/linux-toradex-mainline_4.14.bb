@@ -16,7 +16,7 @@ PR = "${TDX_VER_ITEM}"
 
 PV = "${LINUX_VERSION}"
 S = "${WORKDIR}/linux-${PV}"
-TK1-PATCHES = " \
+GENERIC_PATCHES = " \
     file://0001-apalis-t30-tk1-mainline-customize-defconfig.patch \
     file://0002-apalis_t30-tk1-fix-pcie-clock-and-reset-not-conformi.patch \
     file://0003-igb-integrate-tools-only-device-support.patch \
@@ -29,10 +29,23 @@ TK1-PATCHES = " \
     file://0010-drm-tegra-gem-Make-__tegra_gem_mmap-available-more-w.patch \
     file://0011-drm-tegra-fb-Implement-fb_mmap-callback.patch \
     file://0012-apalis-tk1-support-for-k20-mfd.patch \
+    file://0013-usb-chipidea-tegra-Use-aligned-DMA-on-Tegra30.patch \
+    file://0014-usb-chipidea-tegra-Use-aligned-DMA-on-Tegra114-124.patch \
+    file://0015-Revert-mmc-core-fix-error-path-in-mmc_host_alloc.patch \
+    file://0016-Revert-mmc-core-simplify-ida-handling.patch \
+    file://0017-mmc-read-mmc-alias-from-device-tree.patch \
+    file://0018-apalis-t30-mainline-force-fixed-ids-for-sdmmc-contro.patch \
+    file://0019-clk-tegra-Fix-pll_u-rate-configuration.patch \
+"
+MACHINE_PATCHES = " \
+"
+MACHINE_PATCHES_apalis-t30-mainline = " \
+    file://0024-apalis-t30-mainline-apply-pcie-fix-hacks.patch \
 "
 SRC_URI = " \
     https://cdn.kernel.org/pub/linux/kernel/v4.x/linux-${PV}.tar.xz \
-    ${TK1-PATCHES} \
+    ${GENERIC_PATCHES} \
+    ${MACHINE_PATCHES} \
 "
 SRC_URI[md5sum] = "1f25f5abe06404f9c3d41fbf25d8a22e"
 SRC_URI[sha256sum] = "7c5bb02feb48f1b7ab9a9c3ff051f325c0c6474fb0e25d9d7bcee91b2cfe6645"
@@ -45,7 +58,8 @@ S_use-head-next = "${WORKDIR}/git"
 SRCBRANCH_use-head-next = "linux-4.14.y"
 SRC_URI_use-head-next = " \
     git://git.kernel.org/pub/scm/linux/kernel/git/stable/linux-stable.git;protocol=git;branch=${SRCBRANCH} \
-    ${TK1-PATCHES} \
+    ${GENERIC_PATCHES} \
+    ${MACHINE_PATCHES} \
 "
 
 COMPATIBLE_MACHINE = "(apalis-tk1-mainline|apalis-t30-mainline)"

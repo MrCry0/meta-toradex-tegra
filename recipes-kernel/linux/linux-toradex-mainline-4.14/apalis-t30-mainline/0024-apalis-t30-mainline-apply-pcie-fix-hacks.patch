@@ -1,0 +1,31 @@
+From 50c98b667b749119f705504d0a4ff752c27be5ec Mon Sep 17 00:00:00 2001
+Message-Id: <50c98b667b749119f705504d0a4ff752c27be5ec.1529072479.git.marcel.ziswiler@toradex.com>
+In-Reply-To: <fb4764e8eb658d35e8fc62ae79c77e1f6e2b0ef3.1529072479.git.marcel.ziswiler@toradex.com>
+References: <fb4764e8eb658d35e8fc62ae79c77e1f6e2b0ef3.1529072479.git.marcel.ziswiler@toradex.com>
+From: Marcel Ziswiler <marcel.ziswiler@toradex.com>
+Date: Fri, 20 Apr 2018 10:07:58 +0200
+Subject: [PATCH 24/27] apalis-t30-mainline: apply pcie fix hacks
+
+Signed-off-by: Marcel Ziswiler <marcel.ziswiler@toradex.com>
+---
+ drivers/pci/host/pci-tegra.c | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/drivers/pci/host/pci-tegra.c b/drivers/pci/host/pci-tegra.c
+index 0c6237159243..bdc7e7592cc8 100644
+--- a/drivers/pci/host/pci-tegra.c
++++ b/drivers/pci/host/pci-tegra.c
+@@ -51,8 +51,8 @@
+ #include <soc/tegra/cpuidle.h>
+ #include <soc/tegra/pmc.h>
+ 
+-//#define CONFIG_MACH_APALIS_T30
+-#define CONFIG_MACH_APALIS_TK1
++#define CONFIG_MACH_APALIS_T30
++//#define CONFIG_MACH_APALIS_TK1
+ #if defined(CONFIG_MACH_APALIS_T30) || defined(CONFIG_MACH_APALIS_TK1)
+ #include <linux/gpio.h>
+ 
+-- 
+2.14.4
+

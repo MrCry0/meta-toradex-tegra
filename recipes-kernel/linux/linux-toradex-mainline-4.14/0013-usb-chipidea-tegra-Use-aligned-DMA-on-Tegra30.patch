@@ -1,0 +1,30 @@
+From 061e20e9899e2fef170135a5d68f62d2a9514b3b Mon Sep 17 00:00:00 2001
+From: Dmitry Osipenko <digetx@gmail.com>
+Date: Tue, 19 Dec 2017 05:58:07 +0300
+Subject: usb: chipidea: tegra: Use aligned DMA on Tegra30
+
+USB Ethernet gadget now works on Tegra30.
+
+Acked-by: Thierry Reding <treding@nvidia.com>
+Signed-off-by: Dmitry Osipenko <digetx@gmail.com>
+Signed-off-by: Peter Chen <peter.chen@nxp.com>
+---
+ drivers/usb/chipidea/ci_hdrc_tegra.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/drivers/usb/chipidea/ci_hdrc_tegra.c b/drivers/usb/chipidea/ci_hdrc_tegra.c
+index 7b65a10..7f4d2b6 100644
+--- a/drivers/usb/chipidea/ci_hdrc_tegra.c
++++ b/drivers/usb/chipidea/ci_hdrc_tegra.c
+@@ -29,7 +29,7 @@ static const struct tegra_udc_soc_info tegra20_udc_soc_info = {
+ };
+ 
+ static const struct tegra_udc_soc_info tegra30_udc_soc_info = {
+-	.flags = 0,
++	.flags = CI_HDRC_REQUIRES_ALIGNED_DMA,
+ };
+ 
+ static const struct tegra_udc_soc_info tegra114_udc_soc_info = {
+-- 
+cgit v1.1
+

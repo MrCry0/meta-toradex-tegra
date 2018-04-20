@@ -1,0 +1,45 @@
+From 84faf19eb6451b55bd34e39a08555e1ebe623088 Mon Sep 17 00:00:00 2001
+Message-Id: <84faf19eb6451b55bd34e39a08555e1ebe623088.1529072479.git.marcel.ziswiler@toradex.com>
+In-Reply-To: <fb4764e8eb658d35e8fc62ae79c77e1f6e2b0ef3.1529072479.git.marcel.ziswiler@toradex.com>
+References: <fb4764e8eb658d35e8fc62ae79c77e1f6e2b0ef3.1529072479.git.marcel.ziswiler@toradex.com>
+From: Marcel Ziswiler <marcel.ziswiler@toradex.com>
+Date: Thu, 19 Apr 2018 14:01:58 +0200
+Subject: [PATCH 18/27] apalis-t30-mainline: force fixed ids for sdmmc
+ controllers
+
+The following, together with the previous 3 kernel patches, forces a
+fixed assignment between device id and sdmmc controller.
+
+I.e. the eMMC on SDMMC4 will be /dev/mmcblk0.
+
+Signed-off-by: Marcel Ziswiler <marcel.ziswiler@toradex.com>
+---
+ arch/arm/boot/dts/tegra30-apalis-eval.dts | 12 ++++++++++++
+ 1 file changed, 12 insertions(+)
+
+diff --git a/arch/arm/boot/dts/tegra30-apalis-eval.dts b/arch/arm/boot/dts/tegra30-apalis-eval.dts
+index 07b945b0391a..785217d9f70b 100644
+--- a/arch/arm/boot/dts/tegra30-apalis-eval.dts
++++ b/arch/arm/boot/dts/tegra30-apalis-eval.dts
+@@ -8,6 +8,18 @@
+ 	model = "Toradex Apalis T30 on Apalis Evaluation Board";
+ 	compatible = "toradex,apalis_t30-eval", "toradex,apalis_t30", "nvidia,tegra30";
+ 
++	aliases {
++		/*
++		 * The following, together with kernel patches, forces a fixed
++		 * assignment between device id and SDMMC controllers.
++		 *
++		 * I.e. the eMMC on SDMMC4 will be /dev/mmcblk0.
++		 */
++		mmc0 = "/sdhci@78000600"; /* eMMC */
++		mmc1 = &mmc1; /* MMC1 8-bit slot */
++		mmc2 = &sd1; /* SD1  4-bit slot */
++	};
++
+ 	aliases {
+ 		rtc0 = "/i2c@7000c000/rtc@68";
+ 		rtc1 = "/i2c@7000d000/tps65911@2d";
+-- 
+2.14.4
+
