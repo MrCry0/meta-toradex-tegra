@@ -23,7 +23,7 @@ LOGO_SIZE ?= "."
 
 # Support for binary device tree generation
 
-FILES_kernel-devicetree = "/boot/devicetree*"
+FILES_${KERNEL_PACKAGE_NAME}-devicetree = "/boot/devicetree*"
 
 #KERNEL_DEVICETREE to be specified from machine configuration
 
