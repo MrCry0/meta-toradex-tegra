@@ -36,6 +36,7 @@ GENERIC_PATCHES = " \
     file://0017-mmc-read-mmc-alias-from-device-tree.patch \
     file://0018-apalis-t30-mainline-force-fixed-ids-for-sdmmc-contro.patch \
     file://0019-clk-tegra-Fix-pll_u-rate-configuration.patch \
+    file://0020-ARM-tegra-apalis-tk1-Fix-high-speed-UART-compatible.patch \
 "
 MACHINE_PATCHES = " \
 "

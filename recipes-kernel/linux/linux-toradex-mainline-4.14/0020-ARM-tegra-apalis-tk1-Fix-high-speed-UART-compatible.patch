@@ -1,0 +1,73 @@
+From 50c22d845d9ec7de671d5fa4993304593d449ef4 Mon Sep 17 00:00:00 2001
+Message-Id: <50c22d845d9ec7de671d5fa4993304593d449ef4.1529072479.git.marcel.ziswiler@toradex.com>
+In-Reply-To: <fb4764e8eb658d35e8fc62ae79c77e1f6e2b0ef3.1529072479.git.marcel.ziswiler@toradex.com>
+References: <fb4764e8eb658d35e8fc62ae79c77e1f6e2b0ef3.1529072479.git.marcel.ziswiler@toradex.com>
+From: Marcel Ziswiler <marcel.ziswiler@toradex.com>
+Date: Thu, 3 May 2018 09:46:46 +0200
+Subject: [PATCH 20/27] ARM: tegra: apalis-tk1: Fix high speed UART compatible
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Turns out the compatible "nvidia,tegra124-hsuart" does not (yet) exist
+and everybody else also uses it only in conjunction with
+"nvidia,tegra30-hsuart".
+
+Reported-by: Martin Šafařík <msafarik@retia.cz>
+Signed-off-by: Marcel Ziswiler <marcel.ziswiler@toradex.com>
+Signed-off-by: Thierry Reding <treding@nvidia.com>
+(cherry picked from commit b036a75aaea4659ac8b0d7e39ad15d2b54894704)
+---
+ arch/arm/boot/dts/tegra124-apalis-v1.2.dtsi | 6 +++---
+ arch/arm/boot/dts/tegra124-apalis.dtsi      | 6 +++---
+ 2 files changed, 6 insertions(+), 6 deletions(-)
+
+diff --git a/arch/arm/boot/dts/tegra124-apalis-v1.2.dtsi b/arch/arm/boot/dts/tegra124-apalis-v1.2.dtsi
+index bca22e2a6dcb..21cdc3117ca2 100644
+--- a/arch/arm/boot/dts/tegra124-apalis-v1.2.dtsi
++++ b/arch/arm/boot/dts/tegra124-apalis-v1.2.dtsi
+@@ -1572,15 +1572,15 @@
+ 	};
+ 
+ 	serial@70006040 {
+-		compatible = "nvidia,tegra124-hsuart";
++		compatible = "nvidia,tegra124-hsuart", "nvidia,tegra30-hsuart";
+ 	};
+ 
+ 	serial@70006200 {
+-		compatible = "nvidia,tegra124-hsuart";
++		compatible = "nvidia,tegra124-hsuart", "nvidia,tegra30-hsuart";
+ 	};
+ 
+ 	serial@70006300 {
+-		compatible = "nvidia,tegra124-hsuart";
++		compatible = "nvidia,tegra124-hsuart", "nvidia,tegra30-hsuart";
+ 	};
+ 
+ 	hdmi_ddc: i2c@7000c700 {
+diff --git a/arch/arm/boot/dts/tegra124-apalis.dtsi b/arch/arm/boot/dts/tegra124-apalis.dtsi
+index 5d9b18ef5af6..8f80a8cf6a05 100644
+--- a/arch/arm/boot/dts/tegra124-apalis.dtsi
++++ b/arch/arm/boot/dts/tegra124-apalis.dtsi
+@@ -1567,15 +1567,15 @@
+ 	};
+ 
+ 	serial@70006040 {
+-		compatible = "nvidia,tegra124-hsuart";
++		compatible = "nvidia,tegra124-hsuart", "nvidia,tegra30-hsuart";
+ 	};
+ 
+ 	serial@70006200 {
+-		compatible = "nvidia,tegra124-hsuart";
++		compatible = "nvidia,tegra124-hsuart", "nvidia,tegra30-hsuart";
+ 	};
+ 
+ 	serial@70006300 {
+-		compatible = "nvidia,tegra124-hsuart";
++		compatible = "nvidia,tegra124-hsuart", "nvidia,tegra30-hsuart";
+ 	};
+ 
+ 	hdmi_ddc: i2c@7000c400 {
+-- 
+2.14.4
+
