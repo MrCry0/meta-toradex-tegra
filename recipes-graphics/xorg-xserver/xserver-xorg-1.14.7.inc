@@ -28,7 +28,7 @@ inherit autotools pkgconfig
 inherit distro_features_check
 REQUIRED_DISTRO_FEATURES = "x11"
 
-PROTO_DEPS = "randrproto renderproto fixesproto damageproto xextproto xproto xf86dgaproto xf86miscproto xf86vidmodeproto compositeproto recordproto resourceproto videoproto scrnsaverproto  xineramaproto fontsproto kbproto inputproto bigreqsproto xcmiscproto"
+PROTO_DEPS = "xorgproto"
 LIB_DEPS = "pixman libxfont xtrans libxau libxext libxdmcp libdrm libxkbfile libpciaccess openssl libgcrypt nettle"
 DEPENDS = "${PROTO_DEPS} ${LIB_DEPS} font-util"
 
