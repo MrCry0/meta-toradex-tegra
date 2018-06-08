@@ -1,0 +1,71 @@
+diff -Naur r21.6.0-sources-gstomx1_src-gst-omx1/omx/gstomxvideosink.c r21.7.0-sources-gstomx1_src-gst-omx1/omx/gstomxvideosink.c
+--- r21.6.0-sources-gstomx1_src-gst-omx1/omx/gstomxvideosink.c	2017-10-14 03:23:25.000000000 +0200
++++ r21.7.0-sources-gstomx1_src-gst-omx1/omx/gstomxvideosink.c	2018-05-29 22:13:29.000000000 +0200
+@@ -942,6 +942,32 @@
+   return TRUE;
+ }
+ 
++static OMX_ERRORTYPE
++gst_omx_set_stride_alignment (GstOmxVideoSink * self,
++    guint32 align)
++{
++  OMX_INDEXTYPE eIndex;
++  OMX_ERRORTYPE eError;
++
++  eError =  gst_omx_component_get_index (self->sink,
++                   (char *) NVX_INDEX_CONFIG_VIDEOSTRIDEALIGN,
++                   &eIndex);
++
++  if (eError == OMX_ErrorNone) {
++    NVX_CONFIG_VIDEO_STRIDEALIGN oStride;
++
++    GST_OMX_INIT_STRUCT (&oStride);
++
++    eError = gst_omx_component_get_config (self->sink, eIndex, &oStride);
++
++    if (eError == OMX_ErrorNone) {
++      oStride.nAlign = (unsigned long) align;
++      eError = gst_omx_component_set_config (self->sink, eIndex, &oStride);
++    }
++  }
++  return eError;
++}
++
+ static void
+ gst_omx_video_sink_check_nvfeatures (GstOmxVideoSink * self, GstCaps * caps)
+ {
+@@ -950,6 +976,13 @@
+   if (gst_caps_features_contains (feature, "memory:NVMM")) {
+     self->hw_path = TRUE;
+   }
++
++  if (!self->hw_path) {
++    if (gst_omx_set_stride_alignment (self, 4)
++        != OMX_ErrorNone) {
++      g_warning ("Failed to set stride alignment.\n");
++    }
++  }
+ }
+ 
+ static OMX_ERRORTYPE
+@@ -1087,6 +1120,20 @@
+   min = MAX (port_def.nBufferCountMin, 4);
+   port_def.nBufferCountActual = min;
+ 
++  switch (info.finfo->format) {
++    case GST_VIDEO_FORMAT_I420:
++      port_def.format.video.eColorFormat = OMX_COLOR_FormatYUV420Planar;
++      break;
++    case GST_VIDEO_FORMAT_NV12:
++      port_def.format.video.eColorFormat = OMX_COLOR_FormatYUV420SemiPlanar;
++      break;
++    default:
++      GST_ERROR_OBJECT (self, "Unsupported format %s",
++          gst_video_format_to_string (info.finfo->format));
++      return FALSE;
++      break;
++  }
++
+   GST_DEBUG_OBJECT (self, "Setting inport port definition");
+ 
+   if (gst_omx_port_update_port_definition (self->sink_in_port,

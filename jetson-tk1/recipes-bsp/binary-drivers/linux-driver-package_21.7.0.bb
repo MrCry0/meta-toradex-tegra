@@ -2,7 +2,7 @@ DESCRIPTION = "NVIDIA Linux Driver Packages"
 HOMEPAGE = "https://developer.nvidia.com/"
 LICENSE = "Proprietary"
 
-SRC_URI = "http://developer.download.nvidia.com/embedded/L4T/r21_Release_v6.0/Tegra124_Linux_R21.6.0_armhf.tbz2 \
+SRC_URI = "http://developer.download.nvidia.com/embedded/L4T/r21_Release_v7.0/Tegra124_Linux_R21.7.0_armhf.tbz2 \
            file://xorg.conf.add \
            file://nv \
            file://nvfb \
@@ -10,10 +10,10 @@ SRC_URI = "http://developer.download.nvidia.com/embedded/L4T/r21_Release_v6.0/Te
 
 LIC_FILES_CHKSUM = "file://nv_tegra/LICENSE;md5=60ad17cc726658e8cf73578bea47b85f"
 
-SRC_URI[md5sum] = "e82193b117171243ea21c908fbd347ed"
-SRC_URI[sha256sum] = "b9dfbdd0d21d6454e5e9668673a3494e7567698764673938d4c1ef83f42ee72d"
+SRC_URI[md5sum] = "2139c0c7ecff94da68aef8a6ad0df20b"
+SRC_URI[sha256sum] = "676add1e8e6b2fcf76d97f22f38c9d0cbbe8a92342039a85c8a4c87e8c1ce824"
 
-PR = "r6"
+PR = "r7"
 
 inherit update-rc.d
 

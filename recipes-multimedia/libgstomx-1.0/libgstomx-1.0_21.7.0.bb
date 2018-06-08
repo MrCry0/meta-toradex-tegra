@@ -6,6 +6,7 @@ LIC_FILES_CHKSUM = "file://COPYING;md5=4fbd65380cdd255951079008b364516c"
 SRC_URI = " \
     http://developer.download.nvidia.com/embedded/L4T/r21_Release_v5.0/source/gstomx1_src.tbz2 \
     file://r21.6.0-sources-gstomx1_src.patch \
+    file://r21.7.0-sources-gstomx1_src.patch \
     file://gstomx-1.0.patch \
 "
 

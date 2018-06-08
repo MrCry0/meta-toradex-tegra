@@ -17,8 +17,8 @@ SRCREV_use-head-next = "${AUTOREV}"
 
 PV = "${LINUX_VERSION}+gitr${SRCPV}"
 S = "${WORKDIR}/git"
-SRCBRANCH = "toradex_tk1_l4t_r21.6"
-SRCBRANCH_use-head-next = "toradex_tk1_l4t_r21.6-next"
+SRCBRANCH = "toradex_tk1_l4t_r21.7"
+SRCBRANCH_use-head-next = "toradex_tk1_l4t_r21.7-next"
 SRC_URI = "git://git.toradex.com/linux-toradex.git;protocol=git;branch=${SRCBRANCH}"
 
 COMPATIBLE_MACHINE = "apalis-tk1"
