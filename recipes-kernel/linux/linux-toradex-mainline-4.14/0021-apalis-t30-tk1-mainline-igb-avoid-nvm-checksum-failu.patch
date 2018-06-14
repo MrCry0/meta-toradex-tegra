@@ -1,0 +1,36 @@
+From 8c72a22b01f1db78a0bd7c982c4db394eb9a166f Mon Sep 17 00:00:00 2001
+Message-Id: <8c72a22b01f1db78a0bd7c982c4db394eb9a166f.1529072479.git.marcel.ziswiler@toradex.com>
+In-Reply-To: <fb4764e8eb658d35e8fc62ae79c77e1f6e2b0ef3.1529072479.git.marcel.ziswiler@toradex.com>
+References: <fb4764e8eb658d35e8fc62ae79c77e1f6e2b0ef3.1529072479.git.marcel.ziswiler@toradex.com>
+From: Marcel Ziswiler <marcel.ziswiler@toradex.com>
+Date: Tue, 12 Jun 2018 09:47:30 +0200
+Subject: [PATCH 21/27] apalis-t30/tk1-mainline: igb: avoid nvm checksum
+ failure
+
+This avoids the following error in case the iNVM of the i210/i211 is not
+yet programmed (e.g. due to using one of them early Apalis T30 samples
+or a factory pristine module as in the FCT case):
+
+The NVM Checksum Is Not Valid
+
+Signed-off-by: Marcel Ziswiler <marcel.ziswiler@toradex.com>
+---
+ drivers/net/ethernet/intel/igb/igb_main.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/drivers/net/ethernet/intel/igb/igb_main.c b/drivers/net/ethernet/intel/igb/igb_main.c
+index c2e8a3654119..2207d0d1906c 100644
+--- a/drivers/net/ethernet/intel/igb/igb_main.c
++++ b/drivers/net/ethernet/intel/igb/igb_main.c
+@@ -2533,7 +2533,7 @@ static int igb_probe(struct pci_dev *pdev, const struct pci_device_id *ent)
+ 	case e1000_i210:
+ 	case e1000_i211:
+ 		if (igb_get_flash_presence_i210(hw)) {
+-			if (hw->nvm.ops.validate(hw) < 0) {
++			if ((hw->nvm.ops.validate(hw) < 0) && !g_usr_mac) {
+ 				dev_err(&pdev->dev,
+ 					"The NVM Checksum Is Not Valid\n");
+ 				err = -EIO;
+-- 
+2.14.4
+

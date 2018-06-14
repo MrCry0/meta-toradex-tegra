@@ -37,6 +37,9 @@ GENERIC_PATCHES = " \
     file://0018-apalis-t30-mainline-force-fixed-ids-for-sdmmc-contro.patch \
     file://0019-clk-tegra-Fix-pll_u-rate-configuration.patch \
     file://0020-ARM-tegra-apalis-tk1-Fix-high-speed-UART-compatible.patch \
+    file://0021-apalis-t30-tk1-mainline-igb-avoid-nvm-checksum-failu.patch \
+    file://0022-apalis_t30-fix-can2.patch \
+    file://0023-mfd-as3722-disable-auto-power-on-when-AC-OK.patch \
 "
 MACHINE_PATCHES = " \
 "

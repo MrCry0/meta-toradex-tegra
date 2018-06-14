@@ -1,0 +1,34 @@
+From c76e3da5c5e5d1c94ffcc6a5c73d916c7af8060e Mon Sep 17 00:00:00 2001
+Message-Id: <c76e3da5c5e5d1c94ffcc6a5c73d916c7af8060e.1529072479.git.marcel.ziswiler@toradex.com>
+In-Reply-To: <fb4764e8eb658d35e8fc62ae79c77e1f6e2b0ef3.1529072479.git.marcel.ziswiler@toradex.com>
+References: <fb4764e8eb658d35e8fc62ae79c77e1f6e2b0ef3.1529072479.git.marcel.ziswiler@toradex.com>
+From: Marcel Ziswiler <marcel.ziswiler@toradex.com>
+Date: Tue, 12 Jun 2018 14:39:50 +0200
+Subject: [PATCH 22/27] apalis_t30: fix can2
+
+CAN2 currently fails on probe as follows:
+
+mcp251x spi1.1: Probe failed, err=19
+
+Fix this by enabling input on pin mux of resp. SPI4 pins.
+
+Signed-off-by: Marcel Ziswiler <marcel.ziswiler@toradex.com>
+---
+ arch/arm/boot/dts/tegra30-apalis.dtsi | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/arch/arm/boot/dts/tegra30-apalis.dtsi b/arch/arm/boot/dts/tegra30-apalis.dtsi
+index faa8cd2914e8..4b022b50782b 100644
+--- a/arch/arm/boot/dts/tegra30-apalis.dtsi
++++ b/arch/arm/boot/dts/tegra30-apalis.dtsi
+@@ -118,6 +118,7 @@
+ 				nvidia,function = "spi4";
+ 				nvidia,pull = <TEGRA_PIN_PULL_NONE>;
+ 				nvidia,tristate = <TEGRA_PIN_DISABLE>;
++				nvidia,enable-input = <TEGRA_PIN_ENABLE>;
+ 			};
+ 			/* CAN_INT2 */
+ 			spi2_cs2_n_pw3 {
+-- 
+2.14.4
+
