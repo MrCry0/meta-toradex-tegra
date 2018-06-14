@@ -6,6 +6,7 @@ SRC_URI = "http://developer.download.nvidia.com/embedded/L4T/r21_Release_v7.0/Te
            file://xorg.conf.add \
            file://nv \
            file://nvfb \
+           file://tegra_xusb_firmware \
 	   "
 
 LIC_FILES_CHKSUM = "file://nv_tegra/LICENSE;md5=60ad17cc726658e8cf73578bea47b85f"
@@ -56,6 +57,7 @@ do_patch () {
 
 do_install () {
     tar xjf ${WORKDIR}/Linux_for_Tegra/nv_tegra/nvidia_drivers.tbz2 -C ${D}
+    cp -r ${WORKDIR}/tegra_xusb_firmware ${D}/lib/firmware/
     ln -sf ./libcuda.so.1.1 ${D}/usr/lib/arm-linux-gnueabihf/tegra/libcuda.so
     ln -sf ./arm-linux-gnueabihf/tegra/libcuda.so ${D}/usr/lib/libcuda.so
     ln -sf ./arm-linux-gnueabihf/tegra/libGL.so.1 ${D}/usr/lib/libGL.so
