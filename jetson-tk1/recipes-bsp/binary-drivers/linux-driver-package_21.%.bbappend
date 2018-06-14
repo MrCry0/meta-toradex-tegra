@@ -9,7 +9,7 @@ inherit systemd
 
 do_install_append_apalis-tk1 () {
     rm ${D}/usr/lib/libGL.so
-    ln -sf ./arm-linux-gnueabihf/tegra/libGL.so.1 ${D}/usr/lib/arm-linux-gnueabihf/tegra/libGL.so
+    ln -sf libGL.so.1 ${D}/usr/lib/arm-linux-gnueabihf/tegra/libGL.so
 
     cp ${WORKDIR}/xorg.conf ${D}/etc/X11/
     install -d ${D}${systemd_unitdir}/system/
@@ -106,4 +106,3 @@ do_install_append () {
 
 SYSTEMD_SERVICE_${PN} = "nvfb.service"
 SYSTEMD_SERVICE_${PN} += " nv.service"
-
