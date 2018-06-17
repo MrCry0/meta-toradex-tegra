@@ -1,0 +1,112 @@
+From 0bb1ade93567b57999f7370307f4770406f8ed71 Mon Sep 17 00:00:00 2001
+From: Max Krummenacher <max.krummenacher@toradex.com>
+Date: Sat, 9 Jun 2018 12:33:04 +0200
+Subject: [PATCH 3/3] libfdt move: all the rest
+
+---
+ include/compiler.h       | 4 ++++
+ lib/libfdt/fdt_overlay.c | 6 ++----
+ tools/Makefile           | 2 +-
+ tools/dtoc/dtoc.py       | 2 +-
+ tools/fdt_host.h         | 2 ++
+ tools/fdtgrep.c          | 6 ++++++
+ 6 files changed, 16 insertions(+), 6 deletions(-)
+
+diff --git a/include/compiler.h b/include/compiler.h
+index 65b826e4d1..59a465ead9 100644
+--- a/include/compiler.h
++++ b/include/compiler.h
+@@ -132,7 +132,11 @@ typedef unsigned int uint;
+ #include <stdint.h>
+ #else
+ /* Type for `void *' pointers. */
++#ifndef __UINTPTR_TYPE__
+ typedef unsigned long int uintptr_t;
++#else
++typedef __UINTPTR_TYPE__ uintptr_t;
++#endif
+ #endif
+ 
+ #include <linux/string.h>
+diff --git a/lib/libfdt/fdt_overlay.c b/lib/libfdt/fdt_overlay.c
+index 31657a00c9..c5fad87482 100644
+--- a/lib/libfdt/fdt_overlay.c
++++ b/lib/libfdt/fdt_overlay.c
+@@ -1,10 +1,8 @@
+-#include "libfdt_env.h"
+-
+-#include <fdt.h>
+ #include <linux/libfdt.h>
++#include <fdt.h>
+ 
+ #include "libfdt_internal.h"
+-
++#include <compiler.h>
+ /**
+  * overlay_get_target_phandle - retrieves the target phandle of a fragment
+  * @fdto: pointer to the device tree overlay blob
+diff --git a/tools/Makefile b/tools/Makefile
+index 9edb504fdd..a499708ae9 100644
+--- a/tools/Makefile
++++ b/tools/Makefile
+@@ -237,7 +237,7 @@ LICENSE-$(CONFIG_CMD_LICENSE) += $(LICENSE_H)
+ # Define __KERNEL_STRICT_NAMES to prevent typedef overlaps
+ # Define _GNU_SOURCE to obtain the getline prototype from stdio.h
+ #
+-HOST_EXTRACFLAGS += -include $(srctree)/include/libfdt_env.h \
++HOST_EXTRACFLAGS += -include $(srctree)/include/linux/libfdt_env.h \
+ 		$(patsubst -I%,-idirafter%, $(filter -I%, $(UBOOTINCLUDE))) \
+ 		-I$(srctree)/lib/libfdt \
+ 		-I$(srctree)/tools \
+diff --git a/tools/dtoc/dtoc.py b/tools/dtoc/dtoc.py
+index 11050b66f7..a891d1c747 100755
+--- a/tools/dtoc/dtoc.py
++++ b/tools/dtoc/dtoc.py
+@@ -260,7 +260,7 @@ class DtbPlatdata:
+         README.of-plat for more information.
+         """
+         self.Out('#include <stdbool.h>\n')
+-        self.Out('#include <libfdt.h>\n')
++        self.Out('#include <linux/libfdt.h>\n')
+ 
+         # Output the struct definition
+         for name in sorted(structs):
+diff --git a/tools/fdt_host.h b/tools/fdt_host.h
+index d8ea8de1ec..5455095b83 100644
+--- a/tools/fdt_host.h
++++ b/tools/fdt_host.h
+@@ -11,6 +11,8 @@
+ #include "../include/linux/libfdt.h"
+ #include "../include/fdt_support.h"
+ 
++#include <stdbool.h>
++
+ int fit_check_sign(const void *working_fdt, const void *key);
+ 
+ #endif /* __FDT_HOST_H__ */
+diff --git a/tools/fdtgrep.c b/tools/fdtgrep.c
+index fbe38c824a..889aaa6763 100644
+--- a/tools/fdtgrep.c
++++ b/tools/fdtgrep.c
+@@ -10,12 +10,18 @@
+ 
+ #include <assert.h>
+ #include <ctype.h>
++#include <errno.h>
+ #include <getopt.h>
++#include <stdbool.h>
+ #include <stdio.h>
+ #include <stdlib.h>
+ #include <string.h>
+ #include <unistd.h>
+ 
++#include <sys/types.h>
++#include <sys/stat.h>
++#include <fcntl.h>
++
+ #include <../include/linux/libfdt.h>
+ #include <libfdt_internal.h>
+ 
+-- 
+2.13.7
+

@@ -29,6 +29,11 @@ SRC_URI = " \
     file://fw_env.config \
     file://fw_unlock_mmc.sh \
 "
+SRC_URI += " \
+    file://0001-change-includes-to-linux-fdt-h.patch \
+    file://0002-libfdt-h-move-to-include-linux.patch \
+    file://0003-libfdt-move-all-the-rest.patch \
+"
 
 PV = "2016.11+git${SRCPV}"
 PR = "${TDX_VER_ITEM}"
