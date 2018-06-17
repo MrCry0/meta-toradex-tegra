@@ -1,11 +1,11 @@
-From ea64a271a36553990bb2a6cb40edfd929d8e6e88 Mon Sep 17 00:00:00 2001
-Message-Id: <ea64a271a36553990bb2a6cb40edfd929d8e6e88.1510580437.git.marcel.ziswiler@toradex.com>
-In-Reply-To: <8d39626d07718220b426e9be045df8ed9d1fd707.1510580437.git.marcel.ziswiler@toradex.com>
-References: <8d39626d07718220b426e9be045df8ed9d1fd707.1510580437.git.marcel.ziswiler@toradex.com>
+From f8ab701354544ed62591ea343c881efee973740d Mon Sep 17 00:00:00 2001
+Message-Id: <f8ab701354544ed62591ea343c881efee973740d.1529072479.git.marcel.ziswiler@toradex.com>
+In-Reply-To: <fb4764e8eb658d35e8fc62ae79c77e1f6e2b0ef3.1529072479.git.marcel.ziswiler@toradex.com>
+References: <fb4764e8eb658d35e8fc62ae79c77e1f6e2b0ef3.1529072479.git.marcel.ziswiler@toradex.com>
 From: Marcel Ziswiler <marcel.ziswiler@toradex.com>
 Date: Mon, 13 Nov 2017 14:37:25 +0100
-Subject: [PATCH 8/8] apalis-tk1: fix pcie reset for reliable gigabit ethernet
- operation
+Subject: [PATCH 08/27] apalis-tk1: fix pcie reset for reliable gigabit
+ ethernet operation
 
 It turns out that the current PCIe reset implementation is not quite
 working reliably due to some Intel i210 errata. Fix this by making sure
@@ -23,7 +23,7 @@ Acked-by: Dominik Sliwa <dominik.sliwa@toradex.com>
  1 file changed, 72 insertions(+)
 
 diff --git a/drivers/pci/host/pci-tegra.c b/drivers/pci/host/pci-tegra.c
-index 5c7916b..0c62371 100644
+index 5c7916b5de73..0c6237159243 100644
 --- a/drivers/pci/host/pci-tegra.c
 +++ b/drivers/pci/host/pci-tegra.c
 @@ -71,8 +71,12 @@
@@ -136,5 +136,5 @@ index 5c7916b..0c62371 100644
  
  	err = clk_prepare_enable(pcie->afi_clk);
 -- 
-2.9.5
+2.14.4
 

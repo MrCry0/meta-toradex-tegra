@@ -1,7 +1,7 @@
 From b6d7974d10b30bf3baed7e50d8e574f5184cfdd1 Mon Sep 17 00:00:00 2001
 From: Thierry Reding <treding@nvidia.com>
 Date: Wed, 7 Feb 2018 18:45:54 +0100
-Subject: [PATCH] drm/tegra: gem: Reshuffle declarations
+Subject: drm/tegra: gem: Reshuffle declarations
 
 Move declarations in the gem.h header file into the same order as the
 corresponding definitions in gem.c.
@@ -12,7 +12,7 @@ Signed-off-by: Thierry Reding <treding@nvidia.com>
  1 file changed, 2 insertions(+), 2 deletions(-)
 
 diff --git a/drivers/gpu/drm/tegra/gem.h b/drivers/gpu/drm/tegra/gem.h
-index 8eb9fd24ef0e..1fcf94dce45c 100644
+index 8eb9fd2..1fcf94d 100644
 --- a/drivers/gpu/drm/tegra/gem.h
 +++ b/drivers/gpu/drm/tegra/gem.h
 @@ -68,10 +68,10 @@ void tegra_bo_free_object(struct drm_gem_object *gem);
@@ -29,5 +29,5 @@ index 8eb9fd24ef0e..1fcf94dce45c 100644
  				       struct drm_gem_object *gem,
  				       int flags);
 -- 
-2.15.1
+cgit v1.1
 

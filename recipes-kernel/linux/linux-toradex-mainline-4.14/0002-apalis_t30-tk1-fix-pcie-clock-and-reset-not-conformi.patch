@@ -1,10 +1,10 @@
-From fc37cb5b5f68acc1548ebdc7750d5e04dd616bde Mon Sep 17 00:00:00 2001
-Message-Id: <fc37cb5b5f68acc1548ebdc7750d5e04dd616bde.1510580437.git.marcel.ziswiler@toradex.com>
-In-Reply-To: <8d39626d07718220b426e9be045df8ed9d1fd707.1510580437.git.marcel.ziswiler@toradex.com>
-References: <8d39626d07718220b426e9be045df8ed9d1fd707.1510580437.git.marcel.ziswiler@toradex.com>
+From 94c486ca26222a3e87d780f2c55a7b618e5ebc88 Mon Sep 17 00:00:00 2001
+Message-Id: <94c486ca26222a3e87d780f2c55a7b618e5ebc88.1529072479.git.marcel.ziswiler@toradex.com>
+In-Reply-To: <fb4764e8eb658d35e8fc62ae79c77e1f6e2b0ef3.1529072479.git.marcel.ziswiler@toradex.com>
+References: <fb4764e8eb658d35e8fc62ae79c77e1f6e2b0ef3.1529072479.git.marcel.ziswiler@toradex.com>
 From: Marcel Ziswiler <marcel.ziswiler@toradex.com>
 Date: Thu, 15 Dec 2016 10:24:58 +0100
-Subject: [PATCH 2/8] apalis_t30/tk1: fix pcie clock and reset not conforming
+Subject: [PATCH 02/27] apalis_t30/tk1: fix pcie clock and reset not conforming
  to specification
 
 Fix PCIe clock and reset not conforming to specification by moving PCIe
@@ -29,7 +29,7 @@ a2f63805703b43d55d91ae17f10d0049bf0f625e)
  1 file changed, 88 insertions(+)
 
 diff --git a/drivers/pci/host/pci-tegra.c b/drivers/pci/host/pci-tegra.c
-index 1987fec..5c7916b 100644
+index 1987fec1f126..5c7916b5de73 100644
 --- a/drivers/pci/host/pci-tegra.c
 +++ b/drivers/pci/host/pci-tegra.c
 @@ -51,6 +51,34 @@
@@ -149,5 +149,5 @@ index 1987fec..5c7916b 100644
  
  static void tegra_pcie_port_enable(struct tegra_pcie_port *port)
 -- 
-2.9.5
+2.14.4
 

@@ -17,13 +17,13 @@ PR = "${TDX_VER_ITEM}"
 PV = "${LINUX_VERSION}"
 S = "${WORKDIR}/linux-${PV}"
 TK1-PATCHES = " \
-    file://0001-toradex_apalis_tk1_t30-customize-defconfig.patch \
+    file://0001-apalis-t30-tk1-mainline-customize-defconfig.patch \
     file://0002-apalis_t30-tk1-fix-pcie-clock-and-reset-not-conformi.patch \
     file://0003-igb-integrate-tools-only-device-support.patch \
     file://0004-apalis_t30-tk1-igb-no-nvm-and-Ethernet-MAC-address-h.patch \
     file://0005-mmc-tegra-apalis-tk1-hack-to-make-sd1-functional.patch \
-    file://0006-tegra_defconfig-snapd-squashfs-configuration.patch \
-    file://0007-ARM-tegra-apalis-tk1-support-v1.2-hardware-revision.patch \
+    file://0006-apalis-colibri_t30-apalis-tk1-snapd-squashfs-configu.patch \
+    file://0007-ARM-tegra-apalis-tk1-Support-v1.2-hardware-revision.patch \
     file://0008-apalis-tk1-fix-pcie-reset-for-reliable-gigabit-ether.patch \
     file://0009-drm-tegra-gem-Reshuffle-declarations.patch \
     file://0010-drm-tegra-gem-Make-__tegra_gem_mmap-available-more-w.patch \

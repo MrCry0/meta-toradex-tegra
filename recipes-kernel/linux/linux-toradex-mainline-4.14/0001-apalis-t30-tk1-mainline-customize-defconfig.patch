@@ -1,15 +1,16 @@
-From 8d39626d07718220b426e9be045df8ed9d1fd707 Mon Sep 17 00:00:00 2001
-Message-Id: <8d39626d07718220b426e9be045df8ed9d1fd707.1510580437.git.marcel.ziswiler@toradex.com>
+From fb4764e8eb658d35e8fc62ae79c77e1f6e2b0ef3 Mon Sep 17 00:00:00 2001
+Message-Id: <fb4764e8eb658d35e8fc62ae79c77e1f6e2b0ef3.1529072479.git.marcel.ziswiler@toradex.com>
 From: Dominik Sliwa <dominik.sliwa@toradex.com>
 Date: Thu, 15 Dec 2016 10:40:06 +0100
-Subject: [PATCH 1/8] toradex_apalis_tk1_t30: customize defconfig
+Subject: [PATCH 01/27] apalis-t30/tk1-mainline: customize defconfig
 
+Signed-off-by: Marcel Ziswiler <marcel.ziswiler@toradex.com>
 ---
  arch/arm/configs/tegra_defconfig | 19 ++++++++++++++++---
  1 file changed, 16 insertions(+), 3 deletions(-)
 
 diff --git a/arch/arm/configs/tegra_defconfig b/arch/arm/configs/tegra_defconfig
-index 6678f29..cb97ea2 100644
+index 6678f2929356..cb97ea2db1e0 100644
 --- a/arch/arm/configs/tegra_defconfig
 +++ b/arch/arm/configs/tegra_defconfig
 @@ -104,9 +104,21 @@ CONFIG_USB_PEGASUS=y
@@ -80,5 +81,5 @@ index 6678f29..cb97ea2 100644
  CONFIG_TMPFS=y
  CONFIG_TMPFS_POSIX_ACL=y
 -- 
-2.9.5
+2.14.4
 

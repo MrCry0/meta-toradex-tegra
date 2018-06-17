@@ -1,10 +1,7 @@
-From b2fd39d0358d3a8847835ef57cc32f1ab2821e40 Mon Sep 17 00:00:00 2001
-Message-Id: <b2fd39d0358d3a8847835ef57cc32f1ab2821e40.1510580437.git.marcel.ziswiler@toradex.com>
-In-Reply-To: <8d39626d07718220b426e9be045df8ed9d1fd707.1510580437.git.marcel.ziswiler@toradex.com>
-References: <8d39626d07718220b426e9be045df8ed9d1fd707.1510580437.git.marcel.ziswiler@toradex.com>
+From 4957a2f1f2205214b2ca325872a7508fa91e1096 Mon Sep 17 00:00:00 2001
 From: Marcel Ziswiler <marcel.ziswiler@toradex.com>
-Date: Mon, 2 Oct 2017 09:27:16 +0200
-Subject: [PATCH 7/8] ARM: tegra: apalis-tk1: support v1.2 hardware revision
+Date: Sat, 10 Feb 2018 02:38:06 +0100
+Subject: ARM: tegra: apalis-tk1: Support v1.2 hardware revision
 
 Support the V1.2 hardware revision with the following pin muxing
 changes:
@@ -19,19 +16,20 @@ Usb_vbus_en0_pn4 and usb_vbus_en1_pn5 previously used as USB power
 enable signals are now used as GPIO3 and GPIO4.
 
 Signed-off-by: Marcel Ziswiler <marcel.ziswiler@toradex.com>
+Signed-off-by: Thierry Reding <treding@nvidia.com>
 ---
  arch/arm/boot/dts/Makefile                      |    1 +
- arch/arm/boot/dts/tegra124-apalis-v1.2-eval.dts |  299 ++++
- arch/arm/boot/dts/tegra124-apalis-v1.2.dtsi     | 2070 +++++++++++++++++++++++
- 3 files changed, 2370 insertions(+)
+ arch/arm/boot/dts/tegra124-apalis-v1.2-eval.dts |  250 +++
+ arch/arm/boot/dts/tegra124-apalis-v1.2.dtsi     | 2052 +++++++++++++++++++++++
+ 3 files changed, 2303 insertions(+)
  create mode 100644 arch/arm/boot/dts/tegra124-apalis-v1.2-eval.dts
  create mode 100644 arch/arm/boot/dts/tegra124-apalis-v1.2.dtsi
 
 diff --git a/arch/arm/boot/dts/Makefile b/arch/arm/boot/dts/Makefile
-index faf46ab..8451af8 100644
+index ade7a38..9d88274 100644
 --- a/arch/arm/boot/dts/Makefile
 +++ b/arch/arm/boot/dts/Makefile
-@@ -960,6 +960,7 @@ dtb-$(CONFIG_ARCH_TEGRA_114_SOC) += \
+@@ -1022,6 +1022,7 @@ dtb-$(CONFIG_ARCH_TEGRA_114_SOC) += \
  	tegra114-tn7.dtb
  dtb-$(CONFIG_ARCH_TEGRA_124_SOC) += \
  	tegra124-apalis-eval.dtb \
@@ -41,49 +39,13 @@ index faf46ab..8451af8 100644
  	tegra124-nyan-blaze.dtb \
 diff --git a/arch/arm/boot/dts/tegra124-apalis-v1.2-eval.dts b/arch/arm/boot/dts/tegra124-apalis-v1.2-eval.dts
 new file mode 100644
-index 0000000..c61eb59
+index 0000000..8a8d5fa
 --- /dev/null
 +++ b/arch/arm/boot/dts/tegra124-apalis-v1.2-eval.dts
-@@ -0,0 +1,299 @@
+@@ -0,0 +1,250 @@
++// SPDX-License-Identifier: (GPL-2.0 OR MIT)
 +/*
-+ * Copyright 2016-2017 Toradex AG
-+ *
-+ * This file is dual-licensed: you can use it either under the terms
-+ * of the GPL or the X11 license, at your option. Note that this dual
-+ * licensing only applies to this file, and not this project as a
-+ * whole.
-+ *
-+ *  a) This file is free software; you can redistribute it and/or
-+ *     modify it under the terms of the GNU General Public License
-+ *     version 2 as published by the Free Software Foundation.
-+ *
-+ *     This file is distributed in the hope that it will be useful
-+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
-+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-+ *     GNU General Public License for more details.
-+ *
-+ * Or, alternatively
-+ *
-+ *  b) Permission is hereby granted, free of charge, to any person
-+ *     obtaining a copy of this software and associated documentation
-+ *     files (the "Software"), to deal in the Software without
-+ *     restriction, including without limitation the rights to use
-+ *     copy, modify, merge, publish, distribute, sublicense, and/or
-+ *     sell copies of the Software, and to permit persons to whom the
-+ *     Software is furnished to do so, subject to the following
-+ *     conditions:
-+ *
-+ *     The above copyright notice and this permission notice shall be
-+ *     included in all copies or substantial portions of the Software.
-+ *
-+ *     THE SOFTWARE IS PROVIDED , WITHOUT WARRANTY OF ANY KIND
-+ *     EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
-+ *     OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
-+ *     NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
-+ *     HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY
-+ *     WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
-+ *     FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
-+ *     OTHER DEALINGS IN THE SOFTWARE.
++ * Copyright 2016-2018 Toradex AG
 + */
 +
 +/dts-v1/;
@@ -161,7 +123,7 @@ index 0000000..c61eb59
 +
 +		/* M41T0M6 real time clock on carrier board */
 +		rtc@68 {
-+			compatible = "st,m41t00";
++			compatible = "st,m41t0";
 +			reg = <0x68>;
 +		};
 +	};
@@ -178,7 +140,8 @@ index 0000000..c61eb59
 +	};
 +
 +	/*
-+	 * I2C4 (DDC): I2C4_SDA/SCL (DDC) on MXM3 pin 205/207 (e.g. display EDID)
++	 * I2C4 (DDC): I2C4_SDA/SCL (DDC) on MXM3 pin 205/207
++	 * (e.g. display EDID)
 +	 */
 +	hdmi_ddc: i2c@7000c700 {
 +		status = "okay";
@@ -272,8 +235,7 @@ index 0000000..c61eb59
 +
 +	backlight: backlight {
 +		compatible = "pwm-backlight";
-+		/* BKL1_PWM */
-+		pwms = <&pwm 3 5000000>;
++		pwms = <&pwm 3 5000000>; /* BKL1_PWM */
 +		brightness-levels = <255 231 223 207 191 159 127 0>;
 +		default-brightness-level = <6>;
 +		/* BKL1_ON */
@@ -323,72 +285,23 @@ index 0000000..c61eb59
 +};
 +
 +&gpio {
-+	lan_reset_n {
-+		gpio-hog;
-+		gpios = <TEGRA_GPIO(S, 2) GPIO_ACTIVE_HIGH>;
-+		output-high;
-+		line-name = "LAN_RESET_N";
-+	};
-+
++	/* Apalis GPIO7 MXM3 pin 15 PLX PEX 8605 PCIe Switch Reset */
 +	pex_perst_n {
 +		gpio-hog;
 +		gpios = <TEGRA_GPIO(DD, 1) GPIO_ACTIVE_HIGH>;
 +		output-high;
 +		line-name = "PEX_PERST_N";
 +	};
-+
-+	reset_moci_ctrl {
-+		gpio-hog;
-+		gpios = <TEGRA_GPIO(U, 4) GPIO_ACTIVE_HIGH>;
-+		output-high;
-+		line-name = "RESET_MOCI_CTRL";
-+	};
 +};
 diff --git a/arch/arm/boot/dts/tegra124-apalis-v1.2.dtsi b/arch/arm/boot/dts/tegra124-apalis-v1.2.dtsi
 new file mode 100644
-index 0000000..c2b14e69
+index 0000000..bb67edb
 --- /dev/null
 +++ b/arch/arm/boot/dts/tegra124-apalis-v1.2.dtsi
-@@ -0,0 +1,2070 @@
+@@ -0,0 +1,2052 @@
++// SPDX-License-Identifier: (GPL-2.0 OR MIT)
 +/*
-+ * Copyright 2016-2017 Toradex AG
-+ *
-+ * This file is dual-licensed: you can use it either under the terms
-+ * of the GPL or the X11 license, at your option. Note that this dual
-+ * licensing only applies to this file, and not this project as a
-+ * whole.
-+ *
-+ *  a) This file is free software; you can redistribute it and/or
-+ *     modify it under the terms of the GNU General Public License
-+ *     version 2 as published by the Free Software Foundation.
-+ *
-+ *     This file is distributed in the hope that it will be useful
-+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
-+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-+ *     GNU General Public License for more details.
-+ *
-+ * Or, alternatively
-+ *
-+ *  b) Permission is hereby granted, free of charge, to any person
-+ *     obtaining a copy of this software and associated documentation
-+ *     files (the "Software"), to deal in the Software without
-+ *     restriction, including without limitation the rights to use
-+ *     copy, modify, merge, publish, distribute, sublicense, and/or
-+ *     sell copies of the Software, and to permit persons to whom the
-+ *     Software is furnished to do so, subject to the following
-+ *     conditions:
-+ *
-+ *     The above copyright notice and this permission notice shall be
-+ *     included in all copies or substantial portions of the Software.
-+ *
-+ *     THE SOFTWARE IS PROVIDED , WITHOUT WARRANTY OF ANY KIND
-+ *     EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
-+ *     OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
-+ *     NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
-+ *     HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY
-+ *     WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
-+ *     FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
-+ *     OTHER DEALINGS IN THE SOFTWARE.
++ * Copyright 2016-2018 Toradex AG
 + */
 +
 +#include "tegra124.dtsi"
@@ -2420,6 +2333,24 @@ index 0000000..c2b14e69
 +		};
 +	};
 +};
++
++&gpio {
++	/* I210 Gigabit Ethernet Controller Reset */
++	lan_reset_n {
++		gpio-hog;
++		gpios = <TEGRA_GPIO(S, 2) GPIO_ACTIVE_HIGH>;
++		output-high;
++		line-name = "LAN_RESET_N";
++	};
++
++	/* Control MXM3 pin 26 Reset Module Output Carrier Input */
++	reset_moci_ctrl {
++		gpio-hog;
++		gpios = <TEGRA_GPIO(U, 4) GPIO_ACTIVE_HIGH>;
++		output-high;
++		line-name = "RESET_MOCI_CTRL";
++	};
++};
 -- 
-2.9.5
+cgit v1.1
 

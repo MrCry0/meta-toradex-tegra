@@ -1,7 +1,7 @@
 From 04c0746663bd3ae3cce5e02d5b32c8ade2a833b8 Mon Sep 17 00:00:00 2001
 From: Thierry Reding <treding@nvidia.com>
 Date: Wed, 7 Feb 2018 18:45:55 +0100
-Subject: [PATCH] drm/tegra: gem: Make __tegra_gem_mmap() available more widely
+Subject: drm/tegra: gem: Make __tegra_gem_mmap() available more widely
 
 This function allows mapping a GEM object into a virtual memory address
 space, which makes it useful outside of the GEM code.
@@ -16,7 +16,7 @@ Signed-off-by: Thierry Reding <treding@nvidia.com>
  2 files changed, 4 insertions(+), 4 deletions(-)
 
 diff --git a/drivers/gpu/drm/tegra/gem.c b/drivers/gpu/drm/tegra/gem.c
-index 49b9bf28f872..d3b3aa148225 100644
+index 49b9bf2..d3b3aa1 100644
 --- a/drivers/gpu/drm/tegra/gem.c
 +++ b/drivers/gpu/drm/tegra/gem.c
 @@ -459,8 +459,7 @@ const struct vm_operations_struct tegra_bo_vm_ops = {
@@ -48,7 +48,7 @@ index 49b9bf28f872..d3b3aa148225 100644
  
  static void *tegra_gem_prime_vmap(struct dma_buf *buf)
 diff --git a/drivers/gpu/drm/tegra/gem.h b/drivers/gpu/drm/tegra/gem.h
-index 1fcf94dce45c..6bd7dd7e55b4 100644
+index 1fcf94d..6bd7dd7 100644
 --- a/drivers/gpu/drm/tegra/gem.h
 +++ b/drivers/gpu/drm/tegra/gem.h
 @@ -70,6 +70,7 @@ int tegra_bo_dumb_create(struct drm_file *file, struct drm_device *drm,
@@ -60,5 +60,5 @@ index 1fcf94dce45c..6bd7dd7e55b4 100644
  
  struct dma_buf *tegra_gem_prime_export(struct drm_device *drm,
 -- 
-2.15.1
+cgit v1.1
 

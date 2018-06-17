@@ -1,10 +1,10 @@
-From 3facf94b99d303357bb7d2188174eae38401f294 Mon Sep 17 00:00:00 2001
-Message-Id: <3facf94b99d303357bb7d2188174eae38401f294.1510580437.git.marcel.ziswiler@toradex.com>
-In-Reply-To: <8d39626d07718220b426e9be045df8ed9d1fd707.1510580437.git.marcel.ziswiler@toradex.com>
-References: <8d39626d07718220b426e9be045df8ed9d1fd707.1510580437.git.marcel.ziswiler@toradex.com>
+From e311535be20637969de2ebb95aa2ffbf5ff9e2c3 Mon Sep 17 00:00:00 2001
+Message-Id: <e311535be20637969de2ebb95aa2ffbf5ff9e2c3.1529072479.git.marcel.ziswiler@toradex.com>
+In-Reply-To: <fb4764e8eb658d35e8fc62ae79c77e1f6e2b0ef3.1529072479.git.marcel.ziswiler@toradex.com>
+References: <fb4764e8eb658d35e8fc62ae79c77e1f6e2b0ef3.1529072479.git.marcel.ziswiler@toradex.com>
 From: Marcel Ziswiler <marcel.ziswiler@toradex.com>
 Date: Thu, 15 Dec 2016 10:55:11 +0100
-Subject: [PATCH 3/8] igb: integrate tools only device support
+Subject: [PATCH 03/27] igb: integrate tools only device support
 
 Springville/i211 with a blank Flash/iNVM use different PCI IDs. Extend
 the driver to load despite i210/i211 data sheets claiming tools only,
@@ -12,7 +12,6 @@ not for driver.
 
 Signed-off-by: Marcel Ziswiler <marcel.ziswiler@toradex.com>
 Acked-by: Dominik Sliwa <dominik.sliwa@toradex.com>
-
 (cherry picked from toradex_tk1_l4t_r21.5 commit
 783780c43fd4e1473fb64790c8b9e0adb2be04a3)
 (cherry picked from tegra commit
@@ -24,7 +23,7 @@ Acked-by: Dominik Sliwa <dominik.sliwa@toradex.com>
  3 files changed, 6 insertions(+)
 
 diff --git a/drivers/net/ethernet/intel/igb/e1000_82575.c b/drivers/net/ethernet/intel/igb/e1000_82575.c
-index c37cc8b..d38d8a7 100644
+index c37cc8bccf47..d38d8a76ce92 100644
 --- a/drivers/net/ethernet/intel/igb/e1000_82575.c
 +++ b/drivers/net/ethernet/intel/igb/e1000_82575.c
 @@ -625,6 +625,7 @@ static s32 igb_get_invariants_82575(struct e1000_hw *hw)
@@ -44,7 +43,7 @@ index c37cc8b..d38d8a7 100644
  		mac->type = e1000_i211;
  		break;
 diff --git a/drivers/net/ethernet/intel/igb/e1000_hw.h b/drivers/net/ethernet/intel/igb/e1000_hw.h
-index 6c9485a..a3827f1 100644
+index 6c9485ab4b57..a3827f182df9 100644
 --- a/drivers/net/ethernet/intel/igb/e1000_hw.h
 +++ b/drivers/net/ethernet/intel/igb/e1000_hw.h
 @@ -58,6 +58,8 @@ struct e1000_hw;
@@ -57,7 +56,7 @@ index 6c9485a..a3827f1 100644
  #define E1000_DEV_ID_I210_FIBER			0x1536
  #define E1000_DEV_ID_I210_SERDES		0x1537
 diff --git a/drivers/net/ethernet/intel/igb/igb_main.c b/drivers/net/ethernet/intel/igb/igb_main.c
-index ea69af2..a060fc2 100644
+index d1a44a84c97e..77e74be9c70d 100644
 --- a/drivers/net/ethernet/intel/igb/igb_main.c
 +++ b/drivers/net/ethernet/intel/igb/igb_main.c
 @@ -77,7 +77,9 @@ static const struct pci_device_id igb_pci_tbl[] = {
@@ -71,5 +70,5 @@ index ea69af2..a060fc2 100644
  	{ PCI_VDEVICE(INTEL, E1000_DEV_ID_I210_FIBER), board_82575 },
  	{ PCI_VDEVICE(INTEL, E1000_DEV_ID_I210_SERDES), board_82575 },
 -- 
-2.9.5
+2.14.4
 

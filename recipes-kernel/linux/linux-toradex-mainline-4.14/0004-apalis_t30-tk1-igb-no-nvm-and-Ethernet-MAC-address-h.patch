@@ -1,10 +1,10 @@
-From d912735d53757d9b525ee7f016020400be458867 Mon Sep 17 00:00:00 2001
-Message-Id: <d912735d53757d9b525ee7f016020400be458867.1510580437.git.marcel.ziswiler@toradex.com>
-In-Reply-To: <8d39626d07718220b426e9be045df8ed9d1fd707.1510580437.git.marcel.ziswiler@toradex.com>
-References: <8d39626d07718220b426e9be045df8ed9d1fd707.1510580437.git.marcel.ziswiler@toradex.com>
+From a95cc31636707dad8392bcdae4404524224c27ad Mon Sep 17 00:00:00 2001
+Message-Id: <a95cc31636707dad8392bcdae4404524224c27ad.1529072479.git.marcel.ziswiler@toradex.com>
+In-Reply-To: <fb4764e8eb658d35e8fc62ae79c77e1f6e2b0ef3.1529072479.git.marcel.ziswiler@toradex.com>
+References: <fb4764e8eb658d35e8fc62ae79c77e1f6e2b0ef3.1529072479.git.marcel.ziswiler@toradex.com>
 From: Marcel Ziswiler <marcel.ziswiler@toradex.com>
 Date: Thu, 15 Dec 2016 10:55:54 +0100
-Subject: [PATCH 4/8] apalis_t30/tk1: igb: no nvm and Ethernet MAC address
+Subject: [PATCH 04/27] apalis_t30/tk1: igb: no nvm and Ethernet MAC address
  handling
 
 Only warn rather than fail on NVM validation failures on Apalis T30 and
@@ -28,7 +28,6 @@ blank NVMs as well as iNVMs programmed with Intel's defaults.
 
 Signed-off-by: Marcel Ziswiler <marcel.ziswiler@toradex.com>
 Acked-by: Dominik Sliwa <dominik.sliwa@toradex.com>
-
 (cherry picked from toradex_tk1_l4t_r21.5 commit
 70efa60d96c9f05d91d8875eee97446df7f9e877)
 (cherry picked from tegra commit
@@ -38,7 +37,7 @@ c4c3c7449bdb15c53bfebb0a29c73b24ea810d23)
  1 file changed, 57 insertions(+), 3 deletions(-)
 
 diff --git a/drivers/net/ethernet/intel/igb/igb_main.c b/drivers/net/ethernet/intel/igb/igb_main.c
-index a060fc2..c872c15 100644
+index 77e74be9c70d..c2e8a3654119 100644
 --- a/drivers/net/ethernet/intel/igb/igb_main.c
 +++ b/drivers/net/ethernet/intel/igb/igb_main.c
 @@ -55,6 +55,7 @@
@@ -133,5 +132,5 @@ index a060fc2..c872c15 100644
  
  	igb_set_default_mac_filter(adapter);
 -- 
-2.9.5
+2.14.4
 

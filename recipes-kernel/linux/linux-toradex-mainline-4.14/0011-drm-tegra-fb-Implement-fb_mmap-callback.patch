@@ -1,7 +1,7 @@
 From b8f3f500e09c2c457efc2fcbfe8b7f815f2e6a0e Mon Sep 17 00:00:00 2001
 From: Thierry Reding <treding@nvidia.com>
 Date: Wed, 7 Feb 2018 18:45:56 +0100
-Subject: [PATCH] drm/tegra: fb: Implement ->fb_mmap() callback
+Subject: drm/tegra: fb: Implement ->fb_mmap() callback
 
 This fixes hangs with legacy applications that use the mmap() syscall on
 the fbdev device to map framebuffer memory. The fbdev implementation for
@@ -19,10 +19,10 @@ Signed-off-by: Thierry Reding <treding@nvidia.com>
  1 file changed, 16 insertions(+)
 
 diff --git a/drivers/gpu/drm/tegra/fb.c b/drivers/gpu/drm/tegra/fb.c
-index 001cb77e2f59..0786159edef3 100644
+index 001cb77..0786159 100644
 --- a/drivers/gpu/drm/tegra/fb.c
 +++ b/drivers/gpu/drm/tegra/fb.c
-@@ -224,12 +224,28 @@ struct drm_framebuffer *tegra_fb_create(struct drm_device *drm,
+@@ -224,12 +224,28 @@ unreference:
  }
  
  #ifdef CONFIG_DRM_FBDEV_EMULATION
@@ -52,5 +52,5 @@ index 001cb77e2f59..0786159edef3 100644
  
  static int tegra_fbdev_probe(struct drm_fb_helper *helper,
 -- 
-2.15.1
+cgit v1.1
 
