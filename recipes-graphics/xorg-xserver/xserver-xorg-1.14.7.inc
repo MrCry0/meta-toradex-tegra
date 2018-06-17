@@ -123,9 +123,9 @@ EXTRA_OECONF += "--with-fop=no \
 
 PACKAGECONFIG ??= "udev ${@bb.utils.contains('DISTRO_FEATURES', 'opengl', 'dri dri2 glx', '', d)}"
 PACKAGECONFIG[udev] = "--enable-config-udev,--disable-config-udev,udev"
-PACKAGECONFIG[dri] = "--enable-dri,--disable-dri,glproto virtual/mesa xf86driproto"
-PACKAGECONFIG[dri2] = "--enable-dri2,--disable-dri2,dri2proto"
-PACKAGECONFIG[glx] = "--enable-glx --enable-glx-tls,--disable-glx,glproto virtual/libgl virtual/libx11"
+PACKAGECONFIG[dri] = "--enable-dri,--disable-dri,xorgproto virtual/mesa xorgproto"
+PACKAGECONFIG[dri2] = "--enable-dri2,--disable-dri2,xorgproto"
+PACKAGECONFIG[glx] = "--enable-glx --enable-glx-tls,--disable-glx,xorgproto virtual/libgl virtual/libx11"
 
 # for T20/T30 we don't want xinerama
 PACKAGECONFIG_remove = "xinerama"
