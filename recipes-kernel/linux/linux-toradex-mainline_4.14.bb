@@ -9,7 +9,7 @@ LIC_FILES_CHKSUM = "file://COPYING;md5=d7810fab7487fb0aad327b76f1be7cd7"
 inherit kernel siteinfo
 include conf/tdx_version.conf
 
-LINUX_VERSION ?= "4.14.30"
+LINUX_VERSION ?= "4.14.50"
 
 LOCALVERSION = "-${PR}"
 PR = "${TDX_VER_ITEM}"
@@ -35,7 +35,6 @@ GENERIC_PATCHES = " \
     file://0016-Revert-mmc-core-simplify-ida-handling.patch \
     file://0017-mmc-read-mmc-alias-from-device-tree.patch \
     file://0018-apalis-t30-mainline-force-fixed-ids-for-sdmmc-contro.patch \
-    file://0019-clk-tegra-Fix-pll_u-rate-configuration.patch \
     file://0020-ARM-tegra-apalis-tk1-Fix-high-speed-UART-compatible.patch \
     file://0021-apalis-t30-tk1-mainline-igb-avoid-nvm-checksum-failu.patch \
     file://0022-apalis_t30-fix-can2.patch \
@@ -51,8 +50,8 @@ SRC_URI = " \
     ${GENERIC_PATCHES} \
     ${MACHINE_PATCHES} \
 "
-SRC_URI[md5sum] = "1f25f5abe06404f9c3d41fbf25d8a22e"
-SRC_URI[sha256sum] = "7c5bb02feb48f1b7ab9a9c3ff051f325c0c6474fb0e25d9d7bcee91b2cfe6645"
+SRC_URI[md5sum] = "0d397a2e14669a97d54c1b82ab2b1994"
+SRC_URI[sha256sum] = "703a8d013b25dc428d936f72858fa0c702c22cb3114a040fb9bb47562e4ea2ac"
 
 # For CI use one could use the following instead (plus patches still of course)
 LINUX_VERSION_use-head-next ?= "4.14"
