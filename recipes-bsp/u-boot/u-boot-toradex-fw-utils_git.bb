@@ -19,7 +19,7 @@ DEFAULT_PREFERENCE_colibri-t30 = "1"
 FILESPATHPKG =. "git:"
 
 # This revision is based on upstream "v2016.11"
-SRCREV = "087e95a2dcff4a21cf86bba2654f8948684d7d50"
+SRCREV = "aca804c9ddadbf34a8ff82779e5598ec5e319f23"
 SRCBRANCH = "2016.11-toradex"
 SRCREV_use-head-next = "${AUTOREV}"
 SRCBRANCH_use-head-next = "2016.11-toradex-next"
