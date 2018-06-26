@@ -36,8 +36,6 @@ PR = "${TDX_VER_ITEM}"
 
 S = "${WORKDIR}/git"
 
-#actually this depend on the upstream U-Boot version and not on the machine
-CC_remove = "-mfpu=neon"
 INSANE_SKIP_${PN} = "already-stripped"
 EXTRA_OEMAKE_class-target = 'CROSS_COMPILE=${TARGET_PREFIX} CC="${CC} ${CFLAGS} ${LDFLAGS}" HOSTCC="${BUILD_CC} ${BUILD_CFLAGS} ${BUILD_LDFLAGS}" V=1'
 EXTRA_OEMAKE_class-cross = 'ARCH=${TARGET_ARCH} CC="${CC} ${CFLAGS} ${LDFLAGS}" V=1'
