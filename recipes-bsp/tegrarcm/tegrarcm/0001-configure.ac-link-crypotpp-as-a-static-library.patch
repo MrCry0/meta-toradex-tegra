@@ -20,7 +20,7 @@ index c95a0ec..250f3c2 100644
  AC_LANG(C++)
  SAVED_LDFLAGS=$LDFLAGS
 -LDFLAGS="$LDFLAGS -lcryptopp -lpthread"
-+LDFLAGS="$LDFLAGS -m32 -Wl,-Bstatic -lcryptopp -Wl,-Bdynamic -lpthread"
++LDFLAGS="$LDFLAGS -Wl,-Bstatic -lcryptopp -Wl,-Bdynamic -lpthread"
  CRYPTOLIB=
  AC_LINK_IFELSE(
  	[AC_LANG_PROGRAM([#include <cryptopp/cryptlib.h>],

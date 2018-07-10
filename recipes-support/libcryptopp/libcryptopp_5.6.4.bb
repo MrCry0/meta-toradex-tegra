@@ -27,7 +27,7 @@ TARGET_CC_ARCH += "${LDFLAGS}"
 export PREFIX="${prefix}"
 
 #we want tegrarcm binary to run on a 32-bit architecture, on x86_64 this requires the 32-bit compatibility libs
-EXTRA_OEMAKE_class-native = "CC='${CC} -m32' CXX='${CXX} -m32'"
+EXTRA_OEMAKE_class-native = "CC='${CC}' CXX='${CXX}'"
 
 do_compile() {
     sed -i -e 's/^CXXFLAGS/#CXXFLAGS/' GNUmakefile

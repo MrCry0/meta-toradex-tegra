@@ -25,7 +25,7 @@ EXTRA_OEMAKE = 'PREFIX="${prefix}" LIBDIR="${libdir}"'
 LDFLAGS_append = " -static-libstdc++"
 
 #we want tegrarcm binary to run on a 32-bit architecture, on x86_64 this requires the 32-bit compatibility libs
-EXTRA_OEMAKE_class-native = "CC='${CC} -m32' CXX='${CXX} -m32'"
+EXTRA_OEMAKE_class-native = "CC='${CC}' CXX='${CXX}'"
 EXTRA_OEMAKE_class-nativesdk = "CC='${CC}' CXX='${CXX}'"
 
 S = "${WORKDIR}/git"
