@@ -1,10 +1,10 @@
-From 94c486ca26222a3e87d780f2c55a7b618e5ebc88 Mon Sep 17 00:00:00 2001
-Message-Id: <94c486ca26222a3e87d780f2c55a7b618e5ebc88.1529072479.git.marcel.ziswiler@toradex.com>
-In-Reply-To: <fb4764e8eb658d35e8fc62ae79c77e1f6e2b0ef3.1529072479.git.marcel.ziswiler@toradex.com>
-References: <fb4764e8eb658d35e8fc62ae79c77e1f6e2b0ef3.1529072479.git.marcel.ziswiler@toradex.com>
+From a7c1d4dfb4404c892823aa809993f00426d039bc Mon Sep 17 00:00:00 2001
+Message-Id: <a7c1d4dfb4404c892823aa809993f00426d039bc.1531317141.git.marcel.ziswiler@toradex.com>
+In-Reply-To: <6654e1bd342708a683daf47e7558455f709a3e7e.1531317141.git.marcel.ziswiler@toradex.com>
+References: <6654e1bd342708a683daf47e7558455f709a3e7e.1531317141.git.marcel.ziswiler@toradex.com>
 From: Marcel Ziswiler <marcel.ziswiler@toradex.com>
 Date: Thu, 15 Dec 2016 10:24:58 +0100
-Subject: [PATCH 02/27] apalis_t30/tk1: fix pcie clock and reset not conforming
+Subject: [PATCH 02/33] apalis_t30/tk1: fix pcie clock and reset not conforming
  to specification
 
 Fix PCIe clock and reset not conforming to specification by moving PCIe

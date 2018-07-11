@@ -1,10 +1,10 @@
-From a95cc31636707dad8392bcdae4404524224c27ad Mon Sep 17 00:00:00 2001
-Message-Id: <a95cc31636707dad8392bcdae4404524224c27ad.1529072479.git.marcel.ziswiler@toradex.com>
-In-Reply-To: <fb4764e8eb658d35e8fc62ae79c77e1f6e2b0ef3.1529072479.git.marcel.ziswiler@toradex.com>
-References: <fb4764e8eb658d35e8fc62ae79c77e1f6e2b0ef3.1529072479.git.marcel.ziswiler@toradex.com>
+From 934ba9a81ce07365edb96fcbf227783d0372bdb9 Mon Sep 17 00:00:00 2001
+Message-Id: <934ba9a81ce07365edb96fcbf227783d0372bdb9.1531317141.git.marcel.ziswiler@toradex.com>
+In-Reply-To: <6654e1bd342708a683daf47e7558455f709a3e7e.1531317141.git.marcel.ziswiler@toradex.com>
+References: <6654e1bd342708a683daf47e7558455f709a3e7e.1531317141.git.marcel.ziswiler@toradex.com>
 From: Marcel Ziswiler <marcel.ziswiler@toradex.com>
 Date: Thu, 15 Dec 2016 10:55:54 +0100
-Subject: [PATCH 04/27] apalis_t30/tk1: igb: no nvm and Ethernet MAC address
+Subject: [PATCH 04/33] apalis_t30/tk1: igb: no nvm and Ethernet MAC address
  handling
 
 Only warn rather than fail on NVM validation failures on Apalis T30 and
@@ -37,7 +37,7 @@ c4c3c7449bdb15c53bfebb0a29c73b24ea810d23)
  1 file changed, 57 insertions(+), 3 deletions(-)
 
 diff --git a/drivers/net/ethernet/intel/igb/igb_main.c b/drivers/net/ethernet/intel/igb/igb_main.c
-index 77e74be9c70d..c2e8a3654119 100644
+index 94ac43034033..e9d6a8742826 100644
 --- a/drivers/net/ethernet/intel/igb/igb_main.c
 +++ b/drivers/net/ethernet/intel/igb/igb_main.c
 @@ -55,6 +55,7 @@

@@ -1,10 +1,10 @@
-From c76e3da5c5e5d1c94ffcc6a5c73d916c7af8060e Mon Sep 17 00:00:00 2001
-Message-Id: <c76e3da5c5e5d1c94ffcc6a5c73d916c7af8060e.1529072479.git.marcel.ziswiler@toradex.com>
-In-Reply-To: <fb4764e8eb658d35e8fc62ae79c77e1f6e2b0ef3.1529072479.git.marcel.ziswiler@toradex.com>
-References: <fb4764e8eb658d35e8fc62ae79c77e1f6e2b0ef3.1529072479.git.marcel.ziswiler@toradex.com>
+From 7b35e59d9c78029407b9dbc9ac726fdbacdb507a Mon Sep 17 00:00:00 2001
+Message-Id: <7b35e59d9c78029407b9dbc9ac726fdbacdb507a.1531317141.git.marcel.ziswiler@toradex.com>
+In-Reply-To: <6654e1bd342708a683daf47e7558455f709a3e7e.1531317141.git.marcel.ziswiler@toradex.com>
+References: <6654e1bd342708a683daf47e7558455f709a3e7e.1531317141.git.marcel.ziswiler@toradex.com>
 From: Marcel Ziswiler <marcel.ziswiler@toradex.com>
 Date: Tue, 12 Jun 2018 14:39:50 +0200
-Subject: [PATCH 22/27] apalis_t30: fix can2
+Subject: [PATCH 21/33] apalis_t30: fix can2
 
 CAN2 currently fails on probe as follows:
 

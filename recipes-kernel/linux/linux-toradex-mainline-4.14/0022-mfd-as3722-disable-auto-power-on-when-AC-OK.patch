@@ -1,10 +1,10 @@
-From a7e721386ede46fbb0d78abcccc0f235b257cfe9 Mon Sep 17 00:00:00 2001
-Message-Id: <a7e721386ede46fbb0d78abcccc0f235b257cfe9.1529072479.git.marcel.ziswiler@toradex.com>
-In-Reply-To: <fb4764e8eb658d35e8fc62ae79c77e1f6e2b0ef3.1529072479.git.marcel.ziswiler@toradex.com>
-References: <fb4764e8eb658d35e8fc62ae79c77e1f6e2b0ef3.1529072479.git.marcel.ziswiler@toradex.com>
+From 039b32b6cc7132a1613466c29a7f6dcdaa2ba22b Mon Sep 17 00:00:00 2001
+Message-Id: <039b32b6cc7132a1613466c29a7f6dcdaa2ba22b.1531317141.git.marcel.ziswiler@toradex.com>
+In-Reply-To: <6654e1bd342708a683daf47e7558455f709a3e7e.1531317141.git.marcel.ziswiler@toradex.com>
+References: <6654e1bd342708a683daf47e7558455f709a3e7e.1531317141.git.marcel.ziswiler@toradex.com>
 From: Marcel Ziswiler <marcel.ziswiler@toradex.com>
 Date: Thu, 14 Jun 2018 05:40:06 +0200
-Subject: [PATCH 23/27] mfd: as3722: disable auto power on when AC OK
+Subject: [PATCH 22/33] mfd: as3722: disable auto power on when AC OK
 
 On ams AS3722, power on when AC OK is enabled by default.
 Making this option as disable by default and enable only

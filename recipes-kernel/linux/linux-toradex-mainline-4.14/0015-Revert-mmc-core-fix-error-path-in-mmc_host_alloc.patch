@@ -1,10 +1,10 @@
-From 221424e20f51fd7e9603da30c4ad0970b2dfd868 Mon Sep 17 00:00:00 2001
-Message-Id: <221424e20f51fd7e9603da30c4ad0970b2dfd868.1529072479.git.marcel.ziswiler@toradex.com>
-In-Reply-To: <fb4764e8eb658d35e8fc62ae79c77e1f6e2b0ef3.1529072479.git.marcel.ziswiler@toradex.com>
-References: <fb4764e8eb658d35e8fc62ae79c77e1f6e2b0ef3.1529072479.git.marcel.ziswiler@toradex.com>
+From 12e25f531b9d910ed72ad5b6dd5e5b36a3f664aa Mon Sep 17 00:00:00 2001
+Message-Id: <12e25f531b9d910ed72ad5b6dd5e5b36a3f664aa.1531317141.git.marcel.ziswiler@toradex.com>
+In-Reply-To: <6654e1bd342708a683daf47e7558455f709a3e7e.1531317141.git.marcel.ziswiler@toradex.com>
+References: <6654e1bd342708a683daf47e7558455f709a3e7e.1531317141.git.marcel.ziswiler@toradex.com>
 From: Marcel Ziswiler <marcel.ziswiler@toradex.com>
 Date: Thu, 19 Apr 2018 13:49:00 +0200
-Subject: [PATCH 15/27] Revert "mmc: core: fix error path in mmc_host_alloc"
+Subject: [PATCH 15/33] Revert "mmc: core: fix error path in mmc_host_alloc"
 
 This reverts commit 1ed2171944888cf6787990a0f6387b717ba72e24.
 

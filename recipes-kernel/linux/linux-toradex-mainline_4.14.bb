@@ -35,16 +35,25 @@ GENERIC_PATCHES = " \
     file://0016-Revert-mmc-core-simplify-ida-handling.patch \
     file://0017-mmc-read-mmc-alias-from-device-tree.patch \
     file://0018-apalis-t30-mainline-force-fixed-ids-for-sdmmc-contro.patch \
-    file://0020-ARM-tegra-apalis-tk1-Fix-high-speed-UART-compatible.patch \
-    file://0021-apalis-t30-tk1-mainline-igb-avoid-nvm-checksum-failu.patch \
-    file://0022-apalis_t30-fix-can2.patch \
-    file://0023-mfd-as3722-disable-auto-power-on-when-AC-OK.patch \
-    file://0027-apalis-tk1-mfd-k20-update-api-header-for-fw-version-.patch \
+    file://0019-ARM-tegra-apalis-tk1-Fix-high-speed-UART-compatible.patch \
+    file://0020-apalis-t30-tk1-mainline-igb-avoid-nvm-checksum-failu.patch \
+    file://0021-apalis_t30-fix-can2.patch \
+    file://0022-mfd-as3722-disable-auto-power-on-when-AC-OK.patch \
+    file://0023-apalis-tk1-mfd-k20-update-api-header-for-fw-version-.patch \
+    file://0024-apalis_t30-enable-broken-hpi-on-emmc.patch \
+    file://0025-tegra_defconfig-disable-sound-in-tezi-configuration.patch \
+    file://0026-apalis_t30-fix-mmc1-cmd-pull-up.patch \
+    file://0027-apalis_t30-pull-up-sd-card-detect-pins.patch \
+    file://0028-Revert-mmc-tegra-Disable-UHS-I-modes-for-Tegra124.patch \
+    file://0029-mmc-tegra-fix-eMMC-DDR-mode.patch \
+    file://0030-apalis-tk1-enable-ddr52-mode-on-emmc.patch \
+    file://0031-apalis-tk1-force-fixed-ids-for-sdmmc-controllers.patch \
+    file://0032-apalis-tk1-fix-pcie-reset-for-reliable-gigabit-ether.patch \
 "
 MACHINE_PATCHES = " \
 "
 MACHINE_PATCHES_apalis-t30-mainline = " \
-    file://0024-apalis-t30-mainline-apply-pcie-fix-hacks.patch \
+    file://0033-apalis-t30-mainline-apply-pcie-fix-hacks.patch \
 "
 SRC_URI = " \
     https://cdn.kernel.org/pub/linux/kernel/v4.x/linux-${PV}.tar.xz \

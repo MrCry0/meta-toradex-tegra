@@ -1,10 +1,10 @@
-From 84faf19eb6451b55bd34e39a08555e1ebe623088 Mon Sep 17 00:00:00 2001
-Message-Id: <84faf19eb6451b55bd34e39a08555e1ebe623088.1529072479.git.marcel.ziswiler@toradex.com>
-In-Reply-To: <fb4764e8eb658d35e8fc62ae79c77e1f6e2b0ef3.1529072479.git.marcel.ziswiler@toradex.com>
-References: <fb4764e8eb658d35e8fc62ae79c77e1f6e2b0ef3.1529072479.git.marcel.ziswiler@toradex.com>
+From fc10da7a4d39c99adef1cfe3bd79505da47aeb6f Mon Sep 17 00:00:00 2001
+Message-Id: <fc10da7a4d39c99adef1cfe3bd79505da47aeb6f.1531317141.git.marcel.ziswiler@toradex.com>
+In-Reply-To: <6654e1bd342708a683daf47e7558455f709a3e7e.1531317141.git.marcel.ziswiler@toradex.com>
+References: <6654e1bd342708a683daf47e7558455f709a3e7e.1531317141.git.marcel.ziswiler@toradex.com>
 From: Marcel Ziswiler <marcel.ziswiler@toradex.com>
 Date: Thu, 19 Apr 2018 14:01:58 +0200
-Subject: [PATCH 18/27] apalis-t30-mainline: force fixed ids for sdmmc
+Subject: [PATCH 18/33] apalis-t30-mainline: force fixed ids for sdmmc
  controllers
 
 The following, together with the previous 3 kernel patches, forces a

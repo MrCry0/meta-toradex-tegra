@@ -1,10 +1,10 @@
-From 3a447704e56902115638917c4072c8e50bea851e Mon Sep 17 00:00:00 2001
-Message-Id: <3a447704e56902115638917c4072c8e50bea851e.1529072479.git.marcel.ziswiler@toradex.com>
-In-Reply-To: <fb4764e8eb658d35e8fc62ae79c77e1f6e2b0ef3.1529072479.git.marcel.ziswiler@toradex.com>
-References: <fb4764e8eb658d35e8fc62ae79c77e1f6e2b0ef3.1529072479.git.marcel.ziswiler@toradex.com>
+From 8457755081b1f33ffcaceb101fdd31acc3e10d64 Mon Sep 17 00:00:00 2001
+Message-Id: <8457755081b1f33ffcaceb101fdd31acc3e10d64.1531317141.git.marcel.ziswiler@toradex.com>
+In-Reply-To: <6654e1bd342708a683daf47e7558455f709a3e7e.1531317141.git.marcel.ziswiler@toradex.com>
+References: <6654e1bd342708a683daf47e7558455f709a3e7e.1531317141.git.marcel.ziswiler@toradex.com>
 From: Marcel Ziswiler <marcel.ziswiler@toradex.com>
 Date: Sun, 18 Jun 2017 01:23:26 +0200
-Subject: [PATCH 06/27] apalis/colibri_t30, apalis-tk1: snapd squashfs
+Subject: [PATCH 06/33] apalis/colibri_t30, apalis-tk1: snapd squashfs
  configuration
 
 Prepare for snapd integration.

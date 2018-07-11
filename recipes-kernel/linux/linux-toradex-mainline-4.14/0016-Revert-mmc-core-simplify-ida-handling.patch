@@ -1,10 +1,10 @@
-From 50a063a5271868aaf17ee86741e6452a6c405a50 Mon Sep 17 00:00:00 2001
-Message-Id: <50a063a5271868aaf17ee86741e6452a6c405a50.1529072479.git.marcel.ziswiler@toradex.com>
-In-Reply-To: <fb4764e8eb658d35e8fc62ae79c77e1f6e2b0ef3.1529072479.git.marcel.ziswiler@toradex.com>
-References: <fb4764e8eb658d35e8fc62ae79c77e1f6e2b0ef3.1529072479.git.marcel.ziswiler@toradex.com>
+From b74554415a51457783875820b41f3c37abb01cdc Mon Sep 17 00:00:00 2001
+Message-Id: <b74554415a51457783875820b41f3c37abb01cdc.1531317141.git.marcel.ziswiler@toradex.com>
+In-Reply-To: <6654e1bd342708a683daf47e7558455f709a3e7e.1531317141.git.marcel.ziswiler@toradex.com>
+References: <6654e1bd342708a683daf47e7558455f709a3e7e.1531317141.git.marcel.ziswiler@toradex.com>
 From: Marcel Ziswiler <marcel.ziswiler@toradex.com>
 Date: Thu, 19 Apr 2018 13:49:30 +0200
-Subject: [PATCH 16/27] Revert "mmc: core: simplify ida handling"
+Subject: [PATCH 16/33] Revert "mmc: core: simplify ida handling"
 
 This reverts commit 7413d1f509eb0ee605973c1a6da9911700c80012.
 

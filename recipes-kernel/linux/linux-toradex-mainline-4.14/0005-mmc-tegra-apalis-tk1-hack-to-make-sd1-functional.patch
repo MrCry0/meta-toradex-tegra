@@ -1,10 +1,10 @@
-From ad8c244322d0ad03cd94f1acd24b1139b2d36857 Mon Sep 17 00:00:00 2001
-Message-Id: <ad8c244322d0ad03cd94f1acd24b1139b2d36857.1529072479.git.marcel.ziswiler@toradex.com>
-In-Reply-To: <fb4764e8eb658d35e8fc62ae79c77e1f6e2b0ef3.1529072479.git.marcel.ziswiler@toradex.com>
-References: <fb4764e8eb658d35e8fc62ae79c77e1f6e2b0ef3.1529072479.git.marcel.ziswiler@toradex.com>
+From 2c1a2558212cb107d67fc8bad8bc05de33924961 Mon Sep 17 00:00:00 2001
+Message-Id: <2c1a2558212cb107d67fc8bad8bc05de33924961.1531317141.git.marcel.ziswiler@toradex.com>
+In-Reply-To: <6654e1bd342708a683daf47e7558455f709a3e7e.1531317141.git.marcel.ziswiler@toradex.com>
+References: <6654e1bd342708a683daf47e7558455f709a3e7e.1531317141.git.marcel.ziswiler@toradex.com>
 From: Marcel Ziswiler <marcel.ziswiler@toradex.com>
 Date: Thu, 15 Dec 2016 10:56:26 +0100
-Subject: [PATCH 05/27] mmc: tegra: apalis-tk1: hack to make sd1 functional
+Subject: [PATCH 05/33] mmc: tegra: apalis-tk1: hack to make sd1 functional
 
 Disable the external loopback and use the internal loopback as per
 SDMMC_VENDOR_MISC_CNTRL_0 register's SDMMC_SPARE1 bits being set to

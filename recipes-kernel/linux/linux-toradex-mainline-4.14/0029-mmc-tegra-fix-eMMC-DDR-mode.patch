@@ -1,0 +1,33 @@
+From 7641e3bc8feb2ebeb36ccf0877a70f1985e54dd8 Mon Sep 17 00:00:00 2001
+Message-Id: <7641e3bc8feb2ebeb36ccf0877a70f1985e54dd8.1531317141.git.marcel.ziswiler@toradex.com>
+In-Reply-To: <6654e1bd342708a683daf47e7558455f709a3e7e.1531317141.git.marcel.ziswiler@toradex.com>
+References: <6654e1bd342708a683daf47e7558455f709a3e7e.1531317141.git.marcel.ziswiler@toradex.com>
+From: Stefan Agner <stefan@agner.ch>
+Date: Tue, 10 Jul 2018 16:04:20 +0200
+Subject: [PATCH 29/33] mmc: tegra: fix eMMC DDR mode
+
+Make sure the clock is also doubled when using eMMC DDR modes.
+
+Signed-off-by: Stefan Agner <stefan@agner.ch>
+Acked-by: Marcel Ziswiler <marcel.ziswiler@toradex.com>
+---
+ drivers/mmc/host/sdhci-tegra.c | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+diff --git a/drivers/mmc/host/sdhci-tegra.c b/drivers/mmc/host/sdhci-tegra.c
+index c83115860cf4..3b6d504bef45 100644
+--- a/drivers/mmc/host/sdhci-tegra.c
++++ b/drivers/mmc/host/sdhci-tegra.c
+@@ -239,7 +239,8 @@ static void tegra_sdhci_set_uhs_signaling(struct sdhci_host *host,
+ 	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+ 	struct sdhci_tegra *tegra_host = sdhci_pltfm_priv(pltfm_host);
+ 
+-	if (timing == MMC_TIMING_UHS_DDR50)
++	if (timing == MMC_TIMING_UHS_DDR50 ||
++	    timing == MMC_TIMING_MMC_DDR52)
+ 		tegra_host->ddr_signaling = true;
+ 
+ 	return sdhci_set_uhs_signaling(host, timing);
+-- 
+2.14.4
+

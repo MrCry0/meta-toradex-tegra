@@ -1,10 +1,10 @@
-From 8c72a22b01f1db78a0bd7c982c4db394eb9a166f Mon Sep 17 00:00:00 2001
-Message-Id: <8c72a22b01f1db78a0bd7c982c4db394eb9a166f.1529072479.git.marcel.ziswiler@toradex.com>
-In-Reply-To: <fb4764e8eb658d35e8fc62ae79c77e1f6e2b0ef3.1529072479.git.marcel.ziswiler@toradex.com>
-References: <fb4764e8eb658d35e8fc62ae79c77e1f6e2b0ef3.1529072479.git.marcel.ziswiler@toradex.com>
+From 860eb2cc7b67c4173186c677259ac3c95ed80cab Mon Sep 17 00:00:00 2001
+Message-Id: <860eb2cc7b67c4173186c677259ac3c95ed80cab.1531317141.git.marcel.ziswiler@toradex.com>
+In-Reply-To: <6654e1bd342708a683daf47e7558455f709a3e7e.1531317141.git.marcel.ziswiler@toradex.com>
+References: <6654e1bd342708a683daf47e7558455f709a3e7e.1531317141.git.marcel.ziswiler@toradex.com>
 From: Marcel Ziswiler <marcel.ziswiler@toradex.com>
 Date: Tue, 12 Jun 2018 09:47:30 +0200
-Subject: [PATCH 21/27] apalis-t30/tk1-mainline: igb: avoid nvm checksum
+Subject: [PATCH 20/33] apalis-t30/tk1-mainline: igb: avoid nvm checksum
  failure
 
 This avoids the following error in case the iNVM of the i210/i211 is not
@@ -19,7 +19,7 @@ Signed-off-by: Marcel Ziswiler <marcel.ziswiler@toradex.com>
  1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/drivers/net/ethernet/intel/igb/igb_main.c b/drivers/net/ethernet/intel/igb/igb_main.c
-index c2e8a3654119..2207d0d1906c 100644
+index e9d6a8742826..66f78b27ed53 100644
 --- a/drivers/net/ethernet/intel/igb/igb_main.c
 +++ b/drivers/net/ethernet/intel/igb/igb_main.c
 @@ -2533,7 +2533,7 @@ static int igb_probe(struct pci_dev *pdev, const struct pci_device_id *ent)

@@ -1,10 +1,10 @@
-From 6f34f7130c51b54683944f27b952e520b6ceba76 Mon Sep 17 00:00:00 2001
-Message-Id: <6f34f7130c51b54683944f27b952e520b6ceba76.1529656015.git.marcel.ziswiler@toradex.com>
-In-Reply-To: <cdb0b7ee65695cd32950189e7deecb936400561e.1529656015.git.marcel.ziswiler@toradex.com>
-References: <cdb0b7ee65695cd32950189e7deecb936400561e.1529656015.git.marcel.ziswiler@toradex.com>
+From dbef03b4e18e548eeeaf62133af3591e4cc1ce95 Mon Sep 17 00:00:00 2001
+Message-Id: <dbef03b4e18e548eeeaf62133af3591e4cc1ce95.1531317141.git.marcel.ziswiler@toradex.com>
+In-Reply-To: <6654e1bd342708a683daf47e7558455f709a3e7e.1531317141.git.marcel.ziswiler@toradex.com>
+References: <6654e1bd342708a683daf47e7558455f709a3e7e.1531317141.git.marcel.ziswiler@toradex.com>
 From: Marcel Ziswiler <marcel.ziswiler@toradex.com>
 Date: Fri, 22 Jun 2018 10:23:41 +0200
-Subject: [PATCH 27/27] apalis-tk1: mfd: k20: update api header for fw version
+Subject: [PATCH 23/33] apalis-tk1: mfd: k20: update api header for fw version
  1.1 support
 
 Signed-off-by: Marcel Ziswiler <marcel.ziswiler@toradex.com>

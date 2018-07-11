@@ -1,10 +1,10 @@
-From babab7769aa903d7602c24d4422bca72b5903093 Mon Sep 17 00:00:00 2001
-Message-Id: <babab7769aa903d7602c24d4422bca72b5903093.1529072479.git.marcel.ziswiler@toradex.com>
-In-Reply-To: <fb4764e8eb658d35e8fc62ae79c77e1f6e2b0ef3.1529072479.git.marcel.ziswiler@toradex.com>
-References: <fb4764e8eb658d35e8fc62ae79c77e1f6e2b0ef3.1529072479.git.marcel.ziswiler@toradex.com>
+From 55301c43044ec23e14509a5515a868b7ae995aa1 Mon Sep 17 00:00:00 2001
+Message-Id: <55301c43044ec23e14509a5515a868b7ae995aa1.1531317141.git.marcel.ziswiler@toradex.com>
+In-Reply-To: <6654e1bd342708a683daf47e7558455f709a3e7e.1531317141.git.marcel.ziswiler@toradex.com>
+References: <6654e1bd342708a683daf47e7558455f709a3e7e.1531317141.git.marcel.ziswiler@toradex.com>
 From: Dominik Sliwa <dominik.sliwa@toradex.com>
 Date: Wed, 18 Apr 2018 12:22:26 +0200
-Subject: [PATCH 12/27] apalis-tk1: support for k20 mfd
+Subject: [PATCH 12/33] apalis-tk1: support for k20 mfd
 
 Signed-off-by: Dominik Sliwa <dominik.sliwa@toradex.com>
 Acked-by: Marcel Ziswiler <marcel.ziswiler@toradex.com>
@@ -41,10 +41,10 @@ Acked-by: Marcel Ziswiler <marcel.ziswiler@toradex.com>
  create mode 100644 include/linux/mfd/apalis-tk1-k20.h
 
 diff --git a/arch/arm/boot/dts/tegra124-apalis-v1.2.dtsi b/arch/arm/boot/dts/tegra124-apalis-v1.2.dtsi
-index c2b14e693cda..bca22e2a6dcb 100644
+index bb67edb016c5..93cf49c10954 100644
 --- a/arch/arm/boot/dts/tegra124-apalis-v1.2.dtsi
 +++ b/arch/arm/boot/dts/tegra124-apalis-v1.2.dtsi
-@@ -1792,6 +1792,34 @@
+@@ -1756,6 +1756,34 @@
  	spi@7000d600 {
  		status = "okay";
  		spi-max-frequency = <25000000>;
@@ -389,7 +389,7 @@ index 000000000000..7b44f93df85b
 +MODULE_AUTHOR("Dominik Sliwa <dominik.sliwa@toradex.com>");
 +MODULE_LICENSE("GPL v2");
 diff --git a/drivers/iio/adc/Kconfig b/drivers/iio/adc/Kconfig
-index 1d13bf03c758..38da40c0f19b 100644
+index 369a2c632e46..d4ec5fad1467 100644
 --- a/drivers/iio/adc/Kconfig
 +++ b/drivers/iio/adc/Kconfig
 @@ -116,6 +116,12 @@ config AD7923

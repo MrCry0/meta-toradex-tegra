@@ -1,10 +1,10 @@
-From f8ab701354544ed62591ea343c881efee973740d Mon Sep 17 00:00:00 2001
-Message-Id: <f8ab701354544ed62591ea343c881efee973740d.1529072479.git.marcel.ziswiler@toradex.com>
-In-Reply-To: <fb4764e8eb658d35e8fc62ae79c77e1f6e2b0ef3.1529072479.git.marcel.ziswiler@toradex.com>
-References: <fb4764e8eb658d35e8fc62ae79c77e1f6e2b0ef3.1529072479.git.marcel.ziswiler@toradex.com>
+From 4a3ae8e688872fdc63a2d7af1f3b48b3eba3b975 Mon Sep 17 00:00:00 2001
+Message-Id: <4a3ae8e688872fdc63a2d7af1f3b48b3eba3b975.1531317141.git.marcel.ziswiler@toradex.com>
+In-Reply-To: <6654e1bd342708a683daf47e7558455f709a3e7e.1531317141.git.marcel.ziswiler@toradex.com>
+References: <6654e1bd342708a683daf47e7558455f709a3e7e.1531317141.git.marcel.ziswiler@toradex.com>
 From: Marcel Ziswiler <marcel.ziswiler@toradex.com>
 Date: Mon, 13 Nov 2017 14:37:25 +0100
-Subject: [PATCH 08/27] apalis-tk1: fix pcie reset for reliable gigabit
+Subject: [PATCH 08/33] apalis-tk1: fix pcie reset for reliable gigabit
  ethernet operation
 
 It turns out that the current PCIe reset implementation is not quite

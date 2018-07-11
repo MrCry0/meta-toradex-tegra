@@ -1,0 +1,41 @@
+From a9ff91c77ce8693f394a48d16869cb443a0f4169 Mon Sep 17 00:00:00 2001
+Message-Id: <a9ff91c77ce8693f394a48d16869cb443a0f4169.1531317141.git.marcel.ziswiler@toradex.com>
+In-Reply-To: <6654e1bd342708a683daf47e7558455f709a3e7e.1531317141.git.marcel.ziswiler@toradex.com>
+References: <6654e1bd342708a683daf47e7558455f709a3e7e.1531317141.git.marcel.ziswiler@toradex.com>
+From: Marcel Ziswiler <marcel.ziswiler@toradex.com>
+Date: Wed, 11 Jul 2018 10:32:47 +0200
+Subject: [PATCH 27/33] apalis_t30: pull-up sd card detect pins
+
+In order to avoid any floating SD card detect pins as may e.g. happen on
+Ixora V1.1A pull them all up.
+
+Signed-off-by: Marcel Ziswiler <marcel.ziswiler@toradex.com>
+---
+ arch/arm/boot/dts/tegra30-apalis.dtsi | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/arch/arm/boot/dts/tegra30-apalis.dtsi b/arch/arm/boot/dts/tegra30-apalis.dtsi
+index f97b705abd0d..785d9b109d8e 100644
+--- a/arch/arm/boot/dts/tegra30-apalis.dtsi
++++ b/arch/arm/boot/dts/tegra30-apalis.dtsi
+@@ -190,7 +190,7 @@
+ 			pv3 {
+ 				nvidia,pins = "pv3";
+ 				nvidia,function = "rsvd2";
+-				nvidia,pull = <TEGRA_PIN_PULL_NONE>;
++				nvidia,pull = <TEGRA_PIN_PULL_UP>;
+ 				nvidia,tristate = <TEGRA_PIN_DISABLE>;
+ 				nvidia,enable-input = <TEGRA_PIN_ENABLE>;
+ 			};
+@@ -256,7 +256,7 @@
+ 			clk2_req_pcc5 {
+ 				nvidia,pins = "clk2_req_pcc5";
+ 				nvidia,function = "rsvd2";
+-				nvidia,pull = <TEGRA_PIN_PULL_NONE>;
++				nvidia,pull = <TEGRA_PIN_PULL_UP>;
+ 				nvidia,tristate = <TEGRA_PIN_DISABLE>;
+ 				nvidia,enable-input = <TEGRA_PIN_ENABLE>;
+ 			};
+-- 
+2.14.4
+

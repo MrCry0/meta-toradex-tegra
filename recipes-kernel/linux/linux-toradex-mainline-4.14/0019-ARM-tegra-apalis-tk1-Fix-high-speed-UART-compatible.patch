@@ -1,10 +1,10 @@
-From 50c22d845d9ec7de671d5fa4993304593d449ef4 Mon Sep 17 00:00:00 2001
-Message-Id: <50c22d845d9ec7de671d5fa4993304593d449ef4.1529072479.git.marcel.ziswiler@toradex.com>
-In-Reply-To: <fb4764e8eb658d35e8fc62ae79c77e1f6e2b0ef3.1529072479.git.marcel.ziswiler@toradex.com>
-References: <fb4764e8eb658d35e8fc62ae79c77e1f6e2b0ef3.1529072479.git.marcel.ziswiler@toradex.com>
+From dcb6b8c0c1175002f3d368ad0bac2122bfa038a0 Mon Sep 17 00:00:00 2001
+Message-Id: <dcb6b8c0c1175002f3d368ad0bac2122bfa038a0.1531317141.git.marcel.ziswiler@toradex.com>
+In-Reply-To: <6654e1bd342708a683daf47e7558455f709a3e7e.1531317141.git.marcel.ziswiler@toradex.com>
+References: <6654e1bd342708a683daf47e7558455f709a3e7e.1531317141.git.marcel.ziswiler@toradex.com>
 From: Marcel Ziswiler <marcel.ziswiler@toradex.com>
 Date: Thu, 3 May 2018 09:46:46 +0200
-Subject: [PATCH 20/27] ARM: tegra: apalis-tk1: Fix high speed UART compatible
+Subject: [PATCH 19/33] ARM: tegra: apalis-tk1: Fix high speed UART compatible
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
@@ -23,10 +23,10 @@ Signed-off-by: Thierry Reding <treding@nvidia.com>
  2 files changed, 6 insertions(+), 6 deletions(-)
 
 diff --git a/arch/arm/boot/dts/tegra124-apalis-v1.2.dtsi b/arch/arm/boot/dts/tegra124-apalis-v1.2.dtsi
-index bca22e2a6dcb..21cdc3117ca2 100644
+index 93cf49c10954..0620dcbe5817 100644
 --- a/arch/arm/boot/dts/tegra124-apalis-v1.2.dtsi
 +++ b/arch/arm/boot/dts/tegra124-apalis-v1.2.dtsi
-@@ -1572,15 +1572,15 @@
+@@ -1536,15 +1536,15 @@
  	};
  
  	serial@70006040 {

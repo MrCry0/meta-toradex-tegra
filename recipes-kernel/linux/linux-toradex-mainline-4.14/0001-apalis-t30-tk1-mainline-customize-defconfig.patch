@@ -1,8 +1,8 @@
-From fb4764e8eb658d35e8fc62ae79c77e1f6e2b0ef3 Mon Sep 17 00:00:00 2001
-Message-Id: <fb4764e8eb658d35e8fc62ae79c77e1f6e2b0ef3.1529072479.git.marcel.ziswiler@toradex.com>
+From 6654e1bd342708a683daf47e7558455f709a3e7e Mon Sep 17 00:00:00 2001
+Message-Id: <6654e1bd342708a683daf47e7558455f709a3e7e.1531317141.git.marcel.ziswiler@toradex.com>
 From: Dominik Sliwa <dominik.sliwa@toradex.com>
 Date: Thu, 15 Dec 2016 10:40:06 +0100
-Subject: [PATCH 01/27] apalis-t30/tk1-mainline: customize defconfig
+Subject: [PATCH 01/33] apalis-t30/tk1-mainline: customize defconfig
 
 Signed-off-by: Marcel Ziswiler <marcel.ziswiler@toradex.com>
 ---
