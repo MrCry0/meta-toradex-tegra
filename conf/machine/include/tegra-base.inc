@@ -13,6 +13,26 @@ XSERVER = "xserver-xorg \
 
 PREFERRED_PROVIDER_virtual/kernel = "linux-toradex"
 KERNEL_IMAGETYPE = "zImage"
+
+# wic support
+SOC_DEFAULT_IMAGE_FSTYPES = "wic.gz tar.xz"
+IMAGE_FSTYPES = "${SOC_DEFAULT_IMAGE_FSTYPES}"
+
+IMAGE_BOOT_FILES ?= " \
+    ${KERNEL_IMAGETYPE} \
+"
+WKS_FILE_DEPENDS ?= " \
+    virtual/bootloader \
+    \
+    e2fsprogs-native \
+    bmap-tools-native \
+"
+
+SOC_DEFAULT_WKS_FILE ?= "imx-uboot-bootpart.wks"
+SOC_DEFAULT_WKS_FILE_mxs ?= "imx-uboot-mxs-bootpart.wks"
+WKS_FILE ?= "sdimage-bootpart-tegra.wks"
+WIC_CREATE_EXTRA_ARGS_append = " --no-fstab-update"
+
 # The kernel lives in a seperate FAT or UBI partition, don't deploy it in /boot
 RDEPENDS_kernel-base = ""
 
