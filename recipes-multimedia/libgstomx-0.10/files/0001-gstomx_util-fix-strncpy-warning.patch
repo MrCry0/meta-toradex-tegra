@@ -1,0 +1,28 @@
+From 19fa5402774e2dea5d9400395cfd88a60db33afe Mon Sep 17 00:00:00 2001
+From: Max Krummenacher <max.krummenacher@toradex.com>
+Date: Wed, 19 Sep 2018 21:11:15 +0000
+Subject: [PATCH] gstomx_util: fix strncpy warning
+
+| ./../gstomx_src/gst-openmax/omx/gstomx_util.c:329:7: error: 'strncpy' specified bound 128 equals destination size [-Werror=stringop-truncation]
+
+Signed-off-by: Max Krummenacher <max.krummenacher@toradex.com>
+---
+ omx/gstomx_util.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/omx/gstomx_util.c b/omx/gstomx_util.c
+index e74521a..352d9f7 100644
+--- a/omx/gstomx_util.c
++++ b/omx/gstomx_util.c
+@@ -327,7 +327,7 @@ g_omx_core_init (GOmxCore * core)
+       G_OMX_INIT_PARAM (param);
+ 
+       strncpy ((char *) param.cRole, core->component_role,
+-          OMX_MAX_STRINGNAME_SIZE);
++          OMX_MAX_STRINGNAME_SIZE - 1);
+ 
+       OMX_SetParameter (core->omx_handle, OMX_IndexParamStandardComponentRole,
+           &param);
+-- 
+2.13.6
+

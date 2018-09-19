@@ -7,6 +7,7 @@ SRC_URI = " \
     https://developer.download.nvidia.com/embedded/L4T/r21_Release_v7.0/r21.7.0-sources.tbz2 \
     file://0001-fix-gstomx-compilation-issues.patch \
     file://0001-configure-don-t-use-gst-photography-even-if-it-is-in.patch \
+    file://0001-gstomx_util-fix-strncpy-warning.patch \
 "
 
 SRC_URI[md5sum] = "620d0979ffbbc8cbe8cb36faacee386b"
