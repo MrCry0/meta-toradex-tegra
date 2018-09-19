@@ -16,7 +16,7 @@ DEPENDS_REMOVE = "linux-driver-package"
 DEPENDS_REMOVE_tegra124 = ""
 DEPENDS_remove = "${DEPENDS_REMOVE}"
 
-SRC_URI_append_tegra124 = " file://tegra-path-add.patch"
+SRC_URI_append_tegra124 = " file://0001-pkg-config-files-add-tegra-paths.patch"
 
 PACKAGE_ARCH_tegra124 = "${MACHINE_ARCH}"
 
