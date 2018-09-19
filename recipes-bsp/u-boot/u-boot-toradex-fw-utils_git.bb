@@ -71,11 +71,7 @@ do_install_append_tegra124m() {
     install_unlock_emmc
 }
 
-pkg_postinst_${PN}_colibri-t20 () {
-    # can't do this offline
-    if [ "x$D" != "x" ]; then
-        exit 1
-    fi
+pkg_postinst_ontarget_${PN}_colibri-t20 () {
     grep u-boot-env /proc/mtd | awk '{print "/dev/" substr($1,0,4) " 0x00000000 0x00010000 0x" $3 " 1" >> "/etc/fw_env.config" }'
 }
 

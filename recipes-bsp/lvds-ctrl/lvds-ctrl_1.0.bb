@@ -15,7 +15,7 @@ do_install () {
     install -m 0755 ${WORKDIR}/*.sh ${D}/${bindir}
 }
 
-pkg_postinst_${PN}() {
+pkg_postinst_ontarget_${PN}() {
     mkdir -p ${sysconfdir}/xdg/lxsession/LXDE
     echo "${bindir}/lvds-single-channel-24bit-mode2.sh" >> ${sysconfdir}/xdg/lxsession/LXDE/autostart
 }
