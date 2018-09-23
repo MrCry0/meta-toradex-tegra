@@ -31,13 +31,6 @@ EXTRA_OECONF_append_tegra124m = " --enable-texture-float --without-dri-drivers -
 DRIDRIVERS_tegra124m = " "
 GALLIUMDRIVERS_tegra124m = "tegra"
 
-SRC_URI_append_tegra124m = " \
-    file://0001-gallium-add-tegra-support.patch \
-    file://0002-make-DRI-work-under-X.patch \
-    file://0003-loader-Automatic-PRIME-detection.patch \
-    file://0004-mesa-17.1.7-compilation-fixes.patch \
-"
-
 PACKAGE_ARCH_tegra124m = "${MACHINE_ARCH}"
 PE_tegra124m = "99"
 
