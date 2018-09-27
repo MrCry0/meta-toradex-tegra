@@ -1,0 +1,550 @@
+From dd0ee137eb1f5f9906f6edd05c75aa05f0d0bc24 Mon Sep 17 00:00:00 2001
+From: Dominik Sliwa <dominik.sliwa@toradex.com>
+Date: Tue, 11 Sep 2018 14:05:49 +0200
+Subject: [PATCH 33/33] apalis-tk1: mfd: k20: supporte for fw version 1.2
+
+apalis-tk1: mfd: k20: add fw_ignore and fw_reload parameters
+
+Parameter fw_ignore disables fw version check.
+Parameter fw_reload forces k20 firmware reflash via EzPort.
+
+Signed-off-by: Dominik Sliwa <dominik.sliwa@toradex.com>
+
+apalis-tk1: can: k20: change tx complete signaling
+
+In fw version 1.2 K20 CANINTF_TX now indicates TX in progress,
+not TX completed.
+
+Signed-off-by: Dominik Sliwa <dominik.sliwa@toradex.com>
+
+apalis-tk1: mfd: k20: update supported fw version to 1.2
+
+Signed-off-by: Dominik Sliwa <dominik.sliwa@toradex.com>
+---
+ drivers/mfd/apalis-tk1-k20.c           | 214 +++++++++++++++++++--------------
+ drivers/net/can/apalis-tk1-k20-can.c   |  99 ++++++++++-----
+ include/linux/mfd/apalis-tk1-k20-api.h |   2 +-
+ 3 files changed, 195 insertions(+), 120 deletions(-)
+
+diff --git a/drivers/mfd/apalis-tk1-k20.c b/drivers/mfd/apalis-tk1-k20.c
+index 913be65c33e6..38d52b6d2d88 100644
+--- a/drivers/mfd/apalis-tk1-k20.c
++++ b/drivers/mfd/apalis-tk1-k20.c
+@@ -2,7 +2,7 @@
+  * Copyright 2016-2017 Toradex AG
+  * Dominik Sliwa <dominik.sliwa@toradex.com>
+  *
+- * based on an driver for MC13xxx by:
++ * based on a driver for MC13xxx by:
+  * Copyright 2009-2010 Pengutronix
+  * Uwe Kleine-Koenig <u.kleine-koenig@pengutronix.de>
+  *
+@@ -29,6 +29,16 @@
+ #include "apalis-tk1-k20-ezp.h"
+ #define APALIS_TK1_K20_MAX_MSG 4
+ 
++static unsigned int fw_ignore = 0;
++module_param(fw_ignore , uint, 0);
++MODULE_PARM_DESC(fw_ignore, "Assume that K20 is running valid fw version. "
++		 "Don't verify, don't erase, don't update");
++
++static unsigned int force_fw_reload = 0;
++module_param(force_fw_reload , uint, 0);
++MODULE_PARM_DESC(force_fw_reload, "Update K20 fw even when the same version"
++		" is already flashed.");
++
+ static const struct spi_device_id apalis_tk1_k20_device_ids[] = {
+ 	{
+ 		.name = "apalis-tk1-k20",
+@@ -142,7 +152,6 @@ static int apalis_tk1_k20_spi_write(void *context, const void *data,
+ 	uint8_t out_data[APALIS_TK1_K20_MAX_BULK];
+ 	int ret;
+ 
+-
+ 	spi->mode = SPI_MODE_1;
+ 
+ 	if (count == 2) {
+@@ -704,18 +713,21 @@ static int apalis_tk1_k20_probe_gpios_dt(
+ 	apalis_tk1_k20->reset_gpio = of_get_named_gpio(np, "rst-gpio", 0);
+ 	if (apalis_tk1_k20->reset_gpio < 0)
+ 		return apalis_tk1_k20->reset_gpio;
++
+ 	gpio_request(apalis_tk1_k20->reset_gpio, "apalis-tk1-k20-reset");
+ 	gpio_direction_output(apalis_tk1_k20->reset_gpio, 1);
+ 
+ 	apalis_tk1_k20->ezpcs_gpio = of_get_named_gpio(np, "ezport-cs-gpio", 0);
+ 	if (apalis_tk1_k20->ezpcs_gpio < 0)
+ 		return apalis_tk1_k20->ezpcs_gpio;
++
+ 	gpio_request(apalis_tk1_k20->ezpcs_gpio, "apalis-tk1-k20-ezpcs");
+ 	gpio_direction_output(apalis_tk1_k20->ezpcs_gpio, 1);
+ 
+ 	apalis_tk1_k20->int2_gpio = of_get_named_gpio(np, "int2-gpio", 0);
+ 	if (apalis_tk1_k20->int2_gpio < 0)
+ 		return apalis_tk1_k20->int2_gpio;
++
+ 	gpio_request(apalis_tk1_k20->int2_gpio, "apalis-tk1-k20-int2");
+ 	gpio_direction_output(apalis_tk1_k20->int2_gpio, 1);
+ 
+@@ -734,13 +746,101 @@ static inline int apalis_tk1_k20_probe_gpios_dt(
+ }
+ #endif
+ 
++int apalis_tk1_k20_fw_update(struct apalis_tk1_k20_regmap *apalis_tk1_k20,
++		uint32_t revision) {
++	int erase_only = 0;
++
++	if ((request_firmware(&fw_entry, "apalis-tk1-k20.bin", apalis_tk1_k20->dev) < 0)
++		    && (revision != APALIS_TK1_K20_FW_VER)) {
++			dev_err(apalis_tk1_k20->dev,
++				"Unsupported firmware version %d.%d and no local" \
++				" firmware file available.\n",
++				(revision & 0xF0 >> 8),
++				(revision & 0x0F));
++			return -ENOTSUPP;
++		}
++
++		if ((fw_entry == NULL) && (revision != APALIS_TK1_K20_FW_VER)) {
++			dev_err(apalis_tk1_k20->dev,
++				"Unsupported firmware version %d.%d and no local" \
++				" firmware file available.\n",
++				(revision & 0xF0 >> 8),
++				(revision & 0x0F));
++			return -ENOTSUPP;
++		}
++
++		if (fw_entry != NULL) {
++			if (fw_entry->size == 1)
++				erase_only = 1;
++		}
++
++		if ((apalis_tk1_k20_get_fw_revision() != APALIS_TK1_K20_FW_VER) &&
++			(revision != APALIS_TK1_K20_FW_VER) && !erase_only &&
++			(fw_entry != NULL)) {
++			dev_err(apalis_tk1_k20->dev,
++				"Unsupported firmware version in both the device " \
++				"as well as the local firmware file.\n");
++			release_firmware(fw_entry);
++			return -ENOTSUPP;
++		}
++
++		if ((revision != APALIS_TK1_K20_FW_VER) && !erase_only &&
++				(!apalis_tk1_k20_fw_ezport_status()) &&
++				(fw_entry != NULL)) {
++			dev_err(apalis_tk1_k20->dev,
++				"Unsupported firmware version in the device and the " \
++				"local firmware file disables the EZ Port.\n");
++			release_firmware(fw_entry);
++			return -ENOTSUPP;
++		}
++
++		if (((revision != APALIS_TK1_K20_FW_VER) || erase_only
++				|| force_fw_reload) && (fw_entry != NULL)) {
++			int i = 0;
++			while (apalis_tk1_k20_enter_ezport(apalis_tk1_k20) < 0
++					&& i++ < 5) {
++				msleep(50);
++			}
++			if (i >= 5) {
++				dev_err(apalis_tk1_k20->dev,
++					"Problem entering EZ port mode.\n");
++				release_firmware(fw_entry);
++				return -EIO;
++			}
++			if (apalis_tk1_k20_erase_chip_ezport(apalis_tk1_k20) < 0) {
++				dev_err(apalis_tk1_k20->dev,
++					"Problem erasing the chip. Deferring...\n");
++				release_firmware(fw_entry);
++				return -EPROBE_DEFER;
++			}
++			if (erase_only) {
++				dev_err(apalis_tk1_k20->dev,
++					"Chip fully erased.\n");
++				release_firmware(fw_entry);
++				return -EIO;
++			}
++			if (apalis_tk1_k20_flash_chip_ezport(apalis_tk1_k20) < 0) {
++				dev_err(apalis_tk1_k20->dev,
++					"Problem flashing new firmware. Deferring...\n");
++				release_firmware(fw_entry);
++				return -EPROBE_DEFER;
++			}
++
++			return 1;
++		}
++		if (fw_entry != NULL)
++			release_firmware(fw_entry);
++
++	return 0;
++
++}
++
+ int apalis_tk1_k20_dev_init(struct device *dev)
+ {
+ 	struct apalis_tk1_k20_platform_data *pdata = dev_get_platdata(dev);
+ 	struct apalis_tk1_k20_regmap *apalis_tk1_k20 = dev_get_drvdata(dev);
+ 	uint32_t revision = 0x00;
+ 	int ret, i;
+-	int erase_only = 0;
+ 
+ 	apalis_tk1_k20->dev = dev;
+ 
+@@ -762,99 +862,21 @@ int apalis_tk1_k20_dev_init(struct device *dev)
+ 			&revision);
+ 
+ #ifdef CONFIG_APALIS_TK1_K20_EZP
+-	if ((request_firmware(&fw_entry, "apalis-tk1-k20.bin", dev) < 0)
+-	    && (revision != APALIS_TK1_K20_FW_VER)) {
+-		dev_err(apalis_tk1_k20->dev,
+-			"Unsupported firmware version %d.%d and no local" \
+-			" firmware file available.\n",
+-			(revision & 0xF0 >> 8),
+-			(revision & 0x0F));
+-		ret = -ENOTSUPP;
+-		goto bad;
+-	}
+ 
+-	if ((fw_entry == NULL) && (revision != APALIS_TK1_K20_FW_VER)) {
+-		dev_err(apalis_tk1_k20->dev,
+-			"Unsupported firmware version %d.%d and no local" \
+-			" firmware file available.\n",
+-			(revision & 0xF0 >> 8),
+-			(revision & 0x0F));
+-		ret = -ENOTSUPP;
+-		goto bad;
+-	}
+-
+-	if (fw_entry != NULL) {
+-		if (fw_entry->size == 1)
+-			erase_only = 1;
+-	}
+-
+-	if ((apalis_tk1_k20_get_fw_revision() != APALIS_TK1_K20_FW_VER) &&
+-		(revision != APALIS_TK1_K20_FW_VER) && !erase_only &&
+-		(fw_entry != NULL)) {
+-		dev_err(apalis_tk1_k20->dev,
+-			"Unsupported firmware version in both the device " \
+-			"as well as the local firmware file.\n");
+-		release_firmware(fw_entry);
+-		ret = -ENOTSUPP;
+-		goto bad;
+-	}
+-
+-	if ((revision != APALIS_TK1_K20_FW_VER) && !erase_only &&
+-			(!apalis_tk1_k20_fw_ezport_status()) &&
+-			(fw_entry != NULL)) {
+-		dev_err(apalis_tk1_k20->dev,
+-			"Unsupported firmware version in the device and the " \
+-			"local firmware file disables the EZ Port.\n");
+-		release_firmware(fw_entry);
+-		ret = -ENOTSUPP;
+-		goto bad;
+-	}
++	if (fw_ignore == 0) {
++		ret = apalis_tk1_k20_fw_update(apalis_tk1_k20, revision);
+ 
+-	if (((revision != APALIS_TK1_K20_FW_VER) || erase_only) &&
+-			(fw_entry != NULL)) {
+-		i = 0;
+-		while (apalis_tk1_k20_enter_ezport(apalis_tk1_k20) < 0
+-				&& i++ < 5) {
+-			msleep(50);
+-		}
+-		if (i >= 5) {
+-			dev_err(apalis_tk1_k20->dev,
+-				"Problem entering EZ port mode.\n");
+-			release_firmware(fw_entry);
+-			ret = -EIO;
++		if (ret < 0)
+ 			goto bad;
+-		}
+-		if (apalis_tk1_k20_erase_chip_ezport(apalis_tk1_k20) < 0) {
+-			dev_err(apalis_tk1_k20->dev,
+-				"Problem erasing the chip.\n");
+-			release_firmware(fw_entry);
+-			ret = -EPROBE_DEFER;
+-			goto bad;
+-		}
+-		if (erase_only) {
+-			dev_err(apalis_tk1_k20->dev,
+-				"Chip fully erased.\n");
+-			release_firmware(fw_entry);
+-			ret = -EIO;
+-			goto bad;
+-		}
+-		if (apalis_tk1_k20_flash_chip_ezport(apalis_tk1_k20) < 0) {
+-			dev_err(apalis_tk1_k20->dev,
+-				"Problem flashing new firmware.\n");
+-			release_firmware(fw_entry);
+-			ret = -EPROBE_DEFER;
+-			goto bad;
+-		}
+ 	}
+-	if (fw_entry != NULL)
+-		release_firmware(fw_entry);
+-
+-	msleep(10);
+-	apalis_tk1_k20_reset_chip(apalis_tk1_k20);
+-	msleep(10);
++	if (ret) {
++		msleep(10);
++		apalis_tk1_k20_reset_chip(apalis_tk1_k20);
++		msleep(10);
+ 
+-	ret = apalis_tk1_k20_reg_read(apalis_tk1_k20, APALIS_TK1_K20_REVREG,
+-			&revision);
++		ret = apalis_tk1_k20_reg_read(apalis_tk1_k20, APALIS_TK1_K20_REVREG,
++				&revision);
++	}
+ #endif /* CONFIG_APALIS_TK1_K20_EZP */
+ 
+ 	if (ret) {
+@@ -862,7 +884,7 @@ int apalis_tk1_k20_dev_init(struct device *dev)
+ 		goto bad;
+ 	}
+ 
+-	if (revision != APALIS_TK1_K20_FW_VER) {
++	if ((revision != APALIS_TK1_K20_FW_VER) && (fw_ignore == 0)) {
+ 		dev_err(apalis_tk1_k20->dev,
+ 			"Unsupported firmware version %d.%d.\n",
+ 			((revision & 0xF0) >> 4), (revision & 0x0F));
+@@ -870,6 +892,14 @@ int apalis_tk1_k20_dev_init(struct device *dev)
+ 		goto bad;
+ 	}
+ 
++	if (fw_ignore == 1) {
++		dev_err(apalis_tk1_k20->dev, "fw_ignore == 1. Detected "
++				"firmware %d.%d. Driver expected %d.%d\n",
++				((revision & 0xF0) >> 4), (revision & 0x0F),
++				((APALIS_TK1_K20_FW_VER & 0xF0) >> 4),
++				(APALIS_TK1_K20_FW_VER & 0x0F));
++	}
++
+ 	for (i = 0; i < ARRAY_SIZE(apalis_tk1_k20->irqs); i++) {
+ 		apalis_tk1_k20->irqs[i].reg_offset = i /
+ 						     APALIS_TK1_K20_IRQ_PER_REG;
+diff --git a/drivers/net/can/apalis-tk1-k20-can.c b/drivers/net/can/apalis-tk1-k20-can.c
+index e24adbb35dfd..0c238b8062ca 100644
+--- a/drivers/net/can/apalis-tk1-k20-can.c
++++ b/drivers/net/can/apalis-tk1-k20-can.c
+@@ -42,11 +42,12 @@
+ #define MB_DLC_MASK	0xF
+ #define MB_EID_LEN	4
+ 
+-#define CANCTRL_MODMASK	0x03
+-#define CANCTRL_INTEN	BIT(2)
+-#define CANINTF_RX	BIT(3)
+-#define CANINTF_TX	BIT(4)
+-#define CANINTF_ERR	BIT(5)
++#define CANCTRL_MODMASK		(BIT(1) | BIT(0))
++#define CANCTRL_INTEN		BIT(2)
++#define CANINTF_RX		BIT(3)
++#define CANINTF_TX		BIT(4)
++#define CANINTF_ERR		BIT(5)
++#define CANCTRL_ENABLE		BIT(6)
+ #define CANCTRL_INTMASK	(CANINTF_RX | CANINTF_TX | CANINTF_ERR)
+ 
+ #define EFLG_EWARN	0x01
+@@ -95,6 +96,7 @@ struct apalis_tk1_k20_priv {
+ #define AFTER_SUSPEND_DOWN	2
+ #define AFTER_SUSPEND_RESTART	4
+ 	int restart_tx;
++	int tx_frame;
+ };
+ 
+ static void apalis_tk1_k20_can_clean(struct net_device *net)
+@@ -123,6 +125,8 @@ static void apalis_tk1_k20_can_hw_tx_frame(struct net_device *net, u8 *buf,
+ 				      + APALIS_TK1_K20_CAN_DEV_OFFSET(
+ 				      priv->pdata->id), buf, len);
+ 	apalis_tk1_k20_unlock(priv->apalis_tk1_k20);
++
++	priv->tx_frame = 1;
+ }
+ 
+ static void apalis_tk1_k20_can_hw_tx(struct net_device *net,
+@@ -233,11 +237,8 @@ static int apalis_tk1_k20_can_set_normal_mode(struct net_device *net)
+ 	struct apalis_tk1_k20_priv *priv = netdev_priv(net);
+ 
+ 	apalis_tk1_k20_lock(priv->apalis_tk1_k20);
+-	/* Enable interrupts */
+-	apalis_tk1_k20_reg_rmw(priv->apalis_tk1_k20, APALIS_TK1_K20_CANREG
+-			       + APALIS_TK1_K20_CAN_DEV_OFFSET(
+-			       priv->pdata->id),
+-			       CANCTRL_INTEN, CANCTRL_INTEN);
++
++	priv->can.state = CAN_STATE_ERROR_ACTIVE;
+ 
+ 	if (priv->can.ctrlmode & CAN_CTRLMODE_LOOPBACK) {
+ 		/* Put device into loopback mode */
+@@ -253,6 +254,14 @@ static int apalis_tk1_k20_can_set_normal_mode(struct net_device *net)
+ 				       + APALIS_TK1_K20_CAN_DEV_OFFSET(
+ 				       priv->pdata->id), CANCTRL_MODMASK,
+ 				       CAN_CTRLMODE_LISTENONLY);
++		priv->can.state = CAN_STATE_ERROR_PASSIVE;
++	} else if (priv->can.ctrlmode & CAN_CTRLMODE_3_SAMPLES) {
++		/* Put device into triple sampling mode */
++		apalis_tk1_k20_reg_rmw(priv->apalis_tk1_k20,
++				       APALIS_TK1_K20_CANREG
++				       + APALIS_TK1_K20_CAN_DEV_OFFSET(
++				       priv->pdata->id), CANCTRL_MODMASK,
++				       0x03);
+ 	} else {
+ 		/* Put device into normal mode */
+ 		apalis_tk1_k20_reg_rmw(priv->apalis_tk1_k20,
+@@ -262,7 +271,28 @@ static int apalis_tk1_k20_can_set_normal_mode(struct net_device *net)
+ 				       0x00);
+ 	}
+ 	apalis_tk1_k20_unlock(priv->apalis_tk1_k20);
+-	priv->can.state = CAN_STATE_ERROR_ACTIVE;
++
++	return 0;
++}
++
++static int apalis_tk1_k20_can_enable(struct net_device *net,
++		bool enable)
++{
++	struct apalis_tk1_k20_priv *priv = netdev_priv(net);
++
++	apalis_tk1_k20_lock(priv->apalis_tk1_k20);
++	/* Enable interrupts */
++	apalis_tk1_k20_reg_rmw(priv->apalis_tk1_k20, APALIS_TK1_K20_CANREG
++			       + APALIS_TK1_K20_CAN_DEV_OFFSET(
++			       priv->pdata->id),
++			       CANCTRL_INTEN, (enable) ? CANCTRL_INTEN:0);
++	/* Enable CAN */
++	apalis_tk1_k20_reg_rmw(priv->apalis_tk1_k20, APALIS_TK1_K20_CANREG
++			       + APALIS_TK1_K20_CAN_DEV_OFFSET(
++			       priv->pdata->id),
++			       CANCTRL_ENABLE, (enable) ? CANCTRL_ENABLE:0);
++	apalis_tk1_k20_unlock(priv->apalis_tk1_k20);
++
+ 	return 0;
+ }
+ 
+@@ -350,6 +380,8 @@ static int apalis_tk1_k20_can_stop(struct net_device *net)
+ 	destroy_workqueue(priv->wq);
+ 	priv->wq = NULL;
+ 
++	apalis_tk1_k20_can_enable(net, false);
++
+ 	mutex_lock(&priv->apalis_tk1_k20_can_lock);
+ 	apalis_tk1_k20_lock(priv->apalis_tk1_k20);
+ 	if (pdata->id == 0)
+@@ -358,7 +390,7 @@ static int apalis_tk1_k20_can_stop(struct net_device *net)
+ 	if (pdata->id == 1)
+ 		apalis_tk1_k20_irq_mask(priv->apalis_tk1_k20,
+ 					APALIS_TK1_K20_CAN1_IRQ);
+-	/* Disable and clear pending interrupts */
++
+ 	priv->can.state = CAN_STATE_STOPPED;
+ 	apalis_tk1_k20_unlock(priv->apalis_tk1_k20);
+ 	mutex_unlock(&priv->apalis_tk1_k20_can_lock);
+@@ -462,7 +494,7 @@ static int apalis_tk1_k20_can_resume(struct device *dev)
+ 	if (pdata->id == 1)
+ 		apalis_tk1_k20_irq_unmask(priv->apalis_tk1_k20,
+ 					  APALIS_TK1_K20_CAN1_IRQ);
+-	/* Enable interrupts */
++
+ 	priv->can.state = CAN_STATE_STOPPED;
+ 	apalis_tk1_k20_unlock(priv->apalis_tk1_k20);
+ 	mutex_unlock(&priv->apalis_tk1_k20_can_lock);
+@@ -519,6 +551,7 @@ static irqreturn_t apalis_tk1_k20_can_ist(int irq, void *dev_id)
+ 		u8 clear_intf = 0;
+ 		int can_id = 0, data1 = 0;
+ 
++
+ 		apalis_tk1_k20_lock(priv->apalis_tk1_k20);
+ 		ret = apalis_tk1_k20_reg_read(priv->apalis_tk1_k20,
+ 					      APALIS_TK1_K20_CANREG
+@@ -532,6 +565,25 @@ static irqreturn_t apalis_tk1_k20_can_ist(int irq, void *dev_id)
+ 		}
+ 
+ 		intf &= CANCTRL_INTMASK;
++
++		if (!(intf & CANINTF_TX) &&
++				(priv->tx_frame == 1)) {
++			priv->tx_frame = 0;
++			net->stats.tx_packets++;
++			net->stats.tx_bytes += priv->tx_len - 1;
++			can_led_event(net, CAN_LED_EVENT_TX);
++			if (priv->tx_len) {
++				can_get_echo_skb(net, 0);
++				priv->tx_len = 0;
++			}
++			netif_wake_queue(net);
++			if (!(intf & (CANINTF_RX | CANINTF_ERR)))
++				break;
++		}
++
++		if (intf == 0)
++			break;
++
+ 		/* receive */
+ 		if (intf & CANINTF_RX)
+ 			apalis_tk1_k20_can_hw_rx(net, 0);
+@@ -625,21 +677,7 @@ static irqreturn_t apalis_tk1_k20_can_ist(int irq, void *dev_id)
+ 			break;
+ 		}
+ 
+-		if (intf == 0)
+-			break;
+ 
+-		if (intf & CANINTF_TX) {
+-			net->stats.tx_packets++;
+-			net->stats.tx_bytes += priv->tx_len - 1;
+-			can_led_event(net, CAN_LED_EVENT_TX);
+-			if (priv->tx_len) {
+-				can_get_echo_skb(net, 0);
+-				priv->tx_len = 0;
+-			}
+-			netif_wake_queue(net);
+-			if (!(intf & (CANINTF_RX | CANINTF_ERR)))
+-				break;
+-		}
+ 	}
+ 	mutex_unlock(&priv->apalis_tk1_k20_can_lock);
+ 	return IRQ_HANDLED;
+@@ -662,6 +700,7 @@ static int apalis_tk1_k20_can_open(struct net_device *net)
+ 	priv->force_quit = 0;
+ 	priv->tx_skb = NULL;
+ 	priv->tx_len = 0;
++	priv->tx_frame = 0;
+ 	apalis_tk1_k20_lock(priv->apalis_tk1_k20);
+ 	if (pdata->id == 0)
+ 		ret = apalis_tk1_k20_irq_request(priv->apalis_tk1_k20,
+@@ -701,6 +740,11 @@ static int apalis_tk1_k20_can_open(struct net_device *net)
+ 		apalis_tk1_k20_can_open_clean(net);
+ 		goto open_unlock;
+ 	}
++	ret = apalis_tk1_k20_can_enable(net, true);
++	if (ret) {
++		apalis_tk1_k20_can_open_clean(net);
++		goto open_unlock;
++	}
+ 
+ 	can_led_event(net, CAN_LED_EVENT_OPEN);
+ 
+@@ -765,6 +809,7 @@ static int apalis_tk1_k20_can_probe(struct platform_device *pdev)
+ 	platform_set_drvdata(pdev, priv);
+ 
+ 	ret = register_candev(net);
++
+ 	if (ret)
+ 		goto error_probe;
+ 
+diff --git a/include/linux/mfd/apalis-tk1-k20-api.h b/include/linux/mfd/apalis-tk1-k20-api.h
+index 199b433c3d96..112a79b6b4e8 100644
+--- a/include/linux/mfd/apalis-tk1-k20-api.h
++++ b/include/linux/mfd/apalis-tk1-k20-api.h
+@@ -104,7 +104,7 @@
+ #define APALIS_TK1_K20_TSC_IRQ			4
+ #define APALIS_TK1_K20_GPIO_IRQ			5
+ 
+-#define APALIS_TK1_K20_FW_VER			0x11
++#define APALIS_TK1_K20_FW_VER			0x12
+ #define APALIS_TK1_K20_TESTER_FW_VER		0xFE
+ 
+ #define FW_MINOR (APALIS_TK1_K20_FW_VER & 0x0F)
+-- 
+2.13.6
+
