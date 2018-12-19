@@ -41,7 +41,6 @@ GENERIC_PATCHES = " \
     file://0022-mfd-as3722-disable-auto-power-on-when-AC-OK.patch \
     file://0023-apalis-tk1-mfd-k20-update-api-header-for-fw-version-.patch \
     file://0024-apalis_t30-enable-broken-hpi-on-emmc.patch \
-    file://0025-tegra_defconfig-disable-sound-in-tezi-configuration.patch \
     file://0026-apalis_t30-fix-mmc1-cmd-pull-up.patch \
     file://0027-apalis_t30-pull-up-sd-card-detect-pins.patch \
     file://0028-Revert-mmc-tegra-Disable-UHS-I-modes-for-Tegra124.patch \
