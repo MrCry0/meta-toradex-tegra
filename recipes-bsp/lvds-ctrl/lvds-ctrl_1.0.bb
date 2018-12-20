@@ -4,6 +4,7 @@ LICENSE = "PD"
 SRC_URI = " \
     file://lvds-dual-channel.sh \
     file://lvds-single-channel.sh \
+    file://lvds-single-channel-24bit-mode2.sh \
     file://COPYING \
 "
 
