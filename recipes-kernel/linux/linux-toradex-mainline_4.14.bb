@@ -9,7 +9,7 @@ LIC_FILES_CHKSUM = "file://COPYING;md5=d7810fab7487fb0aad327b76f1be7cd7"
 inherit kernel siteinfo
 include conf/tdx_version.conf
 
-LINUX_VERSION ?= "4.14.72"
+LINUX_VERSION ?= "4.14.90"
 
 LOCALVERSION = "-${PR}"
 PR = "${TDX_VER_ITEM}"
@@ -60,8 +60,8 @@ SRC_URI = " \
     ${GENERIC_PATCHES} \
     ${MACHINE_PATCHES} \
 "
-SRC_URI[md5sum] = "450b3f5f1124442dee768eaa097fd149"
-SRC_URI[sha256sum] = "df925906250bbc40fcf0137d7ad0fb8edc528d926832634f1233b7540564557f"
+SRC_URI[md5sum] = "68e9492de8297edf7202f82d20084cb8"
+SRC_URI[sha256sum] = "0c1ed0c93085e44ad89cd279647b0e4617d06ce5a482213b5481b612ffa186ca"
 
 # For CI use one could use the following instead (plus patches still of course)
 LINUX_VERSION_use-head-next ?= "4.14"
