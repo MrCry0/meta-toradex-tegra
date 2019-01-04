@@ -9,5 +9,3 @@ PERF_SRC_LEGACY_TEGRAS = "Makefile \
                           tools \
 "
 PERF_SRC_apalis-tk1 = "${PERF_SRC_LEGACY_TEGRAS}"
-PERF_SRC_apalis-t30 = "${PERF_SRC_LEGACY_TEGRAS}"
-PERF_SRC_colibri-t30 = "${PERF_SRC_LEGACY_TEGRAS}"

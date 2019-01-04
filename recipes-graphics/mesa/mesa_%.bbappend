@@ -1,14 +1,5 @@
 FILESEXTRAPATHS_prepend := "${THISDIR}/${PN}:"
 
-# tegra2, tegra3
-# we use binary only EGL, GL ES1, GL ES2 drivers (package tdx-nv-binaries)
-# adapted from meta-fsl-arm/recipes-graphics/mesa/
-PACKAGECONFIG_remove_tegra = "egl gles"
-
-PROVIDES_remove_tegra = "virtual/libgles1 virtual/libgles2 virtual/egl"
-
-PACKAGE_ARCH_tegra = "${MACHINE_ARCH}"
-
 #####
 # tegra tk1
 

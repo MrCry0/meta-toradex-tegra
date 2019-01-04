@@ -2,8 +2,7 @@ OpenEmbedded/Yocto BSP Layer for Toradex Modules Based on NVIDIA SoCs
 =====================================================================
 
 This layer provides support for ARM based Toradex computer on modules (COM)
-featuring NVIDIA T20, T30, and TK1 SoCs for use with OpenEmbedded
-and/or Yocto.
+featuring NVIDIA TK1 SoCs for use with OpenEmbedded and/or Yocto.
 For more information on available Toradex COMs please visit:
 
 https://www.toradex.com/computer-on-modules

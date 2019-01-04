@@ -9,12 +9,7 @@ DEPENDS = "mtd-utils"
 include conf/tdx_version.conf
 inherit tegra-u-boot-localversion
 
-COMPATIBLE_MACHINE = "(apalis-t30|apalis-tk1|colibri-t20|colibri-t30)"
-
-DEFAULT_PREFERENCE_apalis-t30 = "1"
-DEFAULT_PREFERENCE_apalis-tk1 = "1"
-DEFAULT_PREFERENCE_colibri-t20 = "1"
-DEFAULT_PREFERENCE_colibri-t30 = "1"
+COMPATIBLE_MACHINE = "(apalis-tk1)"
 
 FILESPATHPKG =. "git:"
 
@@ -59,20 +54,12 @@ install_unlock_emmc() {
     install -m 0644 ${WORKDIR}/fw_unlock_mmc.sh ${D}${sysconfdir}/profile.d/fw_unlock_mmc.sh
 }
 
-do_install_append_tegra3() {
-    install_unlock_emmc
-}
-
 do_install_append_tegra124() {
     install_unlock_emmc
 }
 
 do_install_append_tegra124m() {
     install_unlock_emmc
-}
-
-pkg_postinst_ontarget_${PN}_colibri-t20 () {
-    grep u-boot-env /proc/mtd | awk '{print "/dev/" substr($1,0,4) " 0x00000000 0x00010000 0x" $3 " 1" >> "/etc/fw_env.config" }'
 }
 
 do_install_class-cross () {
