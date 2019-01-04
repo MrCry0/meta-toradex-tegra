@@ -7,7 +7,8 @@ LIC_FILES_CHKSUM = "file://${COMMON_LICENSE_DIR}/MIT;md5=0835ade698e0bcf8506ecda
 
 PR = "r1"
 
-PACKAGE_ARCH = "all"
+#PACKAGE_ARCH = "all"
+#inherit allarch
 
 SRC_URI = " \
     file://hdmi.rules \
