@@ -3,7 +3,7 @@ DESCRIPTION = "Utility used to upload payloads to a NVIDIA Tegra based device in
 SECTION = "bootloader"
 DEPENDS = "libusb1 libcryptopp"
 
-LICENSE = "NVIDIA-Public"
+LICENSE = "Proprietary"
 LIC_FILES_CHKSUM = "file://LICENSE;md5=395fe5affb633ad84474e42989a8e5be"
 
 BBCLASSEXTEND = "native nativesdk"
