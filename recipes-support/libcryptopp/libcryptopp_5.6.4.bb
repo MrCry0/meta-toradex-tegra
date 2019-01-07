@@ -26,7 +26,6 @@ EXTRA_OECONF = "--libdir=${base_libdir}"
 TARGET_CC_ARCH += "${LDFLAGS}"
 export PREFIX="${prefix}"
 
-#we want tegrarcm binary to run on a 32-bit architecture, on x86_64 this requires the 32-bit compatibility libs
 EXTRA_OEMAKE_class-native = "CC='${CC}' CXX='${CXX}'"
 
 do_compile() {

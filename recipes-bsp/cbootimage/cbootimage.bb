@@ -14,7 +14,6 @@ PV = "1.7"
 
 EXTRA_OEMAKE = 'PREFIX="${prefix}" LIBDIR="${libdir}"'
 
-#we want cbootimage binary to run on a 32-bit architecture, on x86_64 this requires the 32-bit compatibility libs
 EXTRA_OEMAKE_class-native = "'CC=${CC}' 'RANLIB=${RANLIB}' 'AR=${AR}' 'CFLAGS=${CFLAGS} -I${S}/include' 'BUILDDIR=${S}'"
 
 S = "${WORKDIR}/git"
