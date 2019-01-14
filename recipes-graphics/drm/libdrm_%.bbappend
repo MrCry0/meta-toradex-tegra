@@ -1,4 +1,5 @@
 PACKAGES += " ${PN}-tegra"
 FILES_${PN}-tegra = "${libdir}/libdrm_tegra.so.*"
 
-EXTRA_OECONF_append += " --enable-tegra-experimental-api"
+PACKAGECONFIG_append_tegra124 = " tegra"
+PACKAGECONFIG_append_tegra124m = " tegra"
