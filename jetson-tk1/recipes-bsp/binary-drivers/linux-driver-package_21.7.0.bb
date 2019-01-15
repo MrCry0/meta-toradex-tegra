@@ -16,7 +16,7 @@ SRC_URI[sha256sum] = "676add1e8e6b2fcf76d97f22f38c9d0cbbe8a92342039a85c8a4c87e8c
 
 PR = "r7"
 
-inherit update-rc.d
+inherit ${@bb.utils.contains('DISTRO_FEATURES', 'systemd', '', 'update-rc.d', d)}
 
 INITSCRIPT_PACKAGES = "${PN}-boot ${PN}-firstboot"
 
