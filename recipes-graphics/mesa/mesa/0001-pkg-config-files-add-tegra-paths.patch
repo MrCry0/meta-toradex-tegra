@@ -22,7 +22,7 @@ index fd6904b..ceaff42 100644
  Requires.private: @GL_PC_REQ_PRIV@
  Version: @PACKAGE_VERSION@
 -Libs: -L${libdir} -lEGL
-+Libs: -L${libdir}/arm-linux-gnueabihf/tegra-egl -L${libdir} -lEGL
++Libs: -L=${libdir}/arm-linux-gnueabihf/tegra-egl -L${libdir} -lEGL
  Libs.private: @GL_PC_LIB_PRIV@
  Cflags: -I${includedir} @GL_PC_CFLAGS@
 diff --git a/src/mapi/es1api/glesv1_cm.pc.in b/src/mapi/es1api/glesv1_cm.pc.in
@@ -34,7 +34,7 @@ index 0c2fed7..d76f418 100644
  Requires.private:
  Version: @VERSION@
 -Libs: -L${libdir} -lGLESv1_CM
-+Libs: -L${libdir}/arm-linux-gnueabihf/tegra-egl -L${libdir} -lGLESv1_CM
++Libs: -L=${libdir}/arm-linux-gnueabihf/tegra-egl -L${libdir} -lGLESv1_CM
  Libs.private: @GLESv1_CM_PC_LIB_PRIV@
  Cflags: -I${includedir}
 diff --git a/src/mapi/es2api/glesv2.pc.in b/src/mapi/es2api/glesv2.pc.in
@@ -46,7 +46,7 @@ index e5bf12f..fd1fccc 100644
  Requires.private:
  Version: @VERSION@
 -Libs: -L${libdir} -lGLESv2
-+Libs: -L${libdir}/arm-linux-gnueabihf/tegra-egl -L${libdir} -lGLESv2
++Libs: -L=${libdir}/arm-linux-gnueabihf/tegra-egl -L${libdir} -lGLESv2
  Libs.private: @GLESv2_PC_LIB_PRIV@
  Cflags: -I${includedir}
 diff --git a/src/mesa/gl.pc.in b/src/mesa/gl.pc.in
@@ -58,7 +58,7 @@ index 680f742..1416def 100644
  Requires.private: @GL_PC_REQ_PRIV@
  Version: @PACKAGE_VERSION@
 -Libs: -L${libdir} -l@GL_PKGCONF_LIB@
-+Libs: -L${libdir}/arm-linux-gnueabihf/tegra -L${libdir} -l@GL_PKGCONF_LIB@
++Libs: -L=${libdir}/arm-linux-gnueabihf/tegra -L${libdir} -l@GL_PKGCONF_LIB@
  Libs.private: @GL_PC_LIB_PRIV@
  Cflags: -I${includedir} @GL_PC_CFLAGS@
  glx_tls: @GLX_TLS@
