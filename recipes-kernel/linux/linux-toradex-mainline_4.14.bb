@@ -49,6 +49,7 @@ GENERIC_PATCHES = " \
     file://0031-apalis-tk1-force-fixed-ids-for-sdmmc-controllers.patch \
     file://0032-apalis-tk1-fix-pcie-reset-for-reliable-gigabit-ether.patch \
     file://0033-apalis-tk1-mfd-k20-supporte-for-fw-version-1.3.patch \
+	file://0034-apalis-tk1-mfd-k20-update-supported-fw-version-to-1..patch \
 "
 MACHINE_PATCHES = " \
 "
