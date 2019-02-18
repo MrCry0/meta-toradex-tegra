@@ -21,3 +21,6 @@ PACKAGECONFIG ?= "dri2 udev ${XORG_CRYPTO} \
                    ${@bb.utils.contains('DISTRO_FEATURES', 'opengl', 'dri glx', '', d)} \
                    ${@bb.utils.contains("DISTRO_FEATURES", "wayland", "xwayland", "", d)} \
 "
+
+# The NVidia driver needs this enabled.
+PACKAGECONFIG_append = " xinerama "
