@@ -13,5 +13,5 @@ IgnoreSIGPIPE=no
 KillMode=process
 GuessMainPID=no
 RemainAfterExit=yes
-ExecStart=/usr/bin/nvfb start
-ExecStop=/usr/bin/nvfb stop
+ExecStart=/etc/init.d/nvfb start
+ExecStop=/etc/init.d/nvfb stop

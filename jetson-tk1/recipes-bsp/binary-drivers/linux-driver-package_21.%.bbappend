@@ -56,15 +56,12 @@ FILES_${PN}-nvgstapps = " \
     ${docdir}/nvgst*README.txt \
 "
 
-FILES_${PN}-boot = " \
+FILES_${PN}-boot += " \
     ${systemd_unitdir}/system/nv.service \
-    ${bindir}/nv \
 "
 
-FILES_${PN}-firstboot = "\
+FILES_${PN}-firstboot += "\
     ${systemd_unitdir}/system/nvfb.service \
-    ${bindir}/nvfb \
-    ${sysconfdir}/nv/nvfirstboot \
 "
 
 #no gnu_hash in NVIDIA binaries, skip QA dev-so for this package
@@ -97,12 +94,6 @@ do_install_append () {
     install -m 0755 ${NV_SAMPLE}/usr/lib/arm-linux-gnueabihf/gstreamer-1.0/libnvgstjpeg.so ${D}${libdir}/gstreamer-1.0
     install -m 0755 ${NV_SAMPLE}/usr/lib/arm-linux-gnueabihf/gstreamer-0.10/libgstnvvidconv.so ${D}${libdir}/gstreamer-0.10
     install -m 0755 ${NV_SAMPLE}/usr/lib/arm-linux-gnueabihf/gstreamer-0.10/libnvgstjpeg.so ${D}${libdir}/gstreamer-0.10
-
-    install -m 0755 ${WORKDIR}/nv ${D}${bindir}
-    install -m 0755 ${WORKDIR}/nvfb ${D}${bindir}
-    rm -rf ${D}${sysconfdir}/init.d/nvfb
-    rm -rf ${D}${sysconfdir}/init.d/nv
 }
 
-SYSTEMD_SERVICE_${PN} = "nvfb.service"
-SYSTEMD_SERVICE_${PN} += " nv.service"
+SYSTEMD_SERVICE_${PN} = "nvfb.service nv.service"
