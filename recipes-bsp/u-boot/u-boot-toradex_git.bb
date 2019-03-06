@@ -1,6 +1,5 @@
 require recipes-bsp/u-boot/u-boot.inc
 require recipes-bsp/u-boot/u-boot-toradex-env.inc
-include conf/tdx_version.conf
 inherit tegra-u-boot-localversion
 
 PROVIDES = "u-boot virtual/bootloader"
@@ -51,3 +50,6 @@ do_deploy_append_apalis-tk1-mainline() {
     cbootimage -s tegra124 ${WORKDIR}/apalis-tk1.img.cfg apalis-tk1.img
     rm PM375_Hynix_2GB_H5TC4G63AFR_RDA_924MHz.bct
 }
+
+# defaults
+TDX_VER_ITEM ??= "0"

@@ -6,7 +6,6 @@ PROVIDES = "u-boot-fw-utils"
 RPROVIDES_${PN} = "u-boot-fw-utils"
 DEPENDS = "mtd-utils"
 
-include conf/tdx_version.conf
 inherit tegra-u-boot-localversion
 
 COMPATIBLE_MACHINE = "(apalis-tk1)"
@@ -71,3 +70,6 @@ do_install_class-cross () {
 SYSROOT_DIRS_append_class-cross = " ${bindir_cross}"
 
 PACKAGE_ARCH = "${MACHINE_ARCH}"
+
+# defaults
+TDX_VER_ITEM ??= "0"
