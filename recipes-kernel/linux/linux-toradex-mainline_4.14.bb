@@ -7,7 +7,6 @@ FILESEXTRAPATHS_prepend := "${THISDIR}/linux-toradex-mainline-4.14:"
 LIC_FILES_CHKSUM = "file://COPYING;md5=d7810fab7487fb0aad327b76f1be7cd7"
 
 inherit kernel siteinfo
-include conf/tdx_version.conf
 
 LINUX_VERSION ?= "4.14.90"
 
@@ -103,3 +102,5 @@ do_uboot_mkimage_prepend() {
     cd ${B}
 }
 
+# defaults
+TDX_VER_ITEM ??= "0"
