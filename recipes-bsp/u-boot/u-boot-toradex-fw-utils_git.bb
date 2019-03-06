@@ -26,6 +26,7 @@ SRCBRANCH_use-head-next = "2016.11-toradex-next"
 SRC_URI = " \
     git://git.toradex.com/u-boot-toradex.git;protocol=git;branch=${SRCBRANCH} \
     file://default-gcc.patch \
+    file://0001-libfdt-move-headers-to-linux-libfdt.h-and-linux-libf.patch \
     file://fw_env.config \
     file://fw_unlock_mmc.sh \
 "

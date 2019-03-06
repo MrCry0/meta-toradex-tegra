@@ -26,7 +26,10 @@ SRCREV = "02735f400478c6e9afc432fda1149abef630657c"
 SRCBRANCH = "2016.11-toradex"
 SRCREV_use-head-next = "${AUTOREV}"
 SRCBRANCH_use-head-next = "2016.11-toradex-next"
-SRC_URI = "git://git.toradex.com/u-boot-toradex.git;protocol=git;branch=${SRCBRANCH}"
+SRC_URI = " \
+    git://git.toradex.com/u-boot-toradex.git;protocol=git;branch=${SRCBRANCH} \
+    file://0001-libfdt-move-headers-to-linux-libfdt.h-and-linux-libf.patch \
+"
 SRC_URI_append_apalis-t30 = " \
     file://apalis_t30.img.cfg \
     file://Apalis_T30_2GB_800Mhz.bct \
