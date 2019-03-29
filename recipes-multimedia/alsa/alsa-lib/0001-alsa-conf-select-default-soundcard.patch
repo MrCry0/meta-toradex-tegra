@@ -1,0 +1,30 @@
+From 6d812a2c9b586be635fa430ebaa1c0e60dfa1b2d Mon Sep 17 00:00:00 2001
+From: Philippe Schenker <philippe.schenker@toradex.com>
+Date: Fri, 29 Mar 2019 15:24:23 +0100
+Subject: [PATCH] alsa-conf: select default soundcard
+
+Select sound card 1 as the default one.
+
+Signed-off-by: Philippe Schenker <philippe.schenker@toradex.com>
+---
+ src/conf/alsa.conf | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/src/conf/alsa.conf b/src/conf/alsa.conf
+index 09980586..8e7c84d6 100644
+--- a/src/conf/alsa.conf
++++ b/src/conf/alsa.conf
+@@ -59,8 +59,8 @@ defaults.namehint.basic on
+ # show extended name hints
+ defaults.namehint.extended off
+ #
+-defaults.ctl.card 0
+-defaults.pcm.card 0
++defaults.ctl.card 1
++defaults.pcm.card 1
+ defaults.pcm.device 0
+ defaults.pcm.subdevice -1
+ defaults.pcm.nonblock 1
+-- 
+2.21.0
+
