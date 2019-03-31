@@ -8,7 +8,7 @@ LIC_FILES_CHKSUM = "file://COPYING;md5=d7810fab7487fb0aad327b76f1be7cd7"
 
 inherit kernel siteinfo
 
-LINUX_VERSION ?= "4.14.90"
+LINUX_VERSION ?= "4.14.109"
 
 LOCALVERSION = "-${PR}"
 PR = "${TDX_VER_ITEM}"
