@@ -1,3 +1,5 @@
-FILESEXTRAPATHS_prepend := "${THISDIR}/${PN}:"
+FILESEXTRAPATHS_prepend_tegra124m := "${THISDIR}/${PN}:"
 
-SRC_URI_append = "file://0001-alsa-conf-select-default-soundcard.patch"
+PACKAGE_ARCH_tegra124m = "${MACHINE_ARCH}"
+
+SRC_URI_append_tegra124m = " file://0001-alsa-conf-select-default-soundcard.patch"
