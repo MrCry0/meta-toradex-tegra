@@ -60,8 +60,8 @@ SRC_URI = " \
     ${GENERIC_PATCHES} \
     ${MACHINE_PATCHES} \
 "
-SRC_URI[md5sum] = "68e9492de8297edf7202f82d20084cb8"
-SRC_URI[sha256sum] = "0c1ed0c93085e44ad89cd279647b0e4617d06ce5a482213b5481b612ffa186ca"
+SRC_URI[md5sum] = "3bb329f28c4de4b9a87c60b222a5b0d8"
+SRC_URI[sha256sum] = "3764f165f779568745f1468d8f7e1db65d94eae9cd8d1350f4fe003a0fd88ee0"
 
 # For CI use one could use the following instead (plus patches still of course)
 LINUX_VERSION_use-head-next ?= "4.14"
