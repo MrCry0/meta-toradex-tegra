@@ -3,16 +3,10 @@ FILESEXTRAPATHS_prepend := "${THISDIR}/${PN}:"
 #####
 # tegra tk1
 
-DEPENDS_REMOVE = "linux-driver-package"
-DEPENDS_REMOVE_tegra124 = ""
-DEPENDS_remove = "${DEPENDS_REMOVE}"
-
+DEPENDS_append_tegra124= " linux-driver-package"
 SRC_URI_append_tegra124 = " file://0001-pkg-config-files-add-tegra-paths.patch"
 
 PACKAGE_ARCH_tegra124 = "${MACHINE_ARCH}"
-
-# until meta-jetson-tk1 adds it through its bbappend:
-DEPENDS_append_tegra124= " linux-driver-package "
 
 #####
 ## Tegra TK1 mainline kernel
