@@ -13,6 +13,5 @@ IgnoreSIGPIPE=no
 KillMode=process
 GuessMainPID=no
 RemainAfterExit=yes
-ExecStart=/etc/init.d/nv start
-ExecStop=/etc/init.d/nv stop
-
+ExecStart=/usr/bin/nv start
+ExecStop=/usr/bin/nv stop

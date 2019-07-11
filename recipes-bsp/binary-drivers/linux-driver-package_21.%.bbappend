@@ -15,6 +15,8 @@ do_install_append_apalis-tk1 () {
     install -d ${D}${systemd_unitdir}/system/
     install -m 0755 ${WORKDIR}/nvfb.service ${D}${systemd_unitdir}/system
     install -m 0755 ${WORKDIR}/nv.service ${D}${systemd_unitdir}/system
+    install -m 0755 ${WORKDIR}/nv ${D}${bindir}
+    install -m 0755 ${WORKDIR}/nvfb ${D}${bindir}
 }
 
 # deploy additional binaries from the nv_gst_apps tarball
@@ -57,10 +59,12 @@ FILES_${PN}-nvgstapps = " \
 "
 
 FILES_${PN}-boot += " \
+    ${bindir}/nv \
     ${systemd_unitdir}/system/nv.service \
 "
 
 FILES_${PN}-firstboot += "\
+    ${bindir}/nvfb \
     ${systemd_unitdir}/system/nvfb.service \
 "
 
