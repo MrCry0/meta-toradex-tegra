@@ -100,5 +100,5 @@ do_install_append () {
     install -m 0755 ${NV_SAMPLE}/usr/lib/arm-linux-gnueabihf/gstreamer-0.10/libnvgstjpeg.so ${D}${libdir}/gstreamer-0.10
 }
 
-SYSTEMD_SERVICE_${PN}-boot = "nv.service"
-SYSTEMD_SERVICE_${PN}-firstboot = "nvfb.service"
+SYSTEMD_AUTO_ENABLE = "enable"
+SYSTEMD_SERVICE_${PN} = "nv.service nvfb.service"
