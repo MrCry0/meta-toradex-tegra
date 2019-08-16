@@ -22,6 +22,8 @@ SRC_URI = "git://git.toradex.com/linux-toradex.git;protocol=git;branch=${SRCBRAN
 
 COMPATIBLE_MACHINE = "apalis-tk1"
 
+KERNEL_MODULE_AUTOLOAD += "xhci-hcd"
+
 # since thud modules no longer load without this
 # [    9.302483] apalis_tk1_k20: Unknown symbol _GLOBAL_OFFSET_TABLE_ (err 0)
 KERNEL_EXTRA_ARGS_append = "CFLAGS_MODULE=-fno-pic"
