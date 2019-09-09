@@ -1,3 +1,0 @@
-FILESEXTRAPATHS_prepend := "${THISDIR}/files:"
-
-SRCREV = "223817ee37988042db7873cfb5b2e899dfe35c10"
