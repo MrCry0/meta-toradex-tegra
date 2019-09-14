@@ -23,10 +23,10 @@ do_install_append_apalis-tk1 () {
 PACKAGES_prepend = "${PN}-gstnvcamera ${PN}-gstnvvidconv-1.0 ${PN}-nvgstjpeg-1.0 ${PN}-nvgstapps "
 RRECOMMENDS_${PN}_append = " ${PN}-gstnvcamera ${PN}-gstnvvidconv-1.0 ${PN}-nvgstjpeg-1.0 ${PN}-nvgstapps"
 
-RDEPENDS_${PN}-gstnvcamera = "libgstvideo-1.0"
-RDEPENDS_${PN}-gstnvvidconv-1.0 = "libgstvideo-1.0"
-RDEPENDS_${PN}-nvgstjpeg-1.0 = "libgstvideo-1.0"
-RDEPENDS_${PN}-nvgstapps = "libgstpbutils-1.0"
+RDEPENDS_${PN}-gstnvcamera = "glib-2.0 gstreamer1.0 libgstvideo-1.0"
+RDEPENDS_${PN}-gstnvvidconv-1.0 = "glib-2.0 gstreamer1.0 libgstvideo-1.0"
+RDEPENDS_${PN}-nvgstjpeg-1.0 = "glib-2.0 gstreamer1.0 libgstvideo-1.0"
+RDEPENDS_${PN}-nvgstapps = "glib-2.0 gstreamer1.0 libgstpbutils-1.0 libgstvideo-1.0"
 
 FILES_${PN}-gstnvcamera = " \
     ${libdir}/gstreamer-1.0/libgstnvcamera.so \
