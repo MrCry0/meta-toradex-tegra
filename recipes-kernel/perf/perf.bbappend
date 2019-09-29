@@ -8,6 +8,6 @@ PERF_SRC_LEGACY_TEGRAS = "Makefile \
 "
 PERF_SRC_apalis-tk1 = "${PERF_SRC_LEGACY_TEGRAS}"
 
-do_configure_prepend () {
+do_configure_prepend_apalis-tk1 () {
     sed -i 's$I/usr/include/slang$I=/usr/include/slang$' tools/perf/Makefile
 }
