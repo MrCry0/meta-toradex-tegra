@@ -2,12 +2,16 @@ DESCRIPTION = "NVIDIA Linux Driver Packages"
 HOMEPAGE = "https://developer.nvidia.com/"
 LICENSE = "Proprietary"
 
-SRC_URI = "http://developer.download.nvidia.com/embedded/L4T/r21_Release_v7.0/Tegra124_Linux_R21.7.0_armhf.tbz2 \
-           file://xorg.conf.add \
-           file://nv \
-           file://nvfb \
-           file://tegra_xusb_firmware \
-	   "
+SRC_URI = " \
+    http://developer.download.nvidia.com/embedded/L4T/r21_Release_v7.0/Tegra124_Linux_R21.7.0_armhf.tbz2 \
+    file://xorg.conf.add \
+    file://nv \
+    file://nvfb \
+    file://tegra_xusb_firmware \
+    file://xorg.conf \
+    file://nvfb.service \
+    file://nv.service \
+"
 
 LIC_FILES_CHKSUM = "file://nv_tegra/LICENSE;md5=60ad17cc726658e8cf73578bea47b85f"
 
@@ -16,7 +20,7 @@ SRC_URI[sha256sum] = "676add1e8e6b2fcf76d97f22f38c9d0cbbe8a92342039a85c8a4c87e8c
 
 PR = "r7"
 
-inherit ${@bb.utils.contains('DISTRO_FEATURES', 'systemd', '', 'update-rc.d', d)}
+inherit ${@bb.utils.contains('DISTRO_FEATURES', 'systemd', 'systemd', 'update-rc.d', d)}
 
 INITSCRIPT_PACKAGES = "${PN}-boot ${PN}-firstboot"
 
@@ -33,7 +37,6 @@ INSANE_SKIP_${PN} = "ldflags"
 PACKAGE_ARCH = "${MACHINE_ARCH}"
 
 S = "${WORKDIR}/Linux_for_Tegra"
-
 
 PACKAGES =+ "${PN}-firmware ${PN}-boot ${PN}-firstboot"
 
@@ -74,6 +77,28 @@ do_install () {
     install -m 0755 ${WORKDIR}/nvfb ${D}${sysconfdir}/init.d/nvfb
     install -d ${D}${sysconfdir}/nv
     touch ${D}${sysconfdir}/nv/nvfirstboot
+
+    rm ${D}/usr/lib/libGL.so
+    ln -sf libGL.so.1 ${D}/usr/lib/arm-linux-gnueabihf/tegra/libGL.so
+
+    cp ${WORKDIR}/xorg.conf ${D}/etc/X11/
+    install -d ${D}${systemd_unitdir}/system/
+    install -m 0755 ${WORKDIR}/nvfb.service ${D}${systemd_unitdir}/system
+    install -m 0755 ${WORKDIR}/nv.service ${D}${systemd_unitdir}/system
+    install -m 0755 ${WORKDIR}/nv ${D}${bindir}
+    install -m 0755 ${WORKDIR}/nvfb ${D}${bindir}
+
+    NV_SAMPLE=${WORKDIR}/Linux_for_Tegra/nv_tegra/nv_sample_apps
+    tar xjf ${NV_SAMPLE}/nvgstapps.tbz2 -C ${NV_SAMPLE}
+    install -d ${D}${bindir} ${D}${libdir}/gstreamer-1.0 ${D}${docdir}
+    install -m 0755 ${NV_SAMPLE}/usr/bin/nvgstcapture-1.0 ${D}${bindir}
+    install -m 0755 ${NV_SAMPLE}/usr/bin/nvgstplayer-1.0 ${D}${bindir}
+    install -m 0755 ${NV_SAMPLE}/nvgstcapture-1.0_README.txt ${D}${docdir}
+    install -m 0755 ${NV_SAMPLE}/nvgstplayer-1.0_README.txt ${D}${docdir}
+
+    install -m 0755 ${NV_SAMPLE}/usr/lib/arm-linux-gnueabihf/gstreamer-1.0/libgstnvcamera.so ${D}${libdir}/gstreamer-1.0
+    install -m 0755 ${NV_SAMPLE}/usr/lib/arm-linux-gnueabihf/gstreamer-1.0/libgstnvvidconv.so ${D}${libdir}/gstreamer-1.0
+    install -m 0755 ${NV_SAMPLE}/usr/lib/arm-linux-gnueabihf/gstreamer-1.0/libnvgstjpeg.so ${D}${libdir}/gstreamer-1.0
 }
 
 do_populate_sysroot () {
@@ -94,10 +119,53 @@ python add_xorg_abi_depends() {
 PACKAGEFUNCS =+ "add_xorg_abi_depends"
 
 FILES_${PN}-boot = " \
-	${sysconfdir}/init.d/nv \
+    ${bindir}/nv \
+    ${sysconfdir}/init.d/nv \
+    ${systemd_unitdir}/system/nv.service \
 "
 
 FILES_${PN}-firstboot = "\
-	${sysconfdir}/init.d/nvfb \
-	${sysconfdir}/nv/nvfirstboot \
+    ${bindir}/nvfb \
+    ${sysconfdir}/init.d/nvfb \
+    ${sysconfdir}/nv/nvfirstboot \
+    ${systemd_unitdir}/system/nvfb.service \
 "
+
+# deploy additional binaries from the nv_gst_apps tarball
+PACKAGES_prepend = "${PN}-gstnvcamera ${PN}-gstnvvidconv-1.0 ${PN}-nvgstjpeg-1.0 ${PN}-nvgstapps "
+RRECOMMENDS_${PN}_append = " ${PN}-gstnvcamera ${PN}-gstnvvidconv-1.0 ${PN}-nvgstjpeg-1.0 ${PN}-nvgstapps"
+
+RDEPENDS_${PN}-gstnvcamera = "glib-2.0 gstreamer1.0 libgstvideo-1.0"
+RDEPENDS_${PN}-gstnvvidconv-1.0 = "glib-2.0 gstreamer1.0 libgstvideo-1.0"
+RDEPENDS_${PN}-nvgstjpeg-1.0 = "glib-2.0 gstreamer1.0 libgstvideo-1.0"
+RDEPENDS_${PN}-nvgstapps = "glib-2.0 gstreamer1.0 libgstpbutils-1.0 libgstvideo-1.0"
+
+FILES_${PN}-gstnvcamera = " \
+    ${libdir}/gstreamer-1.0/libgstnvcamera.so \
+"
+
+FILES_${PN}-gstnvvidconv-1.0 = " \
+    ${libdir}/gstreamer-1.0/libgstnvvidconv.so \
+"
+
+FILES_${PN}-nvgstjpeg-1.0 = " \
+    ${libdir}/gstreamer-1.0/libnvgstjpeg.so \
+"
+
+FILES_${PN}-nvgstapps = " \
+    ${bindir}/nvgstcapture-1.0 \
+    ${bindir}/nvgstplayer-1.0 \
+    ${docdir}/nvgst*README.txt \
+"
+
+#no gnu_hash in NVIDIA binaries, skip QA dev-so for this package
+#we have symlinks ending in .so, skip QA ldflags for this package
+#inhibit warnings about files being stripped
+INSANE_SKIP_${PN} = "build-deps dev-so ldflags already-stripped textrel"
+INSANE_SKIP_${PN}-gstnvcamera = "build-deps dev-so ldflags already-stripped textrel"
+INSANE_SKIP_${PN}-gstnvvidconv-1.0 = "build-deps dev-so ldflags already-stripped textrel"
+INSANE_SKIP_${PN}-nvgstjpeg-1.0 = "build-deps dev-so ldflags already-stripped textrel"
+INSANE_SKIP_${PN}-nvgstapps = "build-deps dev-so ldflags already-stripped textrel"
+
+SYSTEMD_AUTO_ENABLE = "enable"
+SYSTEMD_SERVICE_${PN} = "nv.service nvfb.service"
