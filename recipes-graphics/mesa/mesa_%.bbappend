@@ -1,12 +1,16 @@
-FILESEXTRAPATHS_prepend := "${THISDIR}/${PN}:"
-
 #####
 # tegra tk1
 
-DEPENDS_append_tegra124= " linux-driver-package"
-SRC_URI_append_tegra124 = " file://0001-pkg-config-files-add-tegra-paths.patch"
-
 PACKAGE_ARCH_tegra124 = "${MACHINE_ARCH}"
+
+PROVIDES_remove_tegra124   = "virtual/egl virtual/libgl virtual/libgles1 virtual/libgles2"
+
+do_install_append_tegra124 () {
+    rm ${D}${libdir}/libEGL.so*
+    rm ${D}${libdir}/libGL.so*
+    rm ${D}${libdir}/libGLESv1*.so*
+    rm ${D}${libdir}/libGLESv2.so*
+}
 
 #####
 ## Tegra TK1 mainline kernel

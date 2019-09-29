@@ -30,7 +30,7 @@ INITSCRIPT_PARAMS_${PN}-boot = "start 41 S . "
 INITSCRIPT_NAME_${PN}-firstboot = "nvfb"
 INITSCRIPT_PARAMS_${PN}-firstboot = "start 40 S . "
 
-DEPENDS = "virtual/libx11 alsa-lib libxext"
+DEPENDS = "virtual/libx11 alsa-lib libxext mesa"
 
 INSANE_SKIP_${PN} = "ldflags"
 
@@ -38,11 +38,32 @@ PACKAGE_ARCH = "${MACHINE_ARCH}"
 
 S = "${WORKDIR}/Linux_for_Tegra"
 
+PROVIDES += " \
+    virtual/egl \
+    virtual/libgl \
+    virtual/libgles1 \
+    virtual/libgles2 \
+"
+RPROVIDES_${PN} = " \
+    libegl \
+    libgl \
+    libgles1 \
+    libgles2 \
+"
+
 PACKAGES =+ "${PN}-firmware ${PN}-boot ${PN}-firstboot"
 
 INSANE_SKIP_${PN}-dev = "ldflags"
 
+# We have unversioned shared object, deploy them in the regular packages,
+# but deploy the *.so files which are symlinks in the -dev package.
+FILES_SOLIBSDEV = ""
 FILES_${PN} =  "${bindir}/* ${libdir}/* ${sysconfdir}/* ${sysconfdir}/*/*"
+FILES_${PN}-dev += " \
+    ${libdir}/libcuda.so ${libdir}/libEGL.so ${libdir}/libGLESv1_CM.so \
+    ${libdir}/libGLESv2.so ${libdir}/libGL.so \
+"
+
 RRECOMMENDS_${PN} = "xserver-xorg-module-libwfb"
 RDEPENDS_${PN} = "xserver-xorg bash"
 
@@ -61,10 +82,18 @@ do_patch () {
 do_install () {
     tar xjf ${WORKDIR}/Linux_for_Tegra/nv_tegra/nvidia_drivers.tbz2 -C ${D}
     mv ${D}/lib/firmware/tegra12x ${D}/lib/firmware/gk20a
+    mv ${D}/usr/lib/arm-linux-gnueabihf/tegra/lib* ${D}/usr/lib/
+    mv ${D}/usr/lib/arm-linux-gnueabihf/tegra-egl/lib* ${D}/usr/lib/
+    rm -rf ${D}/usr/lib/arm-linux-gnueabihf/tegra ${D}/usr/lib/arm-linux-gnueabihf/tegra-egl
+    rm -f ${D}/usr/lib/xorg/modules/extensions/libglx.so
+    rm -f  ${D}/usr/lib/libglx.so
+
     cp -r ${WORKDIR}/tegra_xusb_firmware ${D}/lib/firmware/
-    ln -sf ./libcuda.so.1.1 ${D}/usr/lib/arm-linux-gnueabihf/tegra/libcuda.so
-    ln -sf ./arm-linux-gnueabihf/tegra/libcuda.so ${D}/usr/lib/libcuda.so
-    ln -sf ./arm-linux-gnueabihf/tegra/libGL.so.1 ${D}/usr/lib/libGL.so
+    ln -sf ./libcuda.so.1.1 ${D}/usr/lib/libcuda.so
+    ln -sf ./libGL.so.1 ${D}/usr/lib/libGL.so
+    ln -sf ./libEGL.so.1 ${D}/usr/lib/libEGL.so
+    ln -sf ./libGLESv1_CM.so.1 ${D}/usr/lib/libGLESv1_CM.so
+    ln -sf ./libGLESv2.so.2 ${D}/usr/lib/libGLESv2.so
     cp ${WORKDIR}/l4tdrv/etc/asound* ${D}/etc/
     cp -r ${WORKDIR}/l4tdrv/etc/udev ${D}/etc/
     mkdir ${D}/etc/X11/ 
@@ -77,9 +106,6 @@ do_install () {
     install -m 0755 ${WORKDIR}/nvfb ${D}${sysconfdir}/init.d/nvfb
     install -d ${D}${sysconfdir}/nv
     touch ${D}${sysconfdir}/nv/nvfirstboot
-
-    rm ${D}/usr/lib/libGL.so
-    ln -sf libGL.so.1 ${D}/usr/lib/arm-linux-gnueabihf/tegra/libGL.so
 
     cp ${WORKDIR}/xorg.conf ${D}/etc/X11/
     install -d ${D}${systemd_unitdir}/system/
@@ -99,13 +125,6 @@ do_install () {
     install -m 0755 ${NV_SAMPLE}/usr/lib/arm-linux-gnueabihf/gstreamer-1.0/libgstnvcamera.so ${D}${libdir}/gstreamer-1.0
     install -m 0755 ${NV_SAMPLE}/usr/lib/arm-linux-gnueabihf/gstreamer-1.0/libgstnvvidconv.so ${D}${libdir}/gstreamer-1.0
     install -m 0755 ${NV_SAMPLE}/usr/lib/arm-linux-gnueabihf/gstreamer-1.0/libnvgstjpeg.so ${D}${libdir}/gstreamer-1.0
-}
-
-do_populate_sysroot () {
-    tar xjf ${WORKDIR}/Linux_for_Tegra/nv_tegra/nvidia_drivers.tbz2 -C ${WORKDIR}/sysroot-destdir/
-    rm ${WORKDIR}/sysroot-destdir/usr/lib/xorg/modules/extensions/libglx.so
-    mkdir ${WORKDIR}/sysroot-destdir/sysroot-providers
-    touch ${WORKDIR}/sysroot-destdir/sysroot-providers/${PN}
 }
 
 # Function to add the relevant ABI dependency to drivers, which should be called# from a PACKAGEFUNC.
