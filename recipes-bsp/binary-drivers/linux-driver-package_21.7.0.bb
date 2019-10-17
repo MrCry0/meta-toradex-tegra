@@ -85,8 +85,9 @@ do_install () {
     mv ${D}/usr/lib/arm-linux-gnueabihf/tegra/lib* ${D}/usr/lib/
     mv ${D}/usr/lib/arm-linux-gnueabihf/tegra-egl/lib* ${D}/usr/lib/
     rm -rf ${D}/usr/lib/arm-linux-gnueabihf/tegra ${D}/usr/lib/arm-linux-gnueabihf/tegra-egl
+
     rm -f ${D}/usr/lib/xorg/modules/extensions/libglx.so
-    rm -f  ${D}/usr/lib/libglx.so
+    ln -sf /usr/lib/libglx.so ${D}/usr/lib/xorg/modules/extensions/libglx.so
 
     cp -r ${WORKDIR}/tegra_xusb_firmware ${D}/lib/firmware/
     ln -sf ./libcuda.so.1.1 ${D}/usr/lib/libcuda.so
@@ -125,6 +126,8 @@ do_install () {
     install -m 0755 ${NV_SAMPLE}/usr/lib/arm-linux-gnueabihf/gstreamer-1.0/libgstnvcamera.so ${D}${libdir}/gstreamer-1.0
     install -m 0755 ${NV_SAMPLE}/usr/lib/arm-linux-gnueabihf/gstreamer-1.0/libgstnvvidconv.so ${D}${libdir}/gstreamer-1.0
     install -m 0755 ${NV_SAMPLE}/usr/lib/arm-linux-gnueabihf/gstreamer-1.0/libnvgstjpeg.so ${D}${libdir}/gstreamer-1.0
+
+    rm -rf ${D}/usr/lib/arm-linux-gnueabihf
 }
 
 # Function to add the relevant ABI dependency to drivers, which should be called# from a PACKAGEFUNC.
