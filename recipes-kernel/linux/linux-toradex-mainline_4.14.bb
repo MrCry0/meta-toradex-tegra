@@ -8,7 +8,7 @@ LIC_FILES_CHKSUM = "file://COPYING;md5=d7810fab7487fb0aad327b76f1be7cd7"
 
 inherit kernel siteinfo
 
-LINUX_VERSION ?= "4.14.140"
+LINUX_VERSION ?= "4.14.151"
 
 LOCALVERSION = "-${PR}"
 PR = "${TDX_VER_ITEM}"
@@ -60,8 +60,8 @@ SRC_URI = " \
     ${GENERIC_PATCHES} \
     ${MACHINE_PATCHES} \
 "
-SRC_URI[md5sum] = "ad3c70ca3f64810d283dcfe392970270"
-SRC_URI[sha256sum] = "795eed2515715ef29edd24f7a70912040cc206ec9a049c370cb305515f3fbdf2"
+SRC_URI[md5sum] = "5a1ac8dcce45d3b66fd40ac0d0feaca9"
+SRC_URI[sha256sum] = "ff519c428ee9bbb513a84db5ec32a7e3705cd8c23a57104b25b944cb79583fae"
 
 # For CI use one could use the following instead (plus patches still of course)
 LINUX_VERSION_use-head-next ?= "4.14"
