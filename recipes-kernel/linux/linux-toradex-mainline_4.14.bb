@@ -8,7 +8,7 @@ LIC_FILES_CHKSUM = "file://COPYING;md5=d7810fab7487fb0aad327b76f1be7cd7"
 
 inherit kernel siteinfo
 
-LINUX_VERSION ?= "4.14.151"
+LINUX_VERSION ?= "4.14.155"
 
 LOCALVERSION = "-${PR}"
 PR = "${TDX_VER_ITEM}"
@@ -40,7 +40,6 @@ GENERIC_PATCHES = " \
     file://0022-mfd-as3722-disable-auto-power-on-when-AC-OK.patch \
     file://0023-apalis-tk1-mfd-k20-update-api-header-for-fw-version-.patch \
     file://0024-apalis_t30-enable-broken-hpi-on-emmc.patch \
-    file://0026-apalis_t30-fix-mmc1-cmd-pull-up.patch \
     file://0027-apalis_t30-pull-up-sd-card-detect-pins.patch \
     file://0028-Revert-mmc-tegra-Disable-UHS-I-modes-for-Tegra124.patch \
     file://0029-mmc-tegra-fix-eMMC-DDR-mode.patch \
@@ -60,8 +59,8 @@ SRC_URI = " \
     ${GENERIC_PATCHES} \
     ${MACHINE_PATCHES} \
 "
-SRC_URI[md5sum] = "5a1ac8dcce45d3b66fd40ac0d0feaca9"
-SRC_URI[sha256sum] = "ff519c428ee9bbb513a84db5ec32a7e3705cd8c23a57104b25b944cb79583fae"
+SRC_URI[md5sum] = "316f8d2b188febef94a98365799d2141"
+SRC_URI[sha256sum] = "77d61979556b81c95b81452fa10e1fe9368cbe2f9f80a13e4669b0464722e481"
 
 # For CI use one could use the following instead (plus patches still of course)
 LINUX_VERSION_use-head-next ?= "4.14"
