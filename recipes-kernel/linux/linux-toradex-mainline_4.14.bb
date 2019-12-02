@@ -6,12 +6,12 @@ FILESEXTRAPATHS_prepend := "${THISDIR}/linux-toradex-mainline-4.14:"
 
 LIC_FILES_CHKSUM = "file://COPYING;md5=d7810fab7487fb0aad327b76f1be7cd7"
 
-inherit kernel siteinfo
+inherit kernel siteinfo toradex-kernel-localversion
+
+# git hash not available since tarball from kernel.org is used
+SCMVERSION = "n"
 
 LINUX_VERSION ?= "4.14.155"
-
-LOCALVERSION = "-${PR}"
-PR = "${TDX_VER_ITEM}"
 
 PV = "${LINUX_VERSION}"
 S = "${WORKDIR}/linux-${PV}"
@@ -91,16 +91,9 @@ do_configure_prepend () {
     #maybe change some configuration
     config_script
 
-    #Add Toradex BSP Version as LOCALVERSION
-    sed -i -e /CONFIG_LOCALVERSION/d ${B}/.config
-    echo "CONFIG_LOCALVERSION=\"${LOCALVERSION}\"" >> ${B}/.config
-
     cd - > /dev/null
 }
 
 do_uboot_mkimage_prepend() {
     cd ${B}
 }
-
-# defaults
-TDX_VER_ITEM ??= "0"
