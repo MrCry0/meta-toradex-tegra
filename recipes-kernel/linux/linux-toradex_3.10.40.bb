@@ -4,12 +4,9 @@ LICENSE = "GPLv2"
 
 LIC_FILES_CHKSUM = "file://COPYING;md5=d7810fab7487fb0aad327b76f1be7cd7"
 
-inherit kernel siteinfo
+inherit kernel siteinfo toradex-kernel-localversion
 
 LINUX_VERSION ?= "3.10.40"
-
-LOCALVERSION = "-${PR}"
-PR = "${TDX_VER_ITEM}"
 
 SRCREV = "ad44961f8b3cf5ce342d234c7eca05d89369c26b"
 SRCREV_use-head-next = "${AUTOREV}"
@@ -49,20 +46,9 @@ do_configure_prepend () {
     #maybe change some configuration
     config_script
 
-    #Add Toradex BSP Version as LOCALVERSION
-    sed -i -e /CONFIG_LOCALVERSION/d ${B}/.config
-    echo "CONFIG_LOCALVERSION=\"${LOCALVERSION}\"" >> ${B}/.config
-
-    #Add GIT revision to the local version
-    head=`git --git-dir=${S}/.git rev-parse --verify --short HEAD 2> /dev/null`
-    printf "%s%s" +g $head > ${S}/.scmversion
-
     cd - > /dev/null
 }
 
 do_uboot_mkimage_prepend() {
     cd ${B}
 }
-
-# defaults
-TDX_VER_ITEM ??= "0"
