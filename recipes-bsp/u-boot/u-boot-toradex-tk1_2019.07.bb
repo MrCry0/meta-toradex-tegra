@@ -1,5 +1,5 @@
 require u-boot-toradex-common-tk1.inc
-require recipes-bsp/u-boot/u-boot.inc
+require recipes-bsp/u-boot/u-boot-tk1.inc
 require recipes-bsp/u-boot/u-boot-toradex-initial-env.inc
 
 DEPENDS += "bc-native dtc-native"
