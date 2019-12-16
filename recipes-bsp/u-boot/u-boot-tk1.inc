@@ -14,6 +14,7 @@ DEPENDS += "swig-native python-native"
 EXTRA_OEMAKE = 'CROSS_COMPILE=${TARGET_PREFIX} CC="${TARGET_PREFIX}gcc ${TOOLCHAIN_OPTIONS}" V=1'
 EXTRA_OEMAKE += 'HOSTCC="${BUILD_CC} ${BUILD_CFLAGS} ${BUILD_LDFLAGS}"'
 EXTRA_OEMAKE += 'PYTHON2=nativepython STAGING_INCDIR=${STAGING_INCDIR_NATIVE} STAGING_LIBDIR=${STAGING_LIBDIR_NATIVE}'
+PATH_prepend = "${STAGING_BINDIR_NATIVE}/python-native:"
 
 PACKAGECONFIG ??= "openssl"
 # u-boot will compile its own tools during the build, with specific
