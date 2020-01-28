@@ -11,7 +11,7 @@ inherit kernel siteinfo toradex-kernel-localversion
 # git hash not available since tarball from kernel.org is used
 SCMVERSION = "n"
 
-LINUX_VERSION ?= "4.14.160"
+LINUX_VERSION ?= "4.14.168"
 
 PV = "${LINUX_VERSION}"
 S = "${WORKDIR}/linux-${PV}"
@@ -30,7 +30,6 @@ GENERIC_PATCHES = " \
     file://0012-apalis-tk1-support-for-k20-mfd.patch \
     file://0013-usb-chipidea-tegra-Use-aligned-DMA-on-Tegra30.patch \
     file://0014-usb-chipidea-tegra-Use-aligned-DMA-on-Tegra114-124.patch \
-    file://0015-Revert-mmc-core-fix-error-path-in-mmc_host_alloc.patch \
     file://0016-Revert-mmc-core-simplify-ida-handling.patch \
     file://0017-mmc-read-mmc-alias-from-device-tree.patch \
     file://0018-apalis-t30-mainline-force-fixed-ids-for-sdmmc-contro.patch \
@@ -60,8 +59,8 @@ SRC_URI = " \
     ${GENERIC_PATCHES} \
     ${MACHINE_PATCHES} \
 "
-SRC_URI[md5sum] = "286501d9badbb724fddbc6e20e46aa1e"
-SRC_URI[sha256sum] = "c60326bad1bcdede514ca8a0bb96843fa7578ef00829cced6218b888b2efa92c"
+SRC_URI[md5sum] = "e3447527902445b779f5eff66de5bc8c"
+SRC_URI[sha256sum] = "db5777d3a12a85bc8c130b7b250bab2283f9d964b725e5de3c216b495eeb31fe"
 
 # For CI use one could use the following instead (plus patches still of course)
 LINUX_VERSION_use-head-next ?= "4.14"
