@@ -48,6 +48,7 @@ GENERIC_PATCHES = " \
     file://0033-apalis-tk1-mfd-k20-supporte-for-fw-version-1.3.patch \
     file://0034-apalis-tk1-mfd-k20-update-supported-fw-version-to-1..patch \
     file://0035-perf-tools-Add-Python-3-support.patch \
+    file://0001-perf-Make-perf-able-to-build-with-latest-libbfd.patch \
 "
 MACHINE_PATCHES = " \
 "
