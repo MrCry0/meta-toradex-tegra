@@ -1,0 +1,43 @@
+From 41f019dcce7ffb42d9c9aaa9b444fce1b0762456 Mon Sep 17 00:00:00 2001
+Message-Id: <41f019dcce7ffb42d9c9aaa9b444fce1b0762456.1577320580.git.marcel.ziswiler@toradex.com>
+In-Reply-To: <51ce88652e0414c1457e27001e5a1008f51ea0b8.1577320580.git.marcel.ziswiler@toradex.com>
+References: <51ce88652e0414c1457e27001e5a1008f51ea0b8.1577320580.git.marcel.ziswiler@toradex.com>
+From: Marcel Ziswiler <marcel.ziswiler@toradex.com>
+Date: Wed, 14 Aug 2019 13:12:05 +0200
+Subject: [PATCH 36/36] tegra_defconfig: fix ip firewall (bpf/cgroup)
+
+This fixes the following systemd error during boot:
+
+[    4.225226] systemd[1]: File /lib/systemd/system/systemd-journald.
+ service:36 configures an IP firewall (IPAddressDeny=any), but the local
+ system does not support BPF/cgroup based firewalling.
+[    4.242360] systemd[1]: Proceeding WITHOUT firewalling in effect!
+ (This warning is only shown for the first loaded unit using IP
+ firewalling.)
+
+Signed-off-by: Marcel Ziswiler <marcel.ziswiler@toradex.com>
+(similar to arm64 commit cfbad309c60a13bb7fb0ad4b1139a52d485db0cd)
+(similar to arm commit fff496c2a1bd08bb4987232c9f3f4b6704bd3146)
+---
+ arch/arm/configs/tegra_defconfig | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/arch/arm/configs/tegra_defconfig b/arch/arm/configs/tegra_defconfig
+index e8c9bdafa1b9..1913990c3571 100644
+--- a/arch/arm/configs/tegra_defconfig
++++ b/arch/arm/configs/tegra_defconfig
+@@ -9,9 +9,11 @@ CONFIG_CGROUP_SCHED=y
+ CONFIG_RT_GROUP_SCHED=y
+ CONFIG_CGROUP_FREEZER=y
+ CONFIG_CGROUP_CPUACCT=y
++CONFIG_CGROUP_BPF=y
+ CONFIG_CGROUP_DEBUG=y
+ CONFIG_BLK_DEV_INITRD=y
+ # CONFIG_ELF_CORE is not set
++CONFIG_BPF_SYSCALL=y
+ CONFIG_EMBEDDED=y
+ CONFIG_PERF_EVENTS=y
+ CONFIG_SLAB=y
+-- 
+2.24.1
+
