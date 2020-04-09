@@ -48,6 +48,7 @@ GENERIC_PATCHES = " \
     file://0033-apalis-tk1-mfd-k20-supporte-for-fw-version-1.3.patch \
     file://0034-apalis-tk1-mfd-k20-update-supported-fw-version-to-1..patch \
     file://0036-tegra_defconfig-fix-ip-firewall-bpf-cgroup.patch \
+    file://0037-ARM-defconfig-tegra-tune-config-for-backports-5.4.patch \
 "
 MACHINE_PATCHES = " \
 "
