@@ -11,7 +11,7 @@ LINUX_VERSION ?= "3.10.40"
 LOCALVERSION = "-${PR}"
 PR = "${TDX_VER_ITEM}"
 
-SRCREV = "5abb34056de22ab2dfcc05cbcd70c90405f8ea4b"
+SRCREV = "6425c0e1f8a5d0d698c9b604de7f55b85ccddf1f"
 SRCREV_use-head-next = "${AUTOREV}"
 
 PV = "${LINUX_VERSION}+gitr${SRCPV}"
