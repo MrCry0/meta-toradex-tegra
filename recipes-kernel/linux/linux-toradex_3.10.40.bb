@@ -8,7 +8,7 @@ inherit kernel siteinfo toradex-kernel-localversion
 
 LINUX_VERSION ?= "3.10.40"
 
-SRCREV = "5abb34056de22ab2dfcc05cbcd70c90405f8ea4b"
+SRCREV = "063d16eceb570adeb1ae753d73d13f299cefe876"
 SRCREV_use-head-next = "${AUTOREV}"
 
 PV = "${LINUX_VERSION}+gitr${SRCPV}"
