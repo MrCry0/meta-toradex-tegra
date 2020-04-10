@@ -57,7 +57,8 @@ do_patch () {
 
 do_install () {
     tar xjf ${WORKDIR}/Linux_for_Tegra/nv_tegra/nvidia_drivers.tbz2 -C ${D}
-    mv ${D}/lib/firmware/tegra12x ${D}/lib/firmware/gk20a
+    ln -sf tegra12x ${D}/lib/firmware/gk20a
+    ln -sf nvavp_vid_ucode_alt.bin ${D}/lib/firmware/nvavp_vid_ucode.bin
     cp -r ${WORKDIR}/tegra_xusb_firmware ${D}/lib/firmware/
     ln -sf ./libcuda.so.1.1 ${D}/usr/lib/arm-linux-gnueabihf/tegra/libcuda.so
     ln -sf ./arm-linux-gnueabihf/tegra/libcuda.so ${D}/usr/lib/libcuda.so
