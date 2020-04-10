@@ -81,7 +81,8 @@ do_patch () {
 
 do_install () {
     tar xjf ${WORKDIR}/Linux_for_Tegra/nv_tegra/nvidia_drivers.tbz2 -C ${D}
-    mv ${D}/lib/firmware/tegra12x ${D}/lib/firmware/gk20a
+    ln -sf tegra12x ${D}/lib/firmware/gk20a
+    ln -sf nvavp_vid_ucode_alt.bin ${D}/lib/firmware/nvavp_vid_ucode.bin
     mv ${D}/usr/lib/arm-linux-gnueabihf/tegra/lib* ${D}/usr/lib/
     mv ${D}/usr/lib/arm-linux-gnueabihf/tegra-egl/lib* ${D}/usr/lib/
     rm -rf ${D}/usr/lib/arm-linux-gnueabihf/tegra ${D}/usr/lib/arm-linux-gnueabihf/tegra-egl
