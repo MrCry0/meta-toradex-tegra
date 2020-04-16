@@ -1,0 +1,31 @@
+From b788eaedd789c2fd56c5d249400b57055ea9f880 Mon Sep 17 00:00:00 2001
+From: Oleksandr Suvorov <oleksandr.suvorov@toradex.com>
+Date: Thu, 16 Apr 2020 11:08:45 +0300
+Subject: [PATCH 3/3] ARM: apalis-tk1-mainline: enable options for backports
+
+Enable WIRELESS_EXT and WEXT_PRIV options for the backported
+rtl81288eu driver.
+
+Related-to: ELB-2388
+Signed-off-by: Oleksandr Suvorov <oleksandr.suvorov@toradex.com>
+---
+
+ arch/arm/configs/tegra_defconfig | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/arch/arm/configs/tegra_defconfig b/arch/arm/configs/tegra_defconfig
+index 385832bf67c5..49255fc099af 100644
+--- a/arch/arm/configs/tegra_defconfig
++++ b/arch/arm/configs/tegra_defconfig
+@@ -70,6 +70,8 @@ CONFIG_BT_RFCOMM=y
+ CONFIG_BT_BNEP=y
+ CONFIG_BT_HIDP=y
+ CONFIG_BT_HCIBTUSB=m
++CONFIG_WIRELESS_EXT=y
++CONFIG_WEXT_PRIV=y
+ CONFIG_RFKILL=y
+ CONFIG_RFKILL_INPUT=y
+ CONFIG_RFKILL_GPIO=y
+-- 
+2.20.1
+

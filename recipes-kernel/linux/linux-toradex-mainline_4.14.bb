@@ -48,7 +48,9 @@ GENERIC_PATCHES = " \
     file://0033-apalis-tk1-mfd-k20-supporte-for-fw-version-1.3.patch \
     file://0034-apalis-tk1-mfd-k20-update-supported-fw-version-to-1..patch \
     file://0036-tegra_defconfig-fix-ip-firewall-bpf-cgroup.patch \
-    file://0037-ARM-defconfig-tegra-tune-config-for-backports-5.4.patch \
+    file://0037-wireless-make-wireless_ext-and-wext_priv-storable.patch \
+    file://0038-ARM-apalis-tk1-mainline-disable-wireless-drivers.patch \
+    file://0039-ARM-apalis-tk1-mainline-enable-options-for-backport.patch \
 "
 MACHINE_PATCHES = " \
 "
