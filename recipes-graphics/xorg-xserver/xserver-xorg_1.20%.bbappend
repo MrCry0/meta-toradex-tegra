@@ -1,8 +1,5 @@
-# always latest and greatest.
-PE_tegra124m = "99"
+COMPATIBLE_MACHINE_tegra124 = "(tegra124)"
 
-PACKAGE_ARCH_tegra124m = "${MACHINE_ARCH}"
+PACKAGE_ARCH_tegra124 = "${MACHINE_ARCH}"
 
-COMPATIBLE_MACHINE_tegra124m = "(apalis-tk1-mainline)"
-
-PACKAGECONFIG_tegra124m ?= "dri2 dri3 xshmfence glamor glx xwayland udev ${XORG_CRYPTO} "
+PACKAGECONFIG_tegra124 ?= "dri2 dri3 xshmfence glamor glx xwayland udev ${XORG_CRYPTO} "

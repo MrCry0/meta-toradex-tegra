@@ -1,1 +1,1 @@
-PACKAGECONFIG_append_apalis-tk1-mainline = " glut"
+PACKAGECONFIG_append_apalis-tk1 = " glut"

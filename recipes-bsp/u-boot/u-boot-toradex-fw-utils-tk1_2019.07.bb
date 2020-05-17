@@ -43,10 +43,6 @@ do_install_append_tegra124() {
     install_unlock_emmc
 }
 
-do_install_append_tegra124m() {
-    install_unlock_emmc
-}
-
 do_install_class-cross () {
     install -d ${D}${bindir_cross}
     install -m 755 ${S}/tools/env/fw_printenv ${D}${bindir_cross}/fw_printenv
