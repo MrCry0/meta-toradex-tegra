@@ -5,6 +5,8 @@ require recipes-bsp/u-boot/u-boot-toradex-initial-env.inc
 DEPENDS += "bc-native dtc-native"
 DEPENDS_append_apalis-tk1 = " cbootimage-native"
 
+PROVIDES += "u-boot"
+
 COMPATIBLE_MACHINE = "(apalis-tk1)"
 
 SRC_URI_append_apalis-tk1 = " \
