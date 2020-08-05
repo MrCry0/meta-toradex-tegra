@@ -1,6 +1,7 @@
 require u-boot-toradex-common-tk1.inc
-require recipes-bsp/u-boot/u-boot-tk1.inc
-require recipes-bsp/u-boot/u-boot-toradex-initial-env.inc
+require recipes-bsp/u-boot/u-boot.inc
+
+B = "${WORKDIR}/build"
 
 DEPENDS += "bc-native dtc-native"
 DEPENDS_append_apalis-tk1 = " cbootimage-native"
@@ -11,6 +12,7 @@ COMPATIBLE_MACHINE = "(apalis-tk1)"
 
 SRC_URI_append_apalis-tk1 = " \
     file://apalis-tk1.img.cfg \
+    file://fw_env.config \
     file://PM375_Hynix_2GB_H5TC4G63AFR_RDA_924MHz.bct \
 "
 

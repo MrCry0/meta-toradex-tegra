@@ -20,3 +20,5 @@ SRC_URI = "git://git.toradex.com/u-boot-toradex.git;protocol=https;branch=${SRCB
 SRC_URI += "file://0001-u-boot-tk1-make-it-build-with-python3-only-installat.patch"
 
 S = "${WORKDIR}/git"
+
+UBOOT_INITIAL_ENV = "u-boot-initial-env"
