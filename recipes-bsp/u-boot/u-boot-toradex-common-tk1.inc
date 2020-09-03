@@ -14,10 +14,8 @@ inherit toradex-u-boot-localversion
 SRCREV = "c650daccd29536b63d7e1b7d3a2b6d5363c49cfd"
 SRCBRANCH = "toradex_2020.07"
 SRCREV_use-head-next = "${AUTOREV}"
-SRCBRANCH_use-head-next = "toradex_2019.07-next"
 
 SRC_URI = "git://git.toradex.com/u-boot-toradex.git;protocol=https;branch=${SRCBRANCH}"
-SRC_URI += "file://0001-u-boot-tk1-make-it-build-with-python3-only-installat.patch"
 
 S = "${WORKDIR}/git"
 
