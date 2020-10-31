@@ -12,7 +12,7 @@ inherit tegra-u-boot-localversion
 
 # We use the revision in order to avoid having to fetch it from the
 # repo during parse
-SRCREV = "26d926eda08ea0218befcd773191961a9afcd069"
+SRCREV = "347b4ac4e4205379f6570f5e73e2c706870bc37f"
 SRCBRANCH = "toradex_2019.07"
 SRCREV_use-head-next = "${AUTOREV}"
 SRCBRANCH_use-head-next = "toradex_2019.07-next"
