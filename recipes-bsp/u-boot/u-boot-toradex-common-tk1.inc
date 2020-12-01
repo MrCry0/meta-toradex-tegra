@@ -11,7 +11,7 @@ inherit toradex-u-boot-localversion
 
 # We use the revision in order to avoid having to fetch it from the
 # repo during parse
-SRCREV = "2e4010d63cedabeeca428f413ff6db07fd8d884e"
+SRCREV = "51b7d2f591d32916a3addab0193d07bbacb34aad"
 SRCBRANCH = "toradex_2020.07"
 SRCREV_use-head-next = "${AUTOREV}"
 
